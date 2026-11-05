@@ -8,6 +8,7 @@ using DiscImageStudio.Dvd;
 using DiscImageStudio.Generation;
 using DiscImageStudio.ImageIO;
 using DiscImageStudio.Iso;
+using DvdImageSolver.Encoding;
 using Xunit;
 
 namespace DiscImageStudio.PortableArchitectureTests;
@@ -34,6 +35,7 @@ public sealed class DependencyBoundaryTests
         typeof(Iso9660ImageWriter).Assembly,
         typeof(CdDiscModule).Assembly,
         typeof(DvdDiscModule).Assembly,
+        typeof(DvdEccBlockEncoder).Assembly,
         typeof(BluRayDiscModule).Assembly,
         typeof(DiscGenerationService).Assembly,
     ];
@@ -108,9 +110,11 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj",
             "src/DiscImageStudio.Core/DiscImageStudio.Core.csproj",
             "src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj",
+            "src/DiscImageStudio.Dvd.Engine/DiscImageStudio.Dvd.Engine.csproj",
             "src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj",
             "src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj",
             "src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj",
+            "src/DvdImageSolver/DvdImageSolver.csproj",
             "tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj",
         ];
 
@@ -144,6 +148,57 @@ public sealed class DependencyBoundaryTests
                 Includes(project, "ProjectReference"),
                 IsWindowsOnlyProjectReference);
         }
+    }
+
+    [Fact]
+    public void Dvd_engine_has_one_portable_source_owner_and_thin_consumers()
+    {
+        string enginePath = RepositoryPath(
+            "src",
+            "DiscImageStudio.Dvd.Engine",
+            "DiscImageStudio.Dvd.Engine.csproj");
+        XDocument engine = XDocument.Load(enginePath);
+        Assert.Equal(["net10.0"], Values(engine, "TargetFramework"));
+        Assert.DoesNotContain(Values(engine, "OutputType"), value => value == "Exe");
+        Assert.DoesNotContain(Includes(engine, "FrameworkReference"),
+            include => include.Contains("WindowsDesktop", StringComparison.OrdinalIgnoreCase));
+
+        XDocument module = XDocument.Load(RepositoryPath(
+            "src",
+            "DiscImageStudio.Dvd",
+            "DiscImageStudio.Dvd.csproj"));
+        string[] moduleReferences = Includes(module, "ProjectReference")
+            .Select(include => include.Replace('\\', '/'))
+            .ToArray();
+        Assert.Contains(moduleReferences,
+            include => include.EndsWith("DiscImageStudio.Dvd.Engine.csproj", StringComparison.Ordinal));
+        Assert.DoesNotContain(moduleReferences,
+            include => include.EndsWith("DvdImageSolver.csproj", StringComparison.Ordinal));
+        Assert.DoesNotContain(Includes(module, "Compile"),
+            include => include.Contains("DvdImageSolver", StringComparison.Ordinal));
+
+        XDocument host = XDocument.Load(RepositoryPath(
+            "src",
+            "DvdImageSolver",
+            "DvdImageSolver.csproj"));
+        Assert.Equal(["net10.0"], Values(host, "TargetFramework"));
+        Assert.Contains(
+            Includes(host, "ProjectReference").Select(include => include.Replace('\\', '/')),
+            include => include.EndsWith("DiscImageStudio.Dvd.csproj", StringComparison.Ordinal));
+        Assert.Equal(
+            ["Program.cs"],
+            Directory.EnumerateFiles(
+                    RepositoryPath("src", "DvdImageSolver"),
+                    "*.cs",
+                    SearchOption.TopDirectoryOnly)
+                .Select(Path.GetFileName)
+                .Order(StringComparer.Ordinal));
+
+        Assert.Equal(
+            "DiscImageStudio.Dvd.Engine",
+            typeof(DvdEccBlockEncoder).Assembly.GetName().Name);
+        Assert.False(Directory.Exists(RepositoryPath("src", "DvdImageSolver", "Encoding")));
+        Assert.False(Directory.Exists(RepositoryPath("src", "DvdImageSolver", "Solver")));
     }
 
     private static bool IsWindowsOnlyAssembly(string name)
