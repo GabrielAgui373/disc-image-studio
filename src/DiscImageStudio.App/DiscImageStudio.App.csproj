@@ -38,6 +38,7 @@
     <ProjectReference Include="..\DiscImageStudio.Imaging\DiscImageStudio.Imaging.csproj" />
     <ProjectReference Include="..\DiscImageStudio.Cd\DiscImageStudio.Cd.csproj" />
     <ProjectReference Include="..\DiscImageStudio.Dvd\DiscImageStudio.Dvd.csproj" />
+    <ProjectReference Include="..\DiscImageStudio.Dvd.Engine\DiscImageStudio.Dvd.Engine.csproj" />
     <ProjectReference Include="..\DiscImageStudio.BluRay\DiscImageStudio.BluRay.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -55,13 +56,5 @@
   <Target Name="RejectInvariantGlobalizationForWpf" BeforeTargets="PrepareForBuild"
           Condition="'$(InvariantGlobalization)' == 'true'">
     <Error Text="DiscImageStudio.App cannot use invariant globalization because WPF font rendering requires named cultures." />
-  </Target>
-  <Target Name="ExcludeHostedSolverRuntimeConfiguration" BeforeTargets="_HandleFileConflictsForPublish">
-    <!-- The solver runs inside this app and uses its runtime configuration.
-         RID and non-RID references can otherwise publish the solver config twice. -->
-    <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-          Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'DvdImageSolver.runtimeconfig.json'" />
-    </ItemGroup>
   </Target>
 </Project>
