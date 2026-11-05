@@ -5,6 +5,7 @@ using DiscImageStudio.Cd;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
 using DiscImageStudio.Dvd;
+using DiscImageStudio.Generation;
 using DiscImageStudio.ImageIO;
 using DiscImageStudio.Iso;
 using Xunit;
@@ -34,6 +35,7 @@ public sealed class DependencyBoundaryTests
         typeof(CdDiscModule).Assembly,
         typeof(DvdDiscModule).Assembly,
         typeof(BluRayDiscModule).Assembly,
+        typeof(DiscGenerationService).Assembly,
     ];
 
     [Theory]
@@ -106,6 +108,7 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj",
             "src/DiscImageStudio.Core/DiscImageStudio.Core.csproj",
             "src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj",
+            "src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj",
             "src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj",
             "src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj",
             "tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj",
