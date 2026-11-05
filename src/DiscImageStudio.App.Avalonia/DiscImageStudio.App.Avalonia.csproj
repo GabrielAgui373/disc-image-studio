@@ -38,5 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
   </ItemGroup>
 </Project>

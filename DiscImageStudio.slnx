@@ -2,6 +2,7 @@
   <Project Path="src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
   <Project Path="src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj" />
   <Project Path="src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+  <Project Path="src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
   <Project Path="src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj" />
   <Project Path="src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
   <Project Path="src/DiscImageStudio.Imaging/DiscImageStudio.Imaging.csproj" />

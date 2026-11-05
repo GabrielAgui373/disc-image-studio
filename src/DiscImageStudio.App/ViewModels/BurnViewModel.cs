@@ -9,6 +9,7 @@ using DiscImageStudio.Cd;
 using DiscImageStudio.Core;
 using DiscImageStudio.Core.Calibration;
 using DiscImageStudio.Dvd;
+using DiscImageStudio.Generation;
 using DiscImageStudio.Services;
 
 namespace DiscImageStudio.ViewModels;
@@ -566,101 +567,36 @@ public partial class BurnViewModel : ObservableObject
                 // Streaming burns the same export-quality composite the file path writes, so
                 // what the read-back preview verified is the material that lands on the disc.
                 string compositePath = await _design.EnsureExportCompositeAsync();
-                if (bluRay)
+                OpticalDiscFamily family = bluRay
+                    ? OpticalDiscFamily.BluRay
+                    : dvd
+                        ? OpticalDiscFamily.Dvd
+                        : OpticalDiscFamily.CompactDisc;
+                GenerateDiscRequest generationRequest = GenerationRequestFactory.CreateForProject(
+                    family,
+                    _state,
+                    compositePath,
+                    directBurn: true);
+                GenerationPlan generationPlan = await _shell.GenerationService.PlanAsync(generationRequest);
+                OpticalBurnMediaKind generationMediaKind = generationRequest switch
                 {
-                    BluRayDiscParameters disc = ReadBluRayParameters();
-                    string dataDirectory = _state.BdDataDirectory.Trim();
-                    BluRayIsoPlan plan = BluRayIsoGenerator.PrepareDrawing(
-                        disc,
-                        dataDirectory.Length == 0 ? null : dataDirectory,
-                        string.IsNullOrWhiteSpace(_state.BdVolumeLabel)
-                            ? "BD_IMAGE"
-                            : _state.BdVolumeLabel.Trim(),
-                        filesAtOuterRing: dataDirectory.Length != 0 && _state.BdFilesAtOuterRing);
-                    ToneProfile tone = _state.BluRayTone;
-                    bool invert = _state.BdInvertMapping;
-                    request = new OpticalBurnRequest(
-                        device.Id,
-                        OpticalBurnMediaKind.BluRayData,
-                        plan.ContentLength,
-                        (output, cancellationToken) =>
-                        {
-                            BluRayGray8Raster raster = BluRayImageLoader.Load(
-                                compositePath, tone, cancellationToken);
-                            BluRayImagePayloadMapping mapping = new(
-                                disc, raster, new BluRayRunLengthMapping(invert));
-                            BluRayIsoGenerator.GenerateToStream(
-                                output, plan, mapping, progress: null, cancellationToken);
-                        },
-                        selectedWriteSpeed.Speed);
-                    contentDescription = L.F($"BD-R · {disc.TotalSectors} 扇区")
-                        + $" · {plan.ContentLength / (1024.0 * 1024.0):F1} MiB"
-                        + L.F($" · 绘图 LBA {plan.DrawingStartSector}–{plan.DrawingEndSectorExclusive - 1}")
-                        + (plan.HasFileSystem ? L.F($" · 文件：{(_state.BdFilesAtOuterRing ? L.T("外圈") : L.T("内圈"))}") : string.Empty)
-                        + (invert ? L.T(" · 反转 3T/6T") : L.T(" · 标准 3T/6T"));
-                }
-                else if (dvd)
-                {
-                    DvdStreamingOptions options = ReadDvdStreamingOptions();
-                    string dataDirectory = _state.DvdDataDirectory.Trim();
-                    DvdHybridStreamingPlan? hybridPlan = dataDirectory.Length == 0
-                        ? null
-                        : DvdStreamingGenerator.PrepareHybrid(
-                            dataDirectory,
-                            options,
-                            string.IsNullOrWhiteSpace(_state.DvdVolumeLabel)
-                                ? "DISC_IMAGE"
-                                : _state.DvdVolumeLabel.Trim(),
-                            filesAtOuterRing: _state.DvdFilesAtOuterRing);
-                    request = new OpticalBurnRequest(
-                        device.Id,
-                        OpticalBurnMediaKind.DvdData,
-                        options.ContentLength,
-                        (output, cancellationToken) =>
-                        {
-                            if (hybridPlan is null)
-                            {
-                                DvdStreamingGenerator.Generate(
-                                    compositePath,
-                                    output,
-                                    options,
-                                    cancellationToken: cancellationToken);
-                            }
-                            else
-                            {
-                                DvdStreamingGenerator.GenerateHybrid(
-                                    compositePath,
-                                    output,
-                                    options,
-                                    hybridPlan,
-                                    cancellationToken: cancellationToken);
-                            }
-                        },
-                        selectedWriteSpeed.Speed);
-                    contentDescription = hybridPlan is null
-                        ? L.F($"DVD · {options.TotalSectors} 扇区 · {options.ContentLength / (1024.0 * 1024.0):F1} MiB")
-                        : L.F($"DVD 混合盘 · {hybridPlan.FileCount} 个文件（{(_state.DvdFilesAtOuterRing ? L.T("外圈") : L.T("内圈"))}）")
-                            + L.F($" · 绘图 LBA {hybridPlan.DrawingStartLba}–{hybridPlan.DrawingEndLbaExclusive - 1}")
-                            + $" · {options.ContentLength / (1024.0 * 1024.0):F1} MiB";
-                }
-                else
-                {
-                    CdDiscParameters parameters = ReadCdGeneratedParameters();
-                    request = CreateCdBurnRequest(
-                        compositePath,
-                        parameters,
-                        _state.CdDataDirectory,
-                        _state.CdVolumeLabel,
-                        _state.CdFilesAtOuterRing,
-                        _state.CdInterleave,
-                        _state.Tone,
-                        device.Id,
-                        selectedWriteSpeed.Speed);
-                    contentDescription = request.MediaKind == OpticalBurnMediaKind.CdData
-                        ? L.F($"CD 数据盘（DAO） · 文件位于{(_state.CdFilesAtOuterRing ? L.T("外圈") : L.T("内圈"))}")
-                        : L.T("CD 音轨");
-                    contentDescription += L.F($" · {parameters.Sectors} 扇区 · {request.ContentLength / (1024.0 * 1024.0):F1} MiB");
-                }
+                    GenerateCdRequest { Format: CdArtifactFormat.Mode1Iso } => OpticalBurnMediaKind.CdData,
+                    GenerateCdRequest => OpticalBurnMediaKind.CdAudio,
+                    GenerateDvdRequest => OpticalBurnMediaKind.DvdData,
+                    GenerateBluRayRequest => OpticalBurnMediaKind.BluRayData,
+                    _ => throw new InvalidOperationException(L.T("不支持当前光盘类型。")),
+                };
+                request = new OpticalBurnRequest(
+                    device.Id,
+                    generationMediaKind,
+                    generationPlan.EstimatedBytes,
+                    (output, cancellationToken) => _shell.GenerationService
+                        .GenerateStreamAsync(generationPlan, output, progress: null, cancellationToken)
+                        .GetAwaiter()
+                        .GetResult(),
+                    selectedWriteSpeed.Speed);
+                contentDescription = generationPlan.Summary
+                    + $" · {generationPlan.EstimatedBytes / (1024.0 * 1024.0):F1} MiB";
             }
 
             // In-app danger modal; default focus sits on the refusing button.
