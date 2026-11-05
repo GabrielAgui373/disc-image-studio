@@ -207,6 +207,8 @@ O melhor primeiro investimento estrutural é unificar o caso de uso de geração
 
 Após essas fases, o produto manteria a profundidade técnica atual, mas com um único caminho de configuração para arquivo e gravação, motores consumidos por APIs tipadas, UI menos acoplada à CLI, projetos mais compartilháveis, testes portáveis e diagnóstico melhor para hardware real.
 
+O plano foi decomposto em entregas implementáveis no [backlog detalhado da GUI Linux/Avalonia](tasks/00.index.md), com dependências, critérios de aceite, testes e riscos por task.
+
 ---
 
 [← Qualidade e operação](04-quality-and-operations.md) · [Índice](README.md)

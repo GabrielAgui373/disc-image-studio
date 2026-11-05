@@ -58,6 +58,7 @@ Os números são uma fotografia do commit analisado e incluem ferramentas e test
 3. [Código e fluxos de dados](03-code-and-flows.md) — projeto, composição, geração, prévia, gravação, calibração e persistência.
 4. [Qualidade, testes e operação](04-quality-and-operations.md) — testes, CI, release, desempenho, segurança e observabilidade.
 5. [Riscos e roadmap recomendado](05-risks-and-roadmap.md) — riscos priorizados e plano incremental de evolução.
+6. [Backlog detalhado da GUI Linux/Avalonia](tasks/00.index.md) — tasks ordenadas, dependências, critérios de aceite e validação.
 
 ## Escopo e método
 
