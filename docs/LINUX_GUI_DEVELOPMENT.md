@@ -17,6 +17,7 @@ O backlog completo está em [project-analysis/tasks/00.index.md](project-analysi
 - `DiscImageStudio.Cd`;
 - `DiscImageStudio.Dvd`, usando a hospedagem portátil atual do solver;
 - `DiscImageStudio.BluRay`;
+- `DiscImageStudio.Generation`, com requests, planos, validação e geração file/stream tipados;
 - `DiscImageStudio.PortableArchitectureTests`.
 
 Os projetos WPF, Imaging/WPF, Burning/IMAPI e o harness Windows não pertencem a essa solução. Eles continuam na solução principal e no workflow Windows.
@@ -55,6 +56,7 @@ dotnet test tests/DiscImageStudio.PortableArchitectureTests \
 Os testes portáveis bloqueiam referências acidentais a WPF, Windows Forms, WindowsDesktop, `DiscImageStudio.App`, `DiscImageStudio.Imaging` e `DiscImageStudio.Burning` na nova GUI e nos assemblies portáveis.
 
 Os contratos, ownership e regras de threading da camada portátil estão em [APPLICATION_LAYER.md](APPLICATION_LAYER.md).
+O pipeline compartilhado de geração está em [GENERATION_PIPELINE.md](GENERATION_PIPELINE.md).
 
 ## Executar o Hello World
 

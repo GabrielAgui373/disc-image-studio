@@ -86,6 +86,7 @@ O build não pôde ser reproduzido neste ambiente porque o executável `dotnet` 
 - [Release e empacotamento](../RELEASING.md)
 - [Desenvolvimento da GUI Linux/Avalonia](../LINUX_GUI_DEVELOPMENT.md)
 - [Camada de aplicação portátil](../APPLICATION_LAYER.md)
+- [Pipeline de geração tipado](../GENERATION_PIPELINE.md)
 
 ---
 
