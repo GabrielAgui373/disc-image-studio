@@ -8,6 +8,9 @@
   <Project Path="src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
   <Project Path="src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
   <Project Path="src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
+  </Folder>
   <Project Path="src/DiscImageStudio.App/DiscImageStudio.App.csproj" />
   <Project Path="src/DvdImageSolver/DvdImageSolver.csproj" />
   <Project Path="tests/DiscImageStudio.ArchitectureTests/DiscImageStudio.ArchitectureTests.csproj" />
