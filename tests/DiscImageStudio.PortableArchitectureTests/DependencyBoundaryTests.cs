@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using DiscImageStudio.BluRay;
 using DiscImageStudio.Cd;
+using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
 using DiscImageStudio.Dvd;
 using DiscImageStudio.ImageIO;
@@ -27,6 +28,7 @@ public sealed class DependencyBoundaryTests
     public static TheoryData<Assembly> PortableAssemblies =>
     [
         typeof(OpticalDiscFamily).Assembly,
+        typeof(ProjectWorkspace).Assembly,
         typeof(RasterCodec).Assembly,
         typeof(Iso9660ImageWriter).Assembly,
         typeof(CdDiscModule).Assembly,
@@ -79,7 +81,7 @@ public sealed class DependencyBoundaryTests
             include => include.Contains("WindowsDesktop", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(
             Includes(project, "ProjectReference"),
-            include => WindowsOnlyAssemblies.Any(name => include.Contains(name, StringComparison.OrdinalIgnoreCase)));
+            include => IsWindowsOnlyProjectReference(include));
     }
 
     [Fact]
@@ -98,6 +100,7 @@ public sealed class DependencyBoundaryTests
         string[] expected =
         [
             "src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj",
+            "src/DiscImageStudio.Application/DiscImageStudio.Application.csproj",
             "src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj",
             "src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj",
             "src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj",
@@ -136,14 +139,18 @@ public sealed class DependencyBoundaryTests
                 include => include.StartsWith("Avalonia", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(
                 Includes(project, "ProjectReference"),
-                include => include.Contains("DiscImageStudio.App", StringComparison.OrdinalIgnoreCase)
-                    || include.Contains("DiscImageStudio.Burning", StringComparison.OrdinalIgnoreCase)
-                    || include.Contains("DiscImageStudio.Imaging", StringComparison.OrdinalIgnoreCase));
+                IsWindowsOnlyProjectReference);
         }
     }
 
     private static bool IsWindowsOnlyAssembly(string name)
         => WindowsOnlyAssemblies.Contains(name, StringComparer.OrdinalIgnoreCase);
+
+    private static bool IsWindowsOnlyProjectReference(string include)
+    {
+        string projectName = Path.GetFileNameWithoutExtension(include.Replace('\\', '/'));
+        return WindowsOnlyAssemblies.Contains(projectName, StringComparer.OrdinalIgnoreCase);
+    }
 
     private static bool IsEnabled(string value)
         => bool.TryParse(value, out bool enabled) && enabled;

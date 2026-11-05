@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
