@@ -18,10 +18,12 @@
 
 ## 构建和自检
 
-构建需要 Windows 和 .NET 10 SDK；直接运行非自包含产物需要 .NET 10 Windows 桌面运行时：
+DVD 引擎现在由三个项目组成：`DiscImageStudio.Dvd.Engine` 是唯一的编码与求解库，`DiscImageStudio.Dvd` 提供模块及历史命令适配，`DvdImageSolver` 是精简的命令/self-test 启动器。三者均以可移植的 `net10.0` 为目标，不需要 WPF 或 Windows Desktop。
+
+构建和运行需要 .NET 10 SDK；直接运行非自包含产物只需要 .NET 10 runtime：
 
 ```powershell
-dotnet build DvdImageSolver.slnx --configuration Release
+dotnet build src/DvdImageSolver/DvdImageSolver.csproj --configuration Release
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 ```
 
@@ -218,7 +220,7 @@ ISO payload P = Q XOR sector scrambler byte
 只需要尽快生成可刻录镜像、不需要输出最终EFMPlus边界时，可加`--fast-output true`。快速输出仍在相同的payload码字中心采样图片，并产生与普通dispersion模式相同的2048-byte sector；区别是它用预计算的32 KiB扰码掩码直接从`Q`反推ISO字节`P`，不构造Data Frame、EDC、PI、PO和Recording Frame，也不回放EFMPlus、DSV或pit/land状态。JSON中的`exactEccEfmReplay`会是`false`且`finalBoundary`为`null`。这不会省略刻录所需的数据：刻录机仍会从2048-byte sector自行生成这些派生字段。
 
 ```powershell
-& ".\src\DvdImageSolver\bin\Release\net10.0-windows\DvdImageSolver.exe" solve `
+& ".\src\DvdImageSolver\bin\Release\net10.0\DvdImageSolver.exe" solve `
   --image target.png `
   --total-sectors 2297888 `
   --iso-output "R:\full-disc-fast.iso" `
@@ -424,8 +426,8 @@ dotnet run --project src/DvdImageSolver --configuration Release -- encode `
 
 ## 调制表再生成
 
-`Encoding/EfmPlusTables.Generated.cs` 由 ECMA-267 Annex G 机械提取生成。若需要从规范 PDF 重新生成：
+`DiscImageStudio.Dvd.Engine/Encoding/EfmPlusTables.Generated.cs` 由 ECMA-267 Annex G 机械提取生成。若需要从规范 PDF 重新生成：
 
 ```powershell
-python tools/generate_efm_tables.py ECMA-267.pdf src/DvdImageSolver/Encoding/EfmPlusTables.Generated.cs
+python tools/generate_efm_tables.py ECMA-267.pdf src/DiscImageStudio.Dvd.Engine/Encoding/EfmPlusTables.Generated.cs
 ```

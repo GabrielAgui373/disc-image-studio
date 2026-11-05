@@ -1,4 +1,5 @@
 using DiscImageStudio.Core;
+using DiscImageStudio.Generation;
 
 namespace DiscImageStudio.Cli;
 
@@ -16,6 +17,7 @@ internal static class Program
                 foreach (DiscCommandDescriptor command in module.Descriptor.Commands)
                     Console.WriteLine($"  {command.Name,-20} {command.Description}");
             }
+            Console.WriteLine($"\n{TypedGenerationCommandLine.HelpText}");
             return 0;
         }
 

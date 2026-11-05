@@ -152,11 +152,12 @@ src/DiscImageStudio.Core/    介质无关的模块契约、工程/预设模型�
 src/DiscImageStudio.Imaging/ CD/DVD/BD 共用的图片预处理与抖动辅助
 src/DiscImageStudio.Burning/ Windows IMAPI2 设备枚举、流缓冲与安全刻录层
 src/DiscImageStudio.Cd/      CD-DA 生成核心与 CD 模块
-src/DiscImageStudio.Dvd/     DVD 引擎适配模块
+src/DiscImageStudio.Dvd.Engine/ DVD 编码与求解引擎（可移植库）
+src/DiscImageStudio.Dvd/     DVD 模块、生成适配与历史文本命令
 src/DiscImageStudio.BluRay/  BD-R 几何、17PP/ECC、3T/6T 映射、流式生成与 ISO
 src/DiscImageStudio.Iso/     UDF 2.01 / ISO9660 写入器
 src/DiscImageStudio.App/     WPF GUI、统一命令行与商店资源
-src/DvdImageSolver/          保持隔离的 DVD 编码/求解引擎
+src/DvdImageSolver/          DVD 历史命令与 self-test 的精简启动器
 tests/                       无第三方测试框架的架构回归测试
 packaging/                   MSIX 清单与打包脚本
 tools/                       独立辅助工具与资产生成脚本

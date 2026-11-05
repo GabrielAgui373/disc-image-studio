@@ -10,7 +10,7 @@
 | Alta | Concentração na camada App | ViewModels de 800–1.700 linhas e `MainWindow.xaml.cs` com ~905. | Regressões cruzadas e alto custo de mudança. |
 | Alta | Estado numérico baseado em strings | `DiscParametersState` reúne três mídias e parsing tardio. | Validação duplicada e refactors frágeis. |
 | Alta | Validação física limitada por natureza | Resultado depende de mídia, gravador, firmware e velocidade. | Sucesso digital pode não produzir imagem física esperada. |
-| Média | Solver DVD com hospedagem dupla | Referência ao EXE no Windows e inclusão de fontes em `net10.0`. | Drift entre targets e build difícil de entender. |
+| Resolvido | Solver DVD com hospedagem dupla | A Task 04 criou `DiscImageStudio.Dvd.Engine` e removeu a referência ao EXE e o glob de fontes. | Um único assembly portátil é usado em todos os targets. |
 | Média | Projetos não portáveis | Camadas guardam caminhos absolutos. | Assets ausentes ao mover/compartilhar o projeto. |
 | Média | Testes portáveis presos ao Windows | Harness inteiro targeta `net10.0-windows`. | Menor feedback em Linux/macOS e pouca descoberta por IDE. |
 | Média | Cancelamento pode deixar saída parcial | A própria UI alerta sobre arquivos incompletos. | Artefato aparentemente válido, mas truncado. |
@@ -101,9 +101,9 @@ Extrair por motivo de mudança:
 
 Não é necessário dividir cada arquivo por tamanho. A meta é que cada classe tenha um único conjunto coerente de invariantes.
 
-## Fase 3 — extrair o motor de DVD
+## Fase 3 — extrair o motor de DVD (concluída na Task 04)
 
-Estrutura sugerida:
+Estrutura implementada:
 
 ```text
 src/DiscImageStudio.Dvd.Engine/   net10.0, biblioteca
@@ -111,7 +111,7 @@ src/DvdImageSolver/              executável fino + selftest host
 src/DiscImageStudio.Dvd/         módulo + streaming/hybrid adapter
 ```
 
-Mover encoder, solver e tipos compartilhados para a biblioteca. Remover o glob `Compile Include="../DvdImageSolver/**/*.cs"`. O executável histórico e o módulo passam a referenciar exatamente o mesmo assembly em todos os targets.
+Encoder, solver e tipos compartilhados foram movidos para a biblioteca e o glob `Compile Include="../DvdImageSolver/**/*.cs"` foi removido. O executável histórico encaminha ao módulo, e ambos usam exatamente o mesmo engine em todos os targets.
 
 Critério de aceite:
 
@@ -206,6 +206,8 @@ O melhor primeiro investimento estrutural é unificar o caso de uso de geração
 ## Resultado esperado
 
 Após essas fases, o produto manteria a profundidade técnica atual, mas com um único caminho de configuração para arquivo e gravação, motores consumidos por APIs tipadas, UI menos acoplada à CLI, projetos mais compartilháveis, testes portáveis e diagnóstico melhor para hardware real.
+
+O plano foi decomposto em entregas implementáveis no [backlog detalhado da GUI Linux/Avalonia](tasks/00.index.md), com dependências, critérios de aceite, testes e riscos por task.
 
 ---
 

@@ -17,7 +17,8 @@ flowchart LR
     Contract --> CD[DiscImageStudio.Cd]
     Contract --> DVD[DiscImageStudio.Dvd]
     Contract --> BD[DiscImageStudio.BluRay]
-    DVD --> Engine[DvdImageSolver]
+    DVD --> Engine[DiscImageStudio.Dvd.Engine]
+    DvdHost[DvdImageSolver host] --> DVD
     CD --> CdEngine[CD-DA core]
     BD --> BdEngine[BD encoder / 17PP / ECC]
     BD --> Iso[DiscImageStudio.Iso / UDF 2.01]
@@ -102,7 +103,7 @@ BD-R 复用同一刻录契约：`BluRayIsoGenerator` 在一个前向流里写入
 
 ### DVD
 
-`DiscImageStudio.Dvd` 是薄适配器。它只负责元数据、路由与结果归一化，然后调用隔离的 `DvdImageSolver`。DVD 引擎原参数和自检保持不变。
+`DiscImageStudio.Dvd` 是薄适配器。它只负责元数据、路由、历史文本命令与结果归一化，然后调用可移植的 `DiscImageStudio.Dvd.Engine`。`DvdImageSolver` 现在只是一个 `net10.0` 启动器，仍提供原有命令和自检；模块、CLI 与启动器在所有平台使用同一个引擎程序集。
 
 ### Blu-ray
 

@@ -15,7 +15,8 @@ flowchart TB
     CD[DiscImageStudio.Cd]
     DVD[DiscImageStudio.Dvd]
     BD[DiscImageStudio.BluRay]
-    Solver[DvdImageSolver]
+    Solver[DiscImageStudio.Dvd.Engine]
+    DvdHost[DvdImageSolver\nhost histórico]
     ISO[DiscImageStudio.Iso\nISO9660/Joliet + UDF 2.01]
     IO[DiscImageStudio.ImageIO\nWIC ou Stb]
     Imaging[DiscImageStudio.Imaging\ndithering e qualidade]
@@ -37,6 +38,7 @@ flowchart TB
     BD --> ISO
     CD --> IO
     DVD --> Solver
+    DvdHost --> DVD
     Solver --> IO
     UI --> IO
 ```
@@ -52,8 +54,9 @@ Essa estrutura é adequada ao problema. CD, DVD e BD-R não compartilham a mesma
 | `DiscImageStudio.Imaging` | Dithering e constantes de qualidade | Windows/WPF | Pequeno, mas ainda acoplado ao WPF. |
 | `DiscImageStudio.Iso` | ISO9660/Joliet e UDF 2.01 sequenciais | `net10.0` | Não depende da aplicação. |
 | `DiscImageStudio.Cd` | Geometria, amostragem, CD-DA e CD de dados | Portável + Windows | Usa ISO9660/Joliet no modo de dados. |
-| `DvdImageSolver` | Encoder, solver e executável histórico de DVD | Windows | Contém o motor e self-tests próprios. |
-| `DiscImageStudio.Dvd` | Adaptador modular e geração sequencial/híbrida | Portável + Windows | Hospeda o solver de duas maneiras conforme o target. |
+| `DiscImageStudio.Dvd.Engine` | Encoder, ECC/EFMPlus, solver, geometria e writers do DVD | `net10.0` | Único proprietário do motor portátil. |
+| `DiscImageStudio.Dvd` | Adaptador modular, comandos históricos e geração sequencial/híbrida | `net10.0` | Referencia o engine como biblioteca, sem incluir seus fontes. |
+| `DvdImageSolver` | Launcher histórico e host do self-test | `net10.0` | Executável mínimo que encaminha comandos ao módulo. |
 | `DiscImageStudio.BluRay` | Geometria BD-R, 17PP, ECC, mapeamento 3T/6T e UDF | `net10.0` | Implementação experimental de camada única. |
 | `DiscImageStudio.Burning` | Dispositivos, sessões, buffering e gravação | Windows | IMAPI2 para CD/DVD e comandos MMC para BD-R. |
 | `DiscImageStudio.App` | Shell WPF, telas, ViewModels, serviços e CLI Windows | Windows | Maior concentração de código de produção. |
@@ -107,9 +110,9 @@ O projeto trata explicitamente byte order e a diferença entre arquivo e IMAPI. 
 
 ### DVD
 
-`DiscImageStudio.Dvd` é uma fachada sobre o solver existente. Em Windows, referencia `DvdImageSolver` como projeto; em `net10.0`, inclui os fontes do solver com `Compile Include`. Isso preserva o executável histórico e habilita a CLI portável, mas cria dois modelos de hospedagem para o mesmo motor.
+`DiscImageStudio.Dvd.Engine` é o único proprietário do solver, encoder, geometria e writers. O módulo `DiscImageStudio.Dvd` referencia essa biblioteca em todos os sistemas e contém o adapter dos comandos textuais históricos. `DvdImageSolver` é apenas um launcher fino para os mesmos comandos e para o self-test.
 
-O efeito não é duplicar o solver dentro do mesmo target, pois os `ItemGroup` são condicionais. A dívida é de evolução: a identidade do motor depende do target, o projeto executável também funciona como biblioteca, e mudanças no glob de fontes podem afetar a versão portável. O destino ideal é `DiscImageStudio.Dvd.Engine` como biblioteca portável, referenciada pelo executável legado e pelo módulo.
+Essa extração eliminou a identidade dependente do target e o antigo `Compile Include` sobre fontes do executável. O namespace `DvdImageSolver` foi preservado para compatibilidade mecânica; a separação agora é definida pelos assemblies, sem duplicar algoritmos ou fazer a CLI portátil depender de um projeto `Exe`.
 
 ### Blu-ray
 

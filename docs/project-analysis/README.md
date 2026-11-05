@@ -18,7 +18,7 @@ Início → Design → Prévia → Exportação → Gravação
                       Calibração
 ```
 
-O sistema visual é coeso, possui temas claro/escuro, componentes reutilizáveis, layouts responsivos e sete idiomas. O fluxo de Design é o ponto mais forte da interface. Os maiores riscos de manutenção são o tamanho da camada `App`, o estado compartilhado baseado em strings, a hospedagem duplicada do solver de DVD e a diferença entre a qualidade dos testes algorítmicos e a validação física, que necessariamente depende de mídia, gravador e firmware reais.
+O sistema visual é coeso, possui temas claro/escuro, componentes reutilizáveis, layouts responsivos e sete idiomas. O fluxo de Design é o ponto mais forte da interface. Os maiores riscos de manutenção são o tamanho da camada `App`, o estado compartilhado baseado em strings e a diferença entre a qualidade dos testes algorítmicos e a validação física, que necessariamente depende de mídia, gravador e firmware reais. A hospedagem duplicada do solver de DVD identificada nesta análise foi eliminada pela Task 04.
 
 ## Retrato do repositório
 
@@ -58,6 +58,7 @@ Os números são uma fotografia do commit analisado e incluem ferramentas e test
 3. [Código e fluxos de dados](03-code-and-flows.md) — projeto, composição, geração, prévia, gravação, calibração e persistência.
 4. [Qualidade, testes e operação](04-quality-and-operations.md) — testes, CI, release, desempenho, segurança e observabilidade.
 5. [Riscos e roadmap recomendado](05-risks-and-roadmap.md) — riscos priorizados e plano incremental de evolução.
+6. [Backlog detalhado da GUI Linux/Avalonia](tasks/00.index.md) — tasks ordenadas, dependências, critérios de aceite e validação.
 
 ## Escopo e método
 
@@ -83,6 +84,9 @@ O build não pôde ser reproduzido neste ambiente porque o executável `dotnet` 
 - [Auditoria dos modelos físicos](../PHYSICAL_MODEL_AUDIT.md)
 - [Validação registrada](../VALIDATION.md)
 - [Release e empacotamento](../RELEASING.md)
+- [Desenvolvimento da GUI Linux/Avalonia](../LINUX_GUI_DEVELOPMENT.md)
+- [Camada de aplicação portátil](../APPLICATION_LAYER.md)
+- [Pipeline de geração tipado](../GENERATION_PIPELINE.md)
 
 ---
 

@@ -10,7 +10,7 @@ internal static class ThemeValues
 {
     /// Accepts either palette key form: callers name Color tokens and Brush tokens alike.
     public static Color Color(string key, Color fallback) =>
-        Application.Current?.TryFindResource(key) switch
+        System.Windows.Application.Current?.TryFindResource(key) switch
         {
             Color color => color,
             SolidColorBrush brush => brush.Color,
@@ -18,12 +18,12 @@ internal static class ThemeValues
         };
 
     public static Brush Brush(string key, Brush fallback) =>
-        Application.Current?.TryFindResource(key) as Brush ?? fallback;
+        System.Windows.Application.Current?.TryFindResource(key) as Brush ?? fallback;
 
     /// <summary>Scalar metrics (sidebar widths) for animations, which cannot bind resources
     /// the way a XAML property does.</summary>
     public static double Double(string key, double fallback) =>
-        Application.Current?.TryFindResource(key) is double value ? value : fallback;
+        System.Windows.Application.Current?.TryFindResource(key) is double value ? value : fallback;
 
     /// <summary>The same color with a replacement alpha, for idle states that must fade in
     /// place: ColorAnimation interpolates every ARGB channel, so an idle color of

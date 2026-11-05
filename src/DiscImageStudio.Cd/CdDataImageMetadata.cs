@@ -35,7 +35,7 @@ public sealed record CdDataImageMetadata(
         }
     }
 
-    internal static void Save(string path, CdDataImageMetadata metadata)
+    public static void Save(string path, CdDataImageMetadata metadata)
         => File.WriteAllText(path + ".json", JsonSerializer.Serialize(metadata, JsonOptions) + Environment.NewLine);
 
     private static readonly JsonSerializerOptions JsonOptions = new()

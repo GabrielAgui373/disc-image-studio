@@ -94,9 +94,9 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
         Closed += MainWindow_Closed;
-        if (Application.Current is not null)
+        if (System.Windows.Application.Current is not null)
         {
-            Application.Current.SessionEnding += OnSessionEnding;
+            System.Windows.Application.Current.SessionEnding += OnSessionEnding;
         }
     }
 
@@ -613,7 +613,7 @@ public partial class MainWindow : Window
     {
         bool languageChanged = _settings.Language != settings.Language;
         _settings = settings;
-        if (Application.Current is { } application)
+        if (System.Windows.Application.Current is { } application)
         {
             ThemeResolver.Apply(application, settings.Theme);
         }

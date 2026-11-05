@@ -52,9 +52,9 @@ public sealed record CdTrackMetadata(
         }
     }
 
-    internal static string PathFor(string trackPath) => trackPath + ".json";
+    public static string PathFor(string trackPath) => trackPath + ".json";
 
-    internal static void Save(string trackPath, CdTrackMetadata metadata)
+    public static void Save(string trackPath, CdTrackMetadata metadata)
         => File.WriteAllText(
             PathFor(trackPath),
             JsonSerializer.Serialize(metadata, JsonOptions) + Environment.NewLine);

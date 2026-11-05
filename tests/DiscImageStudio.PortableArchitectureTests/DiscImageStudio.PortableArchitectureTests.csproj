@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Dvd.Engine/DiscImageStudio.Dvd.Engine.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj" />
+  </ItemGroup>
+</Project>

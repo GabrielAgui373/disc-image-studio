@@ -32,7 +32,7 @@ internal static class ThemeResolver
 
     /// <summary>Applies the requested theme (resolving the system preference) and returns
     /// the effective one.</summary>
-    internal static AppTheme Apply(Application application, AppTheme requested)
+    internal static AppTheme Apply(System.Windows.Application application, AppTheme requested)
     {
         ArgumentNullException.ThrowIfNull(application);
         AppTheme effective = Resolve(requested);

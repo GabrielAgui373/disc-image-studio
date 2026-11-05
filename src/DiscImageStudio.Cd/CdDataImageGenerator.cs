@@ -41,12 +41,17 @@ public static class CdDataImageGenerator
     private static readonly int[] PhysicalOffsets = BuildPhysicalOffsets();
 
     public static CdDataLayoutPlan PrepareLayout(string dataDirectory, CdDiscParameters parameters,
-        string volumeLabel = "CD_IMAGE", bool filesAtOuterRing = false)
+        string volumeLabel = "CD_IMAGE", bool filesAtOuterRing = false,
+        DateTimeOffset? timestamp = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dataDirectory);
         parameters.Validate();
-        CdDataLayoutPlan plan = new(Iso9660ImageWriter.Plan(dataDirectory,
-            checked((uint)parameters.Sectors), volumeLabel, filesAtOuterRing: filesAtOuterRing));
+        CdDataLayoutPlan plan = new(Iso9660ImageWriter.Plan(
+            dataDirectory,
+            checked((uint)parameters.Sectors),
+            volumeLabel,
+            timestamp,
+            filesAtOuterRing));
         if (plan.DrawingStartLba >= plan.DrawingEndLbaExclusive)
             throw new ArgumentException("The filesystem leaves no CD sectors for drawing.", nameof(dataDirectory));
         return plan;

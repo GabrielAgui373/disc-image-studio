@@ -2,7 +2,9 @@ using DiscImageStudio.Localization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.Core;
+using DiscImageStudio.Generation;
 using DiscImageStudio.Imaging;
+using DiscImageStudio.Services;
 
 namespace DiscImageStudio.ViewModels;
 
@@ -213,40 +215,14 @@ public partial class ExportViewModel : ObservableObject
     {
         string output = RequirePath(_state.CdOutputPath,
             _state.HasCdFiles ? L.T("请选择 CD ISO 输出位置。") : L.T("请选择 CD 音轨输出位置。"));
-        List<string> arguments = ["cd-generate", "--input", compositePath, "--output", output];
-        // The CD engine defaults (1200 mm/s, 0°, 57.5 mm) cover velocity, start angle and the
-        // image outer radius; only the user-visible geometry is passed through.
-        ToneProfile tone = _state.Tone;
-        arguments.AddRange(
-        [
-            "--r0", _state.CdInnerRadius.Trim(),
-            "--r1", _state.CdOuterRadius.Trim(),
-            "--sectors", _state.CdSectors.Trim(),
-            "--tone-dither", tone.DitherStrength.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-levels", tone.Levels.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-brightness", tone.Brightness.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-gamma", tone.SrgbLinearization.ToString().ToLowerInvariant(),
-        ]);
-        if (_state.HasCdFiles)
-        {
-            arguments.AddRange(
-            [
-                "--data-dir", _state.CdDataDirectory.Trim(),
-                "--volume-label", string.IsNullOrWhiteSpace(_state.CdVolumeLabel) ? "CD_IMAGE" : _state.CdVolumeLabel.Trim(),
-                "--file-position", _state.CdFilesAtOuterRing ? "outer" : "inner",
-            ]);
-        }
-        else
-        {
-            arguments.AddRange(
-            [
-                "--interleave", _state.CdInterleave.ToString().ToLowerInvariant(),
-                "--cue", _state.CdWriteCue.ToString().ToLowerInvariant(),
-            ]);
-        }
-        await _shell.RunDiscJobAsync(
+        GenerateDiscRequest request = GenerationRequestFactory.CreateForProject(
+            OpticalDiscFamily.CompactDisc,
+            _state,
+            compositePath,
+            output);
+        await _shell.RunDiscGenerationAsync(
             _state.HasCdFiles ? L.T("正在生成 CD 数据盘 ISO…") : L.T("正在生成 CD 音轨…"),
-            arguments.ToArray(),
+            request,
             output);
         // The generated track is the live preview page's read-back input.
         _state.CdTrackPath = output;
@@ -255,46 +231,14 @@ public partial class ExportViewModel : ObservableObject
     private async Task GenerateDvdAsync(string compositePath)
     {
         string output = RequirePath(_state.DvdOutputPath, L.T("请选择 DVD ISO 输出位置。"));
-        ToneProfile tone = _state.DvdTone;
-        List<string> arguments =
-        [
-            "solve",
-            "--image", compositePath,
-            "--iso-output", output,
-            "--total-sectors", _state.DvdTotalSectors.Trim(),
-            "--inner-radius-mm", _state.DvdInnerRadius.Trim(),
-            "--outer-radius-mm", _state.DvdOuterRadius.Trim(),
-            "--pitch-linear", _state.DvdPitchLinear.Trim(),
-            "--pitch-quadratic", _state.DvdPitchQuadratic.Trim(),
-            "--pitch-cubic", _state.DvdPitchCubic.Trim(),
-            "--spiral-direction", "cw",
-            "--image-threshold", "128",
-            "--alpha-threshold", "1",
-            "--tone-dither", tone.DitherStrength.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-levels", "2",
-            "--tone-brightness", tone.Brightness.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-gamma", tone.SrgbLinearization.ToString().ToLowerInvariant(),
-            "--algorithm", "dispersion",
-            "--iterations-per-block", "1",
-            "--fast-output", "true",
-            "--volume-label", string.IsNullOrWhiteSpace(_state.DvdVolumeLabel) ? "DISC_IMAGE" : _state.DvdVolumeLabel.Trim(),
-        ];
-        if (string.IsNullOrWhiteSpace(_state.DvdDataDirectory))
-        {
-            arguments.Add("--fill-sectors");
-            arguments.Add(_state.DvdTotalSectors.Trim());
-        }
-        else
-        {
-            arguments.Add("--data-dir");
-            arguments.Add(_state.DvdDataDirectory.Trim());
-            arguments.Add("--file-position");
-            arguments.Add(_state.DvdFilesAtOuterRing ? "outer" : "inner");
-        }
-
-        await _shell.RunDiscJobAsync(
+        GenerateDiscRequest request = GenerationRequestFactory.CreateForProject(
+            OpticalDiscFamily.Dvd,
+            _state,
+            compositePath,
+            output);
+        await _shell.RunDiscGenerationAsync(
             L.T("正在生成 DVD ISO…"),
-            arguments.ToArray(),
+            request,
             output);
         // The generated ISO is the live preview page's read-back input.
         _state.DvdIsoPath = output;
@@ -303,34 +247,14 @@ public partial class ExportViewModel : ObservableObject
     private async Task GenerateBluRayAsync(string compositePath)
     {
         string output = RequirePath(_state.BdOutputPath, L.T("请选择蓝光 ISO 输出位置。"));
-        ToneProfile tone = _state.BluRayTone;
-        List<string> arguments =
-        [
-            "bd-generate",
-            "--input", compositePath,
-            "--output", output,
-            "--total-sectors", _state.BdTotalSectors.Trim(),
-            "--r0", _state.BdInnerRadius.Trim(),
-            "--r1", _state.BdOuterRadius.Trim(),
-            "--invert", _state.BdInvertMapping.ToString().ToLowerInvariant(),
-            "--volume-label", string.IsNullOrWhiteSpace(_state.BdVolumeLabel)
-                ? "BD_IMAGE" : _state.BdVolumeLabel.Trim(),
-            "--tone-dither", tone.DitherStrength.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-levels", "2",
-            "--tone-brightness", tone.Brightness.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
-            "--tone-gamma", tone.SrgbLinearization.ToString().ToLowerInvariant(),
-        ];
-        if (!string.IsNullOrWhiteSpace(_state.BdDataDirectory))
-        {
-            arguments.Add("--data-dir");
-            arguments.Add(_state.BdDataDirectory.Trim());
-            arguments.Add("--file-position");
-            arguments.Add(_state.BdFilesAtOuterRing ? "outer" : "inner");
-        }
-
-        await _shell.RunDiscJobAsync(
+        GenerateDiscRequest request = GenerationRequestFactory.CreateForProject(
+            OpticalDiscFamily.BluRay,
+            _state,
+            compositePath,
+            output);
+        await _shell.RunDiscGenerationAsync(
             L.T("正在生成蓝光 ISO…"),
-            arguments.ToArray(),
+            request,
             output);
         // The generated ISO and its sidecar are the live preview page's read-back input.
         _state.BdIsoPath = output;

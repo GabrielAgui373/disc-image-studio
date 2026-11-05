@@ -7,7 +7,11 @@
         x:Class="DiscImageStudio.App.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="DiscImageStudio.App.Avalonia">
+        Width="800"
+        Height="450"
+        MinWidth="480"
+        MinHeight="320"
+        Title="Disc Image Studio">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,8 +19,16 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+    <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12">
+        <TextBlock Text="{Binding Greeting}"
+                   FontSize="32"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="Avalonia UI baseline"
+                   Opacity="0.65"
+                   HorizontalAlignment="Center" />
+    </StackPanel>
 
 </Window>

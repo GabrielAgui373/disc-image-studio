@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.Burning;
 using DiscImageStudio.Core;
+using DiscImageStudio.Generation;
 using DiscImageStudio.Services;
 
 namespace DiscImageStudio.ViewModels;
@@ -23,6 +24,8 @@ namespace DiscImageStudio.ViewModels;
 /// </summary>
 public partial class ShellViewModel : ObservableObject
 {
+    internal IDiscGenerationService GenerationService { get; } = new DiscGenerationService();
+
     private readonly Dispatcher _dispatcher;
     private readonly StringBuilder _log = new();
     private readonly string? _presetLoadWarning;
@@ -1096,6 +1099,99 @@ public partial class ShellViewModel : ObservableObject
             IsJobDockExpanded = true;
             AppendLog(
                 L.F($"[{DateTime.Now:HH:mm:ss}] 任务失败：退出码 {exitCode}，未生成 {Path.GetFullPath(outputPath)}\n"));
+            ShowToast(L.T("任务未完成"), L.T("详情见窗口底部的任务日志。"), ToastKind.Warning);
+        }
+    }
+
+    /// <summary>Runs a typed generation plan without reconstructing a CLI command line.</summary>
+    internal async Task RunDiscGenerationAsync(
+        string status,
+        GenerateDiscRequest request,
+        string outputPath)
+    {
+        if (_isBusy)
+        {
+            ShowToast(L.T("操作未执行"), L.T("已有任务正在运行。"), ToastKind.Info);
+            return;
+        }
+
+        IsBurnTelemetryVisible = false;
+        _burnProgressDisplay = null;
+        _burnTelemetryTimer?.Stop();
+        JobTitle = status;
+        JobStatusText = L.T("正在运行…");
+        JobProgressValue = 0;
+        IsJobProgressIndeterminate = true;
+        JobHasResult = false;
+        using CancellationTokenSource cancellation = new();
+        _jobCancellation = cancellation;
+        OnPropertyChanged(nameof(CancelJobVisibility));
+        CancelJobCommand.NotifyCanExecuteChanged();
+        SetBusy(true);
+
+        LogAppended?.Invoke($"\n[{DateTime.Now:HH:mm:ss}] {status}\n");
+        Progress<GenerationProgress> progress = new(value =>
+        {
+            IsJobProgressIndeterminate = false;
+            JobProgressValue = Math.Clamp(value.Fraction * 100, 0, 100);
+            JobStatusText = L.F($"正在生成… {JobProgressValue:0.#}%");
+        });
+        bool succeeded = false;
+        bool canceled = false;
+        try
+        {
+            GenerationPlan plan = await GenerationService.PlanAsync(request, cancellation.Token);
+            AppendLog(plan.Summary + Environment.NewLine);
+            await GenerationService.GenerateFileAsync(
+                plan,
+                outputPath,
+                progress,
+                cancellation.Token);
+            succeeded = true;
+        }
+        catch (OperationCanceledException)
+        {
+            canceled = true;
+        }
+        catch (GenerationValidationException exception)
+        {
+            AppendLog(
+                L.F($"[{DateTime.Now:HH:mm:ss}] 验证失败：{exception.Error.Code} · {exception.Error.Field}\n"));
+        }
+        catch (Exception exception)
+        {
+            AppendLog(L.F($"[{DateTime.Now:HH:mm:ss}] 任务异常：{exception.Message}\n"));
+        }
+        finally
+        {
+            _jobCancellation = null;
+            OnPropertyChanged(nameof(CancelJobVisibility));
+            CancelJobCommand.NotifyCanExecuteChanged();
+            SetBusy(false);
+        }
+
+        if (canceled)
+        {
+            IsJobProgressIndeterminate = false;
+            JobProgressValue = 0;
+            JobStatusText = L.T("已取消");
+            AppendLog(L.F($"[{DateTime.Now:HH:mm:ss}] 任务已取消\n"));
+            ShowToast(L.T("任务已取消"), L.T("未完成的输出文件可能留在磁盘上。"), ToastKind.Info);
+        }
+        else if (succeeded)
+        {
+            _lastOutputPath = Path.GetFullPath(outputPath);
+            OpenOutputEnabled = true;
+            JobProgressValue = 100;
+            JobHasResult = true;
+            CanPreviewLastOutput = IsDiscArtifact(_lastOutputPath);
+            JobStatusText = L.T("完成：") + Path.GetFileName(_lastOutputPath);
+            AppendLog(L.F($"[{DateTime.Now:HH:mm:ss}] 完成：{_lastOutputPath}\n"));
+        }
+        else
+        {
+            JobStatusText = L.T("任务未完成");
+            IsJobDockExpanded = true;
             ShowToast(L.T("任务未完成"), L.T("详情见窗口底部的任务日志。"), ToastKind.Warning);
         }
     }
