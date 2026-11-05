@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
+    <Project Path="src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+    <Project Path="src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
+    <Project Path="src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj" />
+    <Project Path="src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+    <Project Path="src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
+    <Project Path="src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+    <Project Path="src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj" />
+  </Folder>
+</Solution>
