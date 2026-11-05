@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net10.0;net10.0-windows</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>DiscImageStudio.Generation</AssemblyName>
+    <RootNamespace>DiscImageStudio.Generation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+    <ProjectReference Include="../DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
+    <ProjectReference Include="../DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+  </ItemGroup>
+</Project>

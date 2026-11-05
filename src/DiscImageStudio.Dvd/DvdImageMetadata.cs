@@ -22,6 +22,32 @@ public sealed record DvdImageMetadata(
     uint DrawingEndLbaExclusive = 0,
     bool HasFileSystem = false)
 {
+    public static void Save(string isoPath, DvdImageMetadata metadata)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(isoPath);
+        ArgumentNullException.ThrowIfNull(metadata);
+        var document = new
+        {
+            imageMapping = new
+            {
+                totalSectors = metadata.TotalSectors,
+                innerRadiusMm = metadata.InnerRadiusMm,
+                outerRadiusMm = metadata.OuterRadiusMm,
+                pitchLinear = metadata.PitchLinear,
+                pitchQuadratic = metadata.PitchQuadratic,
+                pitchCubic = metadata.PitchCubic,
+            },
+            startLba = metadata.DrawingStartLba,
+            fillSectors = metadata.DrawingEndLbaExclusive - metadata.DrawingStartLba,
+            metadata.FilesAtOuterRing,
+            iso = new { mountableFilesystem = metadata.HasFileSystem },
+        };
+        File.WriteAllText(
+            Path.GetFullPath(isoPath) + ".json",
+            JsonSerializer.Serialize(document, new JsonSerializerOptions { WriteIndented = true })
+                + Environment.NewLine);
+    }
+
     /// <summary>Reads the sidecar of an ISO, or null when it is absent or unreadable.</summary>
     public static DvdImageMetadata? TryLoad(string isoPath)
     {

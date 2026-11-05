@@ -37,11 +37,15 @@ public static class HybridIsoImageWriter
     }
 
     public static LayoutPlan Plan(string sourceDirectory, uint volumeSectors, string volumeLabel,
-        bool filesAtOuterRing = false)
+        bool filesAtOuterRing = false, DateTimeOffset? timestamp = null)
     {
         ArgumentNullException.ThrowIfNull(sourceDirectory);
-        return new(Iso9660ImageWriter.Plan(sourceDirectory, volumeSectors, volumeLabel,
-            filesAtOuterRing: filesAtOuterRing));
+        return new(Iso9660ImageWriter.Plan(
+            sourceDirectory,
+            volumeSectors,
+            volumeLabel,
+            timestamp,
+            filesAtOuterRing));
     }
 
     public static void WriteOuterRingPrefix(LayoutPlan plan, Stream output, uint endLbaExclusive,

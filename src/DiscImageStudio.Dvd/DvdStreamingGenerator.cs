@@ -146,7 +146,8 @@ public static class DvdStreamingGenerator
         string dataDirectory,
         DvdStreamingOptions options,
         string volumeLabel = "DVD_IMAGE",
-        bool filesAtOuterRing = false)
+        bool filesAtOuterRing = false,
+        DateTimeOffset? timestamp = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dataDirectory);
         ArgumentNullException.ThrowIfNull(options);
@@ -155,7 +156,8 @@ public static class DvdStreamingGenerator
             dataDirectory,
             options.TotalSectors,
             volumeLabel,
-            filesAtOuterRing);
+            filesAtOuterRing,
+            timestamp);
         uint drawingStartLba = AlignToEccBlock(filesAtOuterRing
             ? isoLayout.MetadataEndLbaExclusive : isoLayout.DataEndLbaExclusive, PsnOffset);
         uint drawingEndLba = filesAtOuterRing ? isoLayout.FileDataStartLba / 16 * 16 : options.TotalSectors;
