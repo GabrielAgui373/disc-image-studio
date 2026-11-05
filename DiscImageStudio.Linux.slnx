@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
     <Project Path="src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
     <Project Path="src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
     <Project Path="src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />

@@ -28,6 +28,7 @@
     <PackageReference Include="MahApps.Metro.IconPacks.Lucide" Version="6.2.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DiscImageStudio.Application\DiscImageStudio.Application.csproj" />
     <ProjectReference Include="..\DiscImageStudio.Core\DiscImageStudio.Core.csproj" />
     <ProjectReference Include="..\DiscImageStudio.ImageIO\DiscImageStudio.ImageIO.csproj" />
     <Compile Include="../Shared/BluRayImageLoader.cs" Link="Services/BluRayImageLoader.cs" />

@@ -46,7 +46,7 @@ internal static class DiscTheme
     public static Brush Outline => Resolve("CalibrationOutlineBrush", 0x00, 0x00, 0x00);
 
     public static FontFamily Font =>
-        Application.Current?.TryFindResource("AppFontFamily") as FontFamily
+        System.Windows.Application.Current?.TryFindResource("AppFontFamily") as FontFamily
         ?? new FontFamily("Microsoft YaHei UI, Segoe UI");
 
     public static Typeface Typeface =>
@@ -57,7 +57,7 @@ internal static class DiscTheme
 
     private static Brush Resolve(string key, byte a, byte r, byte g, byte b)
     {
-        if (Application.Current?.TryFindResource(key) is Brush themed)
+        if (System.Windows.Application.Current?.TryFindResource(key) is Brush themed)
         {
             return themed;
         }

@@ -1,5 +1,6 @@
 using DiscImageStudio.Localization;
 using System.Globalization;
+using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
 using DiscImageStudio.Services;
 
@@ -12,13 +13,14 @@ internal static class ProjectSession
 {
     public static void ApplyToState(ProjectDocument document, DiscParametersState state)
     {
-        ProjectGeometry geometry = document.Geometry;
-        ProjectOutputs outputs = document.Outputs;
-        string inner = Format(geometry.InnerRadiusMm);
-        string outer = Format(geometry.OuterRadiusMm);
-        string sectors = geometry.Sectors.ToString(CultureInfo.InvariantCulture);
+        ProjectWorkspace workspace = ProjectDocumentMapper.ToWorkspace(document);
+        MediaState media = workspace.Media;
+        DeliveryState delivery = workspace.Delivery;
+        string inner = Format(media.InnerRadiusMm);
+        string outer = Format(media.OuterRadiusMm);
+        string sectors = media.Sectors.ToString(CultureInfo.InvariantCulture);
 
-        ToneProfile tone = (document.Tone ?? ToneProfile.LegacyBinary).Normalized();
+        ToneProfile tone = workspace.Tone.Profile.Normalized();
         if (document.Family is OpticalDiscFamily.Dvd or OpticalDiscFamily.BluRay
             && tone.Levels == ToneProfile.FourLevels)
         {
@@ -33,53 +35,56 @@ internal static class ProjectSession
         switch (document.Family)
         {
             case OpticalDiscFamily.Dvd:
+                DvdState dvd = (DvdState)media;
                 state.DvdInnerRadius = inner;
                 state.DvdOuterRadius = outer;
                 state.DvdTotalSectors = sectors;
-                state.DvdPitchLinear = Format(geometry.PitchLinear);
-                state.DvdPitchQuadratic = Format(geometry.PitchQuadratic);
-                state.DvdPitchCubic = Format(geometry.PitchCubic);
+                state.DvdPitchLinear = Format(dvd.PitchLinear);
+                state.DvdPitchQuadratic = Format(dvd.PitchQuadratic);
+                state.DvdPitchCubic = Format(dvd.PitchCubic);
                 // The design projection starts neutral: measured geometry follows the project
                 // until the calibration workflow supplies a real disc's radii.
                 state.DvdActualInnerRadius = inner;
                 state.DvdActualOuterRadius = outer;
-                state.DvdActualPitchLinear = Format(geometry.PitchLinear);
-                state.DvdActualPitchQuadratic = Format(geometry.PitchQuadratic);
-                state.DvdActualPitchCubic = Format(geometry.PitchCubic);
-                state.DvdOutputPath = outputs.OutputPath;
-                state.DvdDataDirectory = outputs.DataDirectory;
-                state.DvdFilesAtOuterRing = outputs.FilesAtOuterRing;
-                state.DvdVolumeLabel = outputs.VolumeLabel;
+                state.DvdActualPitchLinear = Format(dvd.PitchLinear);
+                state.DvdActualPitchQuadratic = Format(dvd.PitchQuadratic);
+                state.DvdActualPitchCubic = Format(dvd.PitchCubic);
+                state.DvdOutputPath = delivery.OutputPath;
+                state.DvdDataDirectory = delivery.DataDirectory;
+                state.DvdFilesAtOuterRing = delivery.FilesAtOuterRing;
+                state.DvdVolumeLabel = delivery.VolumeLabel;
                 state.DvdImagePath = string.Empty;
                 break;
             case OpticalDiscFamily.BluRay:
+                BluRayState bluRay = (BluRayState)media;
                 state.BdInnerRadius = inner;
                 state.BdOuterRadius = outer;
                 state.BdTotalSectors = sectors;
                 state.BdActualInnerRadius = inner;
                 state.BdActualOuterRadius = outer;
-                state.BdOutputPath = outputs.OutputPath;
-                state.BdDataDirectory = outputs.DataDirectory;
-                state.BdFilesAtOuterRing = outputs.FilesAtOuterRing;
-                state.BdVolumeLabel = outputs.VolumeLabel;
-                state.BdInvertMapping = document.BluRay?.InvertMapping ?? false;
+                state.BdOutputPath = delivery.OutputPath;
+                state.BdDataDirectory = delivery.DataDirectory;
+                state.BdFilesAtOuterRing = delivery.FilesAtOuterRing;
+                state.BdVolumeLabel = delivery.VolumeLabel;
+                state.BdInvertMapping = bluRay.InvertMapping;
                 state.BdDrawingStartSector = "0";
                 state.BdDrawingEndSectorExclusive = "0";
                 state.BdImagePath = string.Empty;
                 break;
             default:
+                CdState cd = (CdState)media;
                 state.CdInnerRadius = inner;
                 state.CdOuterRadius = outer;
                 state.CdSectors = sectors;
                 state.CdActualInnerRadius = inner;
                 state.CdActualOuterRadius = outer;
-                state.CdDataDirectory = outputs.DataDirectory;
-                state.CdFilesAtOuterRing = outputs.FilesAtOuterRing;
-                state.CdVolumeLabel = string.IsNullOrWhiteSpace(outputs.VolumeLabel) ? "CD_IMAGE" : outputs.VolumeLabel;
-                state.CdOutputPath = outputs.OutputPath;
+                state.CdDataDirectory = delivery.DataDirectory;
+                state.CdFilesAtOuterRing = delivery.FilesAtOuterRing;
+                state.CdVolumeLabel = string.IsNullOrWhiteSpace(delivery.VolumeLabel) ? "CD_IMAGE" : delivery.VolumeLabel;
+                state.CdOutputPath = delivery.OutputPath;
                 state.NormalizeCdOutputFormat();
-                state.CdWriteCue = outputs.WriteCue;
-                state.CdInterleave = outputs.Interleave;
+                state.CdWriteCue = cd.WriteCue;
+                state.CdInterleave = cd.Interleave;
                 state.CdImagePath = string.Empty;
                 break;
         }

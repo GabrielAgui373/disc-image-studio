@@ -57,7 +57,7 @@ internal static class UiPreviewRenderer
         if (language is not (null or "zh-CN" or "zh-TW" or "en" or "ja" or "tr" or "es" or "cs" or "system"))
             throw new ArgumentException(
                 "Snapshot language must be zh-CN, zh-TW, en, ja, tr, es, cs or system.", nameof(language));
-        Application application = AppHost.CreateApplication(ShutdownMode.OnExplicitShutdown, requestedTheme,
+        System.Windows.Application application = AppHost.CreateApplication(ShutdownMode.OnExplicitShutdown, requestedTheme,
             language ?? L.Chinese);
         if (settingsDialog)
         {
@@ -171,7 +171,7 @@ internal static class UiPreviewRenderer
         string mode,
         int width,
         int height,
-        Application application)
+        System.Windows.Application application)
     {
         if (mode is not ("new" or "edit" or "bd"))
         {
@@ -221,7 +221,7 @@ internal static class UiPreviewRenderer
         int width,
         int height,
         string? view,
-        Application application,
+        System.Windows.Application application,
         AppSettings settings)
     {
         int category = view?.ToLowerInvariant() switch
@@ -256,7 +256,7 @@ internal static class UiPreviewRenderer
     /// too. The window sizes itself to content, so the bitmap takes the laid-out size.</summary>
     private static int RenderPresetSaveDialog(
         string outputPath,
-        Application application)
+        System.Windows.Application application)
     {
         Window window = new PresetSaveWindow
         {
@@ -280,7 +280,7 @@ internal static class UiPreviewRenderer
         string outputPath,
         int width,
         int height,
-        Application application)
+        System.Windows.Application application)
     {
         RenderTargetBitmap bitmap = new(width, height, 96, 96, PixelFormats.Pbgra32);
         bitmap.Render(window);
