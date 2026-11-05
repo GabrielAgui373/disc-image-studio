@@ -15,7 +15,9 @@ O backlog completo está em [project-analysis/tasks/00.index.md](project-analysi
 - `DiscImageStudio.ImageIO`, usando o codec portátil;
 - `DiscImageStudio.Iso`;
 - `DiscImageStudio.Cd`;
-- `DiscImageStudio.Dvd`, usando a hospedagem portátil atual do solver;
+- `DiscImageStudio.Dvd.Engine`, proprietário portátil do encoder e solver de DVD;
+- `DiscImageStudio.Dvd`, com o módulo e os adapters de geração;
+- `DvdImageSolver`, host fino dos comandos históricos e do self-test;
 - `DiscImageStudio.BluRay`;
 - `DiscImageStudio.Generation`, com requests, planos, validação e geração file/stream tipados;
 - `DiscImageStudio.PortableArchitectureTests`.

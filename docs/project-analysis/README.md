@@ -18,7 +18,7 @@ Início → Design → Prévia → Exportação → Gravação
                       Calibração
 ```
 
-O sistema visual é coeso, possui temas claro/escuro, componentes reutilizáveis, layouts responsivos e sete idiomas. O fluxo de Design é o ponto mais forte da interface. Os maiores riscos de manutenção são o tamanho da camada `App`, o estado compartilhado baseado em strings, a hospedagem duplicada do solver de DVD e a diferença entre a qualidade dos testes algorítmicos e a validação física, que necessariamente depende de mídia, gravador e firmware reais.
+O sistema visual é coeso, possui temas claro/escuro, componentes reutilizáveis, layouts responsivos e sete idiomas. O fluxo de Design é o ponto mais forte da interface. Os maiores riscos de manutenção são o tamanho da camada `App`, o estado compartilhado baseado em strings e a diferença entre a qualidade dos testes algorítmicos e a validação física, que necessariamente depende de mídia, gravador e firmware reais. A hospedagem duplicada do solver de DVD identificada nesta análise foi eliminada pela Task 04.
 
 ## Retrato do repositório
 

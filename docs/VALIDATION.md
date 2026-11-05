@@ -55,6 +55,30 @@ dotnet build src/DiscImageStudio.App/DiscImageStudio.App.csproj \
 
 Resultados: solução Linux e aplicação WPF cross-target compiladas com zero warnings e zero erros; 33 testes portáveis aprovados. Cinco vetores determinísticos fixam hashes para CD áudio, CD ISO9660/Joliet, DVD, Blu-ray drawing-only e Blu-ray UDF 2.01 e comprovam equivalência byte a byte entre arquivo e stream. A suíte também cobre artefato CLI versus API direta, resumo/filesystem/ranges, help, códigos estáveis de validação, paths e capacidades inválidos, progresso monotônico e cancelamento. A execução WPF e a gravação física não foram realizadas no Linux.
 
+## Extração do motor DVD — 2026-11-05
+
+A Task 04 foi validada no Fedora 44 x64 com .NET SDK 10.0.113 e runtime 10.0.13:
+
+```bash
+dotnet build DiscImageStudio.Linux.slnx --configuration Release --no-restore \
+  --disable-build-servers --maxcpucount:1
+dotnet test tests/DiscImageStudio.PortableArchitectureTests \
+  --configuration Release --no-build --no-restore
+dotnet build src/DiscImageStudio.App/DiscImageStudio.App.csproj \
+  --configuration Release --no-restore -p:EnableWindowsTargeting=true \
+  --disable-build-servers --maxcpucount:1
+dotnet build tests/DiscImageStudio.ArchitectureTests/DiscImageStudio.ArchitectureTests.csproj \
+  --configuration Release --no-restore -p:EnableWindowsTargeting=true \
+  --disable-build-servers --maxcpucount:1
+dotnet src/DvdImageSolver/bin/Release/net10.0/DvdImageSolver.dll selftest
+dotnet publish src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj \
+  --configuration Release --runtime linux-x64 --self-contained false --no-restore
+```
+
+Resultados: solução Linux, aplicação WPF e harness Windows cross-target compilados com zero warnings e zero erros; 35 testes portáveis aprovados; self-test histórico aprovado tanto pelo launcher quanto pela CLI publicada. O vetor determinístico de DVD da Task 03 permaneceu inalterado. O pacote `linux-x64` contém uma única cópia de `DiscImageStudio.Dvd.Engine.dll` e `DiscImageStudio.Dvd.dll`, sem `DvdImageSolver.dll`, apphost ou runtimeconfig concorrente. O `.deps.json` do engine não contém WPF, WindowsDesktop nem assemblies Windows-only.
+
+O harness Windows foi compilado, mas não executado no Linux. O workflow passou a executar o self-test extraído nos jobs Linux e Windows; a confirmação dos demais RIDs e da execução completa do harness depende do CI do pull request.
+
 ## 本地验证
 
 最近一次完整架构回归：2026-10-28，覆盖界面修复、标定生成优化与 Verbatim BD-R (64099) 预设（对应提交 `3088802`、`49a0e4d`、`46e2c53`），Windows、.NET SDK 10.0.400（运行时 10.0.11），Release 配置。完整 solution 构建（0 警告、0 错误）与架构回归全部通过；测试入口直接运行自研 Exe harness，不使用 `dotnet test`。
