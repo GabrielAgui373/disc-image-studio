@@ -23,6 +23,22 @@ Resultados: solução Linux compilada com zero warnings e zero erros; dez testes
 
 Essa validação não inclui as telas funcionais, empacotamento RPM nem gravação física. O escopo e os comandos de desenvolvimento estão em [LINUX_GUI_DEVELOPMENT.md](LINUX_GUI_DEVELOPMENT.md).
 
+## Camada de aplicação portátil — 2026-11-04
+
+A Task 02 foi validada na mesma branch e ambiente com:
+
+```bash
+dotnet build DiscImageStudio.Linux.slnx --configuration Release --no-restore \
+  --disable-build-servers --maxcpucount:1
+dotnet test tests/DiscImageStudio.PortableArchitectureTests \
+  --configuration Release --no-build --no-restore
+dotnet build src/DiscImageStudio.App/DiscImageStudio.App.csproj \
+  --configuration Release --no-restore -p:EnableWindowsTargeting=true \
+  --disable-build-servers --maxcpucount:1
+```
+
+Resultados: solução Linux e aplicação WPF cross-target compiladas com zero warnings e zero erros; 25 testes portáveis aprovados. Os testes cobrem as fronteiras arquiteturais, round-trip CD/DVD/BD, schema legado, membros desconhecidos, paths e assets ausentes, preservação literal dos campos persistidos, limite de thumbnail, cultura `pt-BR`, dirty state, navegação, lifecycle, snapshots, save/cancel e concorrência/cancelamento de jobs. O teste cross-target apenas valida compilação; a execução visual WPF permanece responsabilidade do job Windows.
+
 ## 本地验证
 
 最近一次完整架构回归：2026-10-28，覆盖界面修复、标定生成优化与 Verbatim BD-R (64099) 预设（对应提交 `3088802`、`49a0e4d`、`46e2c53`），Windows、.NET SDK 10.0.400（运行时 10.0.11），Release 配置。完整 solution 构建（0 警告、0 错误）与架构回归全部通过；测试入口直接运行自研 Exe harness，不使用 `dotnet test`。

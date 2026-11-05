@@ -9,6 +9,7 @@ O backlog completo está em [project-analysis/tasks/00.index.md](project-analysi
 `DiscImageStudio.Linux.slnx` contém somente projetos compiláveis como `net10.0` no Linux:
 
 - `DiscImageStudio.App.Avalonia`;
+- `DiscImageStudio.Application`, com casos de uso e estado tipado compartilháveis;
 - `DiscImageStudio.Cli`;
 - `DiscImageStudio.Core`;
 - `DiscImageStudio.ImageIO`, usando o codec portátil;
@@ -52,6 +53,8 @@ dotnet test tests/DiscImageStudio.PortableArchitectureTests \
 ```
 
 Os testes portáveis bloqueiam referências acidentais a WPF, Windows Forms, WindowsDesktop, `DiscImageStudio.App`, `DiscImageStudio.Imaging` e `DiscImageStudio.Burning` na nova GUI e nos assemblies portáveis.
+
+Os contratos, ownership e regras de threading da camada portátil estão em [APPLICATION_LAYER.md](APPLICATION_LAYER.md).
 
 ## Executar o Hello World
 
