@@ -55,6 +55,9 @@ jobs:
       - name: Test portable architecture boundaries
         run: dotnet test tests/DiscImageStudio.PortableArchitectureTests --configuration Release --no-build --no-restore --logger "trx;LogFileName=portable-architecture.trx"
 
+      - name: Test extracted DVD engine host
+        run: dotnet run --project src/DvdImageSolver --configuration Release --no-build -- selftest
+
       - name: Publish framework-dependent Linux GUI
         run: dotnet publish src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj --configuration Release --runtime linux-x64 --self-contained false --output artifacts/linux-gui/publish
 
@@ -151,7 +154,7 @@ jobs:
       - name: Test module architecture
         run: dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release --no-build
 
-      - name: Test original DVD engine
+      - name: Test extracted DVD engine host
         run: dotnet run --project src/DvdImageSolver --configuration Release --no-build -- selftest
 
       - name: Test DVD through module catalog
