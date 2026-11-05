@@ -20,6 +20,54 @@ permissions:
   contents: read
 
 jobs:
+  linux-gui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Record Linux GUI environment
+        shell: bash
+        run: |
+          mkdir -p artifacts/linux-gui
+          dotnet --info | tee artifacts/linux-gui/dotnet-info.txt
+          printf 'commit=%s\nrunner_os=%s\nrunner_arch=%s\n' \
+            "$GITHUB_SHA" "$RUNNER_OS" "$RUNNER_ARCH" \
+            | tee artifacts/linux-gui/environment.txt
+
+      - name: Restore Linux solution
+        run: dotnet restore DiscImageStudio.Linux.slnx
+
+      - name: Build Linux solution
+        run: dotnet build DiscImageStudio.Linux.slnx --configuration Release --no-restore
+
+      - name: Test portable architecture boundaries
+        run: dotnet test tests/DiscImageStudio.PortableArchitectureTests --configuration Release --no-build --no-restore --logger "trx;LogFileName=portable-architecture.trx"
+
+      - name: Publish framework-dependent Linux GUI
+        run: dotnet publish src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj --configuration Release --runtime linux-x64 --self-contained false --output artifacts/linux-gui/publish
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-gui-baseline
+          path: |
+            artifacts/linux-gui/
+            tests/DiscImageStudio.PortableArchitectureTests/TestResults/
+          if-no-files-found: error
+          retention-days: 7
+
   cli:
     strategy:
       fail-fast: false

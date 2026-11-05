@@ -84,6 +84,7 @@ O build não pôde ser reproduzido neste ambiente porque o executável `dotnet` 
 - [Auditoria dos modelos físicos](../PHYSICAL_MODEL_AUDIT.md)
 - [Validação registrada](../VALIDATION.md)
 - [Release e empacotamento](../RELEASING.md)
+- [Desenvolvimento da GUI Linux/Avalonia](../LINUX_GUI_DEVELOPMENT.md)
 
 ---
 

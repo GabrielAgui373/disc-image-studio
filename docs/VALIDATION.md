@@ -2,6 +2,27 @@
 
 本页列出当前源码的可复现检查。自动化回归验证算法、文件布局和应用工作流；实际刻录效果仍取决于刻录机、固件与盘片。
 
+## Baseline Linux/Avalonia — 2026-11-04
+
+A Task 01 da GUI Linux foi validada no Fedora 44 x64 com .NET SDK 10.0.113 e runtime 10.0.13, na branch `feature/linux-gui-architecture-baseline`.
+
+Foram executados:
+
+```bash
+dotnet restore DiscImageStudio.Linux.slnx
+dotnet build DiscImageStudio.Linux.slnx --configuration Release \
+  --no-restore --disable-build-servers --maxcpucount:1
+dotnet test tests/DiscImageStudio.PortableArchitectureTests \
+  --configuration Release --no-build --no-restore
+dotnet publish src/DiscImageStudio.App.Avalonia \
+  --configuration Release --runtime linux-x64 --self-contained false \
+  --output artifacts/linux-gui/publish
+```
+
+Resultados: solução Linux compilada com zero warnings e zero erros; dez testes de fronteira arquitetural aprovados; publicação framework-dependent `linux-x64` concluída; `.deps.json` sem WPF, WindowsDesktop ou assemblies Windows-only do produto. A janela Avalonia foi iniciada por cinco segundos em sessão Wayland/XWayland e exibiu o baseline `Hello, Linux!` sem falha imediata.
+
+Essa validação não inclui as telas funcionais, empacotamento RPM nem gravação física. O escopo e os comandos de desenvolvimento estão em [LINUX_GUI_DEVELOPMENT.md](LINUX_GUI_DEVELOPMENT.md).
+
 ## 本地验证
 
 最近一次完整架构回归：2026-10-28，覆盖界面修复、标定生成优化与 Verbatim BD-R (64099) 预设（对应提交 `3088802`、`49a0e4d`、`46e2c53`），Windows、.NET SDK 10.0.400（运行时 10.0.11），Release 配置。完整 solution 构建（0 警告、0 错误）与架构回归全部通过；测试入口直接运行自研 Exe harness，不使用 `dotnet test`。
