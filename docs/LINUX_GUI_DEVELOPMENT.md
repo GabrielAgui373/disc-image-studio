@@ -1,6 +1,6 @@
 # Desenvolvimento da GUI Linux/Avalonia
 
-Este documento descreve o desenvolvimento da GUI portátil do Disc Image Studio. O host Avalonia já compõe os serviços de plataforma, persiste preferências e recentes em diretórios XDG e apresenta uma tela técnica de diagnóstico; o shell de produto e as telas de projeto ainda serão construídos nas Tasks 06 e 07. Os motores de CD, DVD e Blu-ray, Core, CLI, ImageIO e ISO também fazem parte da solução Linux.
+Este documento descreve o desenvolvimento da GUI portátil do Disc Image Studio. O host Avalonia compõe os serviços de plataforma, persiste preferências e recentes em diretórios XDG e já oferece shell responsivo, navegação, feedback global e diagnóstico técnico. O ciclo funcional de projetos começa na Task 07. Os motores de CD, DVD e Blu-ray, Core, CLI, ImageIO e ISO também fazem parte da solução Linux.
 
 O backlog completo está em [project-analysis/tasks/00.index.md](project-analysis/tasks/00.index.md).
 
@@ -70,6 +70,29 @@ dotnet run --project src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalon
 
 A janela de diagnóstico mostra informações de versão/runtime e diretórios XDG, além de ações para copiar o diagnóstico ou abrir a pasta de logs. O backend desktop requer uma sessão X11/XWayland; se `DISPLAY` estiver ausente, o processo encerra com uma mensagem de orientação em vez de uma falha pouco clara. A abertura da janela deve ser confirmada manualmente em desktop Fedora; o build/teste não substitui esse smoke visual.
 
+### Executar com reload durante o desenvolvimento
+
+Para manter a aplicação aberta e observar alterações nos arquivos C# e Avalonia XAML (`.axaml`), use:
+
+```bash
+dotnet watch run --project src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj
+```
+
+O `dotnet watch` aplica Hot Reload às alterações C# compatíveis. Alterações `.axaml` recompilam e reiniciam o processo da aplicação; nesse caso o estado em memória é perdido. O `Ctrl+R` no terminal força rebuild e reinício. A lista `Watch` do projeto inclui explicitamente os arquivos `.axaml`, que não apareciam na lista padrão observada pelo SDK.
+
+### Checklist visual do shell
+
+Em uma sessão Fedora, valide manualmente:
+
+- janela em 1024×720 e em largura ampla, com conteúdo alcançável por scroll;
+- sidebar expandida e compacta, sem deslocamento dos ícones nem clipping da seleção;
+- tooltips dos itens compactos, foco visível e atalhos `Alt+H/D/P/E/B/S`;
+- temas claro, escuro e preferência do sistema;
+- toast, histórico do `JobDock` e prompt modal, incluindo cancelamento por `Escape`;
+- textos longos com wrapping/trimming sem esconder ações críticas.
+
+Snapshots e testes Avalonia Headless serão mantidos em um módulo de testes dedicado; não fazem parte da conclusão atual da Task 06.
+
 Preferências e recentes são gravados sob os caminhos XDG (`XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME` e `XDG_STATE_HOME`, com fallback para `~/.config`, `~/.local/share`, `~/.cache` e `~/.local/state`). Não é necessário executar como root.
 
 ## Publicar um smoke framework-dependent
@@ -96,7 +119,7 @@ Esse pacote exige o runtime .NET 10 instalado. Empacotamento self-contained, RPM
 
 | Área | WPF | Avalonia/Linux | Task responsável |
 | --- | --- | --- | --- |
-| Inicialização desktop | Completa | Host e diagnóstico técnico; smoke visual pendente | 01, 05 |
+| Inicialização desktop | Completa | Host, shell responsivo, navegação e diagnóstico técnico | 01, 05, 06 |
 | Home e ciclo do projeto | Completa | Não implementado | 07 |
 | Novo projeto/configurações | Completa | Não implementado | 07 |
 | Design/camadas/tom | Completa | Não implementado | 08, 09 |
@@ -105,7 +128,7 @@ Esse pacote exige o runtime .NET 10 instalado. Empacotamento self-contained, RPM
 | Exportação | Completa | Não implementado | 03, 11 |
 | Calibração | Completa | Não implementado | 12 |
 | Gravação | IMAPI/MMC | Não disponível | 13 |
-| Temas/localização | Completa | Inglês inicial; preferências carregadas antes da janela | 05, 06, 14 |
+| Temas/localização | Completa | Tema do sistema/claro/escuro e inglês inicial; i18n planejada | 05, 06, 14 |
 | Settings e Sobre | Completa | Persistência e diagnóstico técnico; telas ainda não implementadas | 05, 07 |
 | Empacotamento | MSIX/release Windows | Não implementado | 16 |
 
