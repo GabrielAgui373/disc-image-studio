@@ -3,32 +3,76 @@
         xmlns:vm="using:DiscImageStudio.App.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d"
+        d:DesignWidth="900"
+        d:DesignHeight="620"
         x:Class="DiscImageStudio.App.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Width="800"
-        Height="450"
-        MinWidth="480"
-        MinHeight="320"
-        Title="Disc Image Studio">
+        Width="900"
+        Height="620"
+        MinWidth="620"
+        MinHeight="480"
+        Title="{Binding Title}">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainViewModel />
-    </Design.DataContext>
+    <ScrollViewer>
+        <StackPanel Margin="40"
+                    MaxWidth="820"
+                    HorizontalAlignment="Stretch"
+                    Spacing="24">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{Binding StatusTitle}"
+                           FontSize="30"
+                           FontWeight="SemiBold" />
+                <TextBlock Text="{Binding StatusDescription}"
+                           FontSize="16"
+                           Opacity="0.72"
+                           TextWrapping="Wrap" />
+            </StackPanel>
 
-    <StackPanel HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="12">
-        <TextBlock Text="{Binding Greeting}"
-                   FontSize="32"
-                   FontWeight="SemiBold"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="Avalonia UI baseline"
-                   Opacity="0.65"
-                   HorizontalAlignment="Center" />
-    </StackPanel>
+            <Border Padding="24"
+                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{Binding AboutTitle}"
+                               FontSize="20"
+                               FontWeight="SemiBold" />
+
+                    <Grid ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="20"
+                          RowSpacing="10">
+                        <TextBlock Grid.Row="0" Text="{Binding VersionLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProductVersion}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="1" Text="{Binding CommitLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Commit}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="2" Text="{Binding RuntimeLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DotnetRuntime}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="3" Text="{Binding AvaloniaLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AvaloniaVersion}" />
+                        <TextBlock Grid.Row="4" Text="{Binding OperatingSystemLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OperatingSystem}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="5" Text="{Binding ConfigDirectoryLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ConfigDirectory}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="6" Text="{Binding DataDirectoryLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="7" Text="{Binding CacheDirectoryLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CacheDirectory}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="8" Text="{Binding LogsDirectoryLabel}" Opacity="0.65" />
+                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding LogsDirectory}" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Content="{Binding CopyDiagnosticsLabel}"
+                                Command="{Binding CopyDiagnosticsCommand}" />
+                        <Button Content="{Binding OpenLogsLabel}"
+                                Command="{Binding OpenLogsCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding ActionStatus}" Opacity="0.7" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 
 </Window>

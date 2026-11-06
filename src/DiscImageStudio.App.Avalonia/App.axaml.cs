@@ -1,13 +1,14 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using DiscImageStudio.App.Avalonia.ViewModels;
-using DiscImageStudio.App.Avalonia.Views;
+using DiscImageStudio.App.Avalonia.Hosting;
 
 namespace DiscImageStudio.App.Avalonia;
 
 public partial class App : global::Avalonia.Application
 {
+    private AppHost? _host;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -17,10 +18,9 @@ public partial class App : global::Avalonia.Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainViewModel(),
-            };
+            _host = AppHost.Create(this, desktop);
+            desktop.MainWindow = _host.MainWindow;
+            desktop.Exit += (_, _) => _host?.Dispose();
         }
 
         base.OnFrameworkInitializationCompleted();
