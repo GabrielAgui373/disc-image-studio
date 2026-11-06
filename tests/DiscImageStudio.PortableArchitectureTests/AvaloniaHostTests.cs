@@ -177,6 +177,22 @@ public sealed class AvaloniaHostTests
 
             Assert.Equal("en", CultureInfo.CurrentUICulture.Name);
             Assert.Equal(ThemeVariant.Dark, app.RequestedThemeVariant);
+
+            StartupPreferences.Apply(app, new UserSettings
+            {
+                Culture = "en",
+                Theme = ApplicationTheme.Light,
+            });
+
+            Assert.Equal(ThemeVariant.Light, app.RequestedThemeVariant);
+
+            StartupPreferences.Apply(app, new UserSettings
+            {
+                Culture = "en",
+                Theme = ApplicationTheme.System,
+            });
+
+            Assert.Equal(ThemeVariant.Default, app.RequestedThemeVariant);
         }
         finally
         {
