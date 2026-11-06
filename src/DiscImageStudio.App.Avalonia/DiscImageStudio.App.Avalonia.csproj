@@ -22,6 +22,7 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <Watch Include="**\*.axaml" />
   </ItemGroup>
 
   <ItemGroup>
