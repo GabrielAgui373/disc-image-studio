@@ -1,0 +1,505 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls">
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{DynamicResource DiscBackgroundBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource DiscFontFamily}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.primary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentHoverBrush}" />
+  </Style>
+
+  <Style Selector="Button.secondary">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.secondary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  </Style>
+
+  <Style Selector="Button.ghost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.ghost:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  </Style>
+
+  <Style Selector="Button.sidebar-toggle">
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+    <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
+    <Setter Property="Padding" Value="10,0" />
+  </Style>
+
+  <!-- Shell chrome intentionally leaves the window frame to the Linux desktop. -->
+  <Style Selector="Border.shell-header">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="{DynamicResource DiscHeaderPadding}" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+    <Setter Property="Padding" Value="12" />
+  </Style>
+
+  <Style Selector="TextBlock.sidebar-label">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.navigation-item">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Height" Value="42" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0,2" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.14" Easing="SineEaseOut" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.14" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Grid.navigation-content">
+    <Setter Property="ClipToBounds" Value="False" />
+  </Style>
+
+  <Style Selector="Button.navigation-item:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Button.navigation-item.current">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  </Style>
+
+  <Style Selector="Button.navigation-item.current:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  </Style>
+
+  <Style Selector="Border.navigation-selection">
+    <Setter Property="Width" Value="44" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar.sidebar-collapsed Button.navigation-item:pointerover">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar.sidebar-collapsed Button.navigation-item.current">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar.sidebar-collapsed Button.navigation-item:pointerover Border.navigation-selection">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar.sidebar-collapsed Button.navigation-item.current Border.navigation-selection">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  </Style>
+
+  <Style Selector="Border.shell-sidebar.sidebar-collapsed Button.navigation-item:focus Border.navigation-selection">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Viewbox.navigation-icon">
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Width" Value="20" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Path.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="StrokeThickness" Value="1.8" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Stroke" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Ellipse.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="StrokeThickness" Value="1.8" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Stroke" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.navigation-item.current Path.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.navigation-item:pointerover Path.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.navigation-item.current Ellipse.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.navigation-item:pointerover Ellipse.navigation-stroke">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.navigation-label">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextAlignment" Value="Left" />
+  </Style>
+
+  <Style Selector="Button.navigation-item:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.stage-bar">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="6" />
+  </Style>
+
+  <Style Selector="Button.stage-item">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.stage-item:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Button.stage-item.current">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.stage-item:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.stage-shortcut">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="Border.navigation-notice">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+
+  <Style Selector="Border.job-dock">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+
+  <Style Selector="Border.job-dock-item">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="Padding" Value="16,10" />
+  </Style>
+
+  <Style Selector="TextBlock.job-detail">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="Button.compact-action">
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="ItemsControl.toast-host">
+    <Setter Property="Width" Value="360" />
+  </Style>
+
+  <Style Selector="Border.toast-card">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusFloating}" />
+    <Setter Property="BoxShadow" Value="0 8 24 0 #33000000" />
+    <Setter Property="Padding" Value="14,12,8,12" />
+  </Style>
+
+  <Style Selector="TextBlock.toast-message">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="Button.toast-dismiss">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontSize" Value="19" />
+  </Style>
+
+  <Style Selector="Border.modal-scrim">
+    <Setter Property="Background" Value="{DynamicResource DiscOverlayBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Padding" Value="24" />
+  </Style>
+
+  <Style Selector="Border.modal-card">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="0 16 48 0 #66000000" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="24" />
+    <Setter Property="Width" Value="460" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TextBlock.modal-message">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.sidebar-caption">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="controls|PageHeader">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace4}">
+          <StackPanel Spacing="{DynamicResource DiscSpace2}">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource DiscSpace2}">
+              <TextBlock Text="{TemplateBinding Title}" FontSize="30" FontWeight="SemiBold" />
+              <Border IsVisible="{TemplateBinding IsBadgeVisible}"
+                      Background="{DynamicResource DiscAccentSoftBrush}"
+                      CornerRadius="{DynamicResource DiscRadiusChip}"
+                      Padding="8,3"
+                      VerticalAlignment="Center">
+                <TextBlock Text="{TemplateBinding Badge}"
+                           Foreground="{DynamicResource DiscAccentBrush}"
+                           FontSize="12"
+                           FontWeight="SemiBold" />
+              </Border>
+            </StackPanel>
+            <TextBlock Text="{TemplateBinding Subtitle}"
+                       Foreground="{DynamicResource DiscTextMutedBrush}"
+                       FontSize="15"
+                       TextWrapping="Wrap" />
+          </StackPanel>
+          <ContentPresenter Grid.Column="1"
+                            Content="{TemplateBinding Actions}"
+                            VerticalAlignment="Center" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="controls|SectionCard">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{DynamicResource DiscSurfaceBrush}"
+                BorderBrush="{DynamicResource DiscBorderBrush}"
+                BorderThickness="1"
+                BoxShadow="0 4 16 0 #1A000000"
+                CornerRadius="{DynamicResource DiscRadiusCard}"
+                Padding="{DynamicResource DiscCardPadding}">
+          <StackPanel Spacing="{DynamicResource DiscSpace4}">
+            <StackPanel Spacing="{DynamicResource DiscSpace1}">
+              <TextBlock Text="{TemplateBinding Title}" FontSize="17" FontWeight="SemiBold" />
+              <TextBlock Text="{TemplateBinding Description}"
+                         Foreground="{DynamicResource DiscTextMutedBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+            <ContentPresenter Content="{TemplateBinding Content}" />
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="controls|SourceChip">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{DynamicResource DiscSurfaceRaisedBrush}"
+                BorderBrush="{DynamicResource DiscBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource DiscRadiusField}"
+                Padding="12,9">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace3}">
+            <StackPanel Spacing="2">
+              <TextBlock Text="{TemplateBinding Text}" FontWeight="SemiBold" />
+              <TextBlock Text="{TemplateBinding Detail}"
+                         Foreground="{DynamicResource DiscTextMutedBrush}"
+                         FontSize="12"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+            <ContentPresenter Grid.Column="1"
+                              Content="{TemplateBinding Actions}"
+                              VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="controls|PathField">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="{DynamicResource DiscSpace2}">
+          <TextBlock Text="{TemplateBinding Label}"
+                     FontSize="13"
+                     FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace2}">
+            <TextBox Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                     PlaceholderText="{TemplateBinding Watermark}"
+                     IsReadOnly="{TemplateBinding IsReadOnly}" />
+            <Button Grid.Column="1"
+                    Classes="secondary"
+                    Command="{TemplateBinding BrowseCommand}"
+                    Content="{TemplateBinding BrowseText}"
+                    IsVisible="{TemplateBinding ShowBrowse}" />
+          </Grid>
+          <TextBlock Text="{TemplateBinding Hint}"
+                     Foreground="{DynamicResource DiscTextMutedBrush}"
+                     FontSize="12"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="controls|EmptyState">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel HorizontalAlignment="Center" MaxWidth="420" Spacing="{DynamicResource DiscSpace3}">
+          <Border Background="{DynamicResource DiscSurfaceRaisedBrush}"
+                  BorderBrush="{DynamicResource DiscBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="{DynamicResource DiscRadiusCard}"
+                  Height="64"
+                  Width="64"
+                  HorizontalAlignment="Center">
+            <TextBlock Text="○" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource DiscTextMutedBrush}" />
+          </Border>
+          <TextBlock Text="{TemplateBinding Title}" FontSize="16" FontWeight="SemiBold"
+                     TextAlignment="Center" />
+          <TextBlock Text="{TemplateBinding Description}" Foreground="{DynamicResource DiscTextMutedBrush}"
+                     TextAlignment="Center" TextWrapping="Wrap" />
+          <ContentPresenter Content="{TemplateBinding Content}" />
+          <Button Classes="primary"
+                  Command="{TemplateBinding ActionCommand}"
+                  Content="{TemplateBinding ActionText}"
+                  HorizontalAlignment="Center"
+                  IsVisible="{TemplateBinding IsActionVisible}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

@@ -1,0 +1,81 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Semantic colors adapt to the requested Avalonia theme. Views consume these names,
+       never raw colors, so a future visual refresh stays localized to this dictionary. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="DiscBackgroundColor">#F6F7FB</Color>
+      <Color x:Key="DiscSurfaceColor">#FFFFFF</Color>
+      <Color x:Key="DiscSurfaceRaisedColor">#EEF1F7</Color>
+      <Color x:Key="DiscTextColor">#1B1D24</Color>
+      <Color x:Key="DiscTextMutedColor">#5B6270</Color>
+      <Color x:Key="DiscBorderColor">#D8DCE6</Color>
+      <Color x:Key="DiscAccentColor">#1E63D5</Color>
+      <Color x:Key="DiscAccentHoverColor">#174FAE</Color>
+      <Color x:Key="DiscAccentSoftColor">#1A1E63D5</Color>
+      <Color x:Key="DiscSuccessColor">#16803C</Color>
+      <Color x:Key="DiscWarningColor">#A85D00</Color>
+      <Color x:Key="DiscDangerColor">#C72D4E</Color>
+      <Color x:Key="DiscOverlayColor">#990B0D12</Color>
+      <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="DiscTextBrush" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="DiscTextMutedBrush" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="DiscBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="DiscAccentBrush" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="DiscAccentHoverBrush" Color="{DynamicResource DiscAccentHoverColor}" />
+      <SolidColorBrush x:Key="DiscAccentSoftBrush" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="DiscSuccessBrush" Color="{DynamicResource DiscSuccessColor}" />
+      <SolidColorBrush x:Key="DiscWarningBrush" Color="{DynamicResource DiscWarningColor}" />
+      <SolidColorBrush x:Key="DiscDangerBrush" Color="{DynamicResource DiscDangerColor}" />
+      <SolidColorBrush x:Key="DiscOverlayBrush" Color="{DynamicResource DiscOverlayColor}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <Color x:Key="DiscBackgroundColor">#11131A</Color>
+      <Color x:Key="DiscSurfaceColor">#191C25</Color>
+      <Color x:Key="DiscSurfaceRaisedColor">#242936</Color>
+      <Color x:Key="DiscTextColor">#F5F7FC</Color>
+      <Color x:Key="DiscTextMutedColor">#B6BDCB</Color>
+      <Color x:Key="DiscBorderColor">#343B4A</Color>
+      <Color x:Key="DiscAccentColor">#6BA5FF</Color>
+      <Color x:Key="DiscAccentHoverColor">#9AC3FF</Color>
+      <Color x:Key="DiscAccentSoftColor">#246BA5FF</Color>
+      <Color x:Key="DiscSuccessColor">#5DCC86</Color>
+      <Color x:Key="DiscWarningColor">#F2B558</Color>
+      <Color x:Key="DiscDangerColor">#FF7893</Color>
+      <Color x:Key="DiscOverlayColor">#AA05070D</Color>
+      <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="DiscTextBrush" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="DiscTextMutedBrush" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="DiscBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="DiscAccentBrush" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="DiscAccentHoverBrush" Color="{DynamicResource DiscAccentHoverColor}" />
+      <SolidColorBrush x:Key="DiscAccentSoftBrush" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="DiscSuccessBrush" Color="{DynamicResource DiscSuccessColor}" />
+      <SolidColorBrush x:Key="DiscWarningBrush" Color="{DynamicResource DiscWarningColor}" />
+      <SolidColorBrush x:Key="DiscDangerBrush" Color="{DynamicResource DiscDangerColor}" />
+      <SolidColorBrush x:Key="DiscOverlayBrush" Color="{DynamicResource DiscOverlayColor}" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
+  <x:Double x:Key="DiscSpace1">4</x:Double>
+  <x:Double x:Key="DiscSpace2">8</x:Double>
+  <x:Double x:Key="DiscSpace3">12</x:Double>
+  <x:Double x:Key="DiscSpace4">16</x:Double>
+  <x:Double x:Key="DiscSpace5">24</x:Double>
+  <x:Double x:Key="DiscSpace6">32</x:Double>
+  <Thickness x:Key="DiscPagePadding">32,24,32,32</Thickness>
+  <Thickness x:Key="DiscHeaderPadding">16</Thickness>
+  <Thickness x:Key="DiscCardPadding">24</Thickness>
+  <CornerRadius x:Key="DiscRadiusField">8</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusCard">12</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusChip">6</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusFloating">10</CornerRadius>
+  <x:Double x:Key="DiscControlHeight">34</x:Double>
+  <x:Double x:Key="DiscCompactControlHeight">28</x:Double>
+  <FontFamily x:Key="DiscFontFamily">Inter, sans-serif</FontFamily>
+  <FontFamily x:Key="DiscMonoFontFamily">Cascadia Mono, Monospace</FontFamily>
+</ResourceDictionary>
