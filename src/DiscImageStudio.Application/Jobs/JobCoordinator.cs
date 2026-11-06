@@ -16,6 +16,8 @@ public sealed record JobCompletion(Guid JobId, string Name, DateTimeOffset Start
 
 public sealed record JobStarted(Guid JobId, string Name);
 
+public sealed record JobProgressReported(Guid JobId, JobProgress Progress);
+
 public sealed record JobFinished(Guid JobId, string Name, ApplicationErrorCode? ErrorCode);
 
 /// <summary>
@@ -98,7 +100,13 @@ public sealed class JobCoordinator
         ApplicationErrorCode? errorCode = null;
         try
         {
-            await operation(new JobExecutionContext(jobId, progress, linked.Token));
+            IProgress<JobProgress> reportedProgress = new Progress<JobProgress>(update =>
+            {
+                progress?.Report(update);
+                _events.Publish(new JobProgressReported(jobId, update));
+            });
+
+            await operation(new JobExecutionContext(jobId, reportedProgress, linked.Token));
             return ApplicationResult<JobCompletion>.Success(
                 new JobCompletion(jobId, request.Name, startedUtc, _clock.UtcNow));
         }

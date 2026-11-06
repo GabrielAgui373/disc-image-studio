@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using DiscImageStudio.App.Avalonia.Diagnostics;
+using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
 using DiscImageStudio.App.Avalonia.ViewModels;
@@ -60,15 +61,17 @@ public sealed class AppHost : IDisposable
         AvaloniaClipboardService clipboard = new(topLevel);
         AvaloniaExternalLauncher launcher = new(topLevel);
         AvaloniaUiDispatcher dispatcher = new();
-        AvaloniaUserPromptService prompts = new(owner, text);
+        OverlayUserPromptService prompts = new(text);
         JsonRecentProjectStore recentProjects = new(paths.RecentProjectsFilePath, storage, logger);
         FileCacheManager cache = new(paths, logger);
-        JobCoordinator jobs = new(new SystemClock());
+        ApplicationEventHub applicationEvents = new();
+        JobCoordinator jobs = new(new SystemClock(), applicationEvents);
         ProjectLifecycleService projects = new(
             new JsonProjectDocumentStore(),
             new PhysicalFileSystem(),
             new SystemClock(),
-            prompts);
+            prompts,
+            applicationEvents);
         AvaloniaApplicationLifetime applicationLifetime = new(
             jobs,
             prompts,
@@ -96,7 +99,8 @@ public sealed class AppHost : IDisposable
             text,
             about);
 
-        MainViewModel viewModel = new(paths, clipboard, launcher, text, about);
+        MainViewModel viewModel = new(paths, clipboard, launcher, text, about, projects, jobs, dispatcher, applicationEvents);
+        prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {
             DataContext = viewModel,

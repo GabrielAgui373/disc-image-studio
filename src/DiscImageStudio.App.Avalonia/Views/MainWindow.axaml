@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls"
         xmlns:vm="using:DiscImageStudio.App.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,64 +16,349 @@
         MinHeight="480"
         Title="{Binding Title}">
 
-    <ScrollViewer>
-        <StackPanel Margin="40"
-                    MaxWidth="820"
-                    HorizontalAlignment="Stretch"
-                    Spacing="24">
-            <StackPanel Spacing="8">
-                <TextBlock Text="{Binding StatusTitle}"
-                           FontSize="30"
-                           FontWeight="SemiBold" />
-                <TextBlock Text="{Binding StatusDescription}"
-                           FontSize="16"
-                           Opacity="0.72"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Alt+H" Command="{Binding NavigateHomeCommand}" />
+        <KeyBinding Gesture="Alt+D" Command="{Binding NavigateDesignCommand}" />
+        <KeyBinding Gesture="Alt+P" Command="{Binding NavigatePreviewCommand}" />
+        <KeyBinding Gesture="Alt+E" Command="{Binding NavigateExportCommand}" />
+        <KeyBinding Gesture="Alt+B" Command="{Binding NavigateBurnCommand}" />
+        <KeyBinding Gesture="Alt+S" Command="{Binding NavigateSettingsCommand}" />
+        <KeyBinding Gesture="Escape" Command="{Binding DismissPromptCommand}" />
+    </Window.KeyBindings>
 
-            <Border Padding="24"
-                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="10">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="{Binding AboutTitle}"
-                               FontSize="20"
-                               FontWeight="SemiBold" />
+    <Grid>
+        <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Classes="shell-header">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Button x:Name="SidebarToggleButton"
+                        Classes="ghost sidebar-toggle"
+                        Click="ToggleSidebar_Click"
+                        Content="☰"
+                        AutomationProperties.Name="Toggle sidebar"
+                        ToolTip.Tip="Toggle sidebar" />
 
-                    <Grid ColumnDefinitions="Auto,*"
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="20"
-                          RowSpacing="10">
-                        <TextBlock Grid.Row="0" Text="{Binding VersionLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProductVersion}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="1" Text="{Binding CommitLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Commit}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="2" Text="{Binding RuntimeLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DotnetRuntime}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="3" Text="{Binding AvaloniaLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AvaloniaVersion}" />
-                        <TextBlock Grid.Row="4" Text="{Binding OperatingSystemLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OperatingSystem}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="5" Text="{Binding ConfigDirectoryLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ConfigDirectory}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="6" Text="{Binding DataDirectoryLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="7" Text="{Binding CacheDirectoryLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CacheDirectory}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="8" Text="{Binding LogsDirectoryLabel}" Opacity="0.65" />
-                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding LogsDirectory}" TextWrapping="Wrap" />
+                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock x:Name="HeaderSubtitle"
+                               Text="Linux desktop workspace"
+                               Classes="sidebar-caption" />
+                </StackPanel>
+
+                <Border Grid.Column="2"
+                        Background="{DynamicResource DiscAccentSoftBrush}"
+                        CornerRadius="{DynamicResource DiscRadiusChip}"
+                        Padding="8,3"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="LINUX" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource DiscAccentBrush}" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+            <Border x:Name="Sidebar" Classes="shell-sidebar" Width="240">
+                <Border.Transitions>
+                    <Transitions>
+                        <DoubleTransition Property="Width" Duration="0:0:0.30" Easing="SineEaseInOut" />
+                    </Transitions>
+                </Border.Transitions>
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Bottom"
+                                HorizontalAlignment="Stretch"
+                                Margin="4,14,4,4"
+                                Spacing="4">
+                        <Button Classes="navigation-item"
+                                Command="{Binding SettingsNavigation.NavigateCommand}"
+                                Classes.current="{Binding SettingsNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding SettingsNavigation.Label}"
+                                ToolTip.Tip="{Binding SettingsNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="navigation-stroke" Data="M4,6 H20 M4,12 H20 M4,18 H20 M8,4 V8 M16,10 V14 M11,16 V20" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding SettingsNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel HorizontalAlignment="Stretch" Spacing="2">
+                        <Button Classes="navigation-item"
+                                Command="{Binding HomeNavigation.NavigateCommand}"
+                                Classes.current="{Binding HomeNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding HomeNavigation.Label}"
+                                ToolTip.Tip="{Binding HomeNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="navigation-stroke" Data="M3,11 L12,3 L21,11 V21 H15 V14 H9 V21 H3 Z" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding HomeNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                        <Button Classes="navigation-item"
+                                Command="{Binding DesignNavigation.NavigateCommand}"
+                                Classes.current="{Binding DesignNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding DesignNavigation.Label}"
+                                ToolTip.Tip="{Binding DesignNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="navigation-stroke" Data="M3,7 L12,3 L21,7 L12,11 Z M3,12 L12,16 L21,12 M3,17 L12,21 L21,17" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding DesignNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                        <Button Classes="navigation-item"
+                                Command="{Binding PreviewNavigation.NavigateCommand}"
+                                Classes.current="{Binding PreviewNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding PreviewNavigation.Label}"
+                                ToolTip.Tip="{Binding PreviewNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="navigation-stroke" Data="M2,12 C5,7 8,5 12,5 C16,5 19,7 22,12 C19,17 16,19 12,19 C8,19 5,17 2,12 Z" />
+                                        <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding PreviewNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                        <Button Classes="navigation-item"
+                                Command="{Binding ExportNavigation.NavigateCommand}"
+                                Classes.current="{Binding ExportNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding ExportNavigation.Label}"
+                                ToolTip.Tip="{Binding ExportNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="navigation-stroke" Data="M10,3 H14 V12 H18 L12,18 L6,12 H10 Z M4,20 H20" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding ExportNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                        <Button Classes="navigation-item"
+                                Command="{Binding BurnNavigation.NavigateCommand}"
+                                Classes.current="{Binding BurnNavigation.IsCurrent}"
+                                AutomationProperties.Name="{Binding BurnNavigation.Label}"
+                                ToolTip.Tip="{Binding BurnNavigation.ToolTip}">
+                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                <Border Grid.Column="0" Classes="navigation-selection" />
+                                <Viewbox Classes="navigation-icon">
+                                    <Canvas Width="24" Height="24">
+                                        <Ellipse Classes="navigation-stroke" Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" />
+                                        <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Grid.Column="1" Text="{Binding BurnNavigation.Label}" Classes="navigation-label sidebar-label" />
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Column="1" RowDefinitions="*,Auto">
+            <ScrollViewer Grid.Row="0" Padding="{DynamicResource DiscPagePadding}">
+                <StackPanel MaxWidth="960"
+                            HorizontalAlignment="Stretch"
+                            Spacing="{DynamicResource DiscSpace5}">
+                    <controls:PageHeader Title="{Binding CurrentPageTitle}"
+                                         Subtitle="{Binding CurrentPageDescription}"
+                                         Badge="{Binding CurrentPageBadge}"
+                                         IsBadgeVisible="True" />
+
+                    <Border Classes="stage-bar">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding NavigationItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:WorkspaceNavigationItem">
+                                        <Button Classes="stage-item"
+                                                Classes.current="{Binding IsCurrent}"
+                                                Command="{Binding NavigateCommand}"
+                                                AutomationProperties.Name="{Binding Label}"
+                                                ToolTip.Tip="{Binding ToolTip}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding Label}" />
+                                                <TextBlock Text="{Binding Shortcut}" Classes="stage-shortcut" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Border Classes="navigation-notice"
+                            IsVisible="{Binding HasNavigationNotice}">
+                        <TextBlock Text="{Binding NavigationNotice}" TextWrapping="Wrap" />
+                    </Border>
+
+                    <controls:SectionCard IsVisible="{Binding IsHomePage}"
+                                          Title="{Binding AboutTitle}"
+                                          Description="Platform details are available for troubleshooting and support.">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                                  ColumnSpacing="20"
+                                  RowSpacing="10">
+                                <TextBlock Grid.Row="0" Text="{Binding VersionLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProductVersion}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="1" Text="{Binding CommitLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Commit}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="2" Text="{Binding RuntimeLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DotnetRuntime}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="3" Text="{Binding AvaloniaLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AvaloniaVersion}" />
+                                <TextBlock Grid.Row="4" Text="{Binding OperatingSystemLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OperatingSystem}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="5" Text="{Binding ConfigDirectoryLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ConfigDirectory}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="6" Text="{Binding DataDirectoryLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="7" Text="{Binding CacheDirectoryLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CacheDirectory}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="8" Text="{Binding LogsDirectoryLabel}" Opacity="0.65" />
+                                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding LogsDirectory}" TextWrapping="Wrap" />
+                            </Grid>
+
+                            <controls:SourceChip Text="Platform services"
+                                                 Detail="XDG paths, diagnostics and lifecycle management are active." />
+
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Classes="secondary"
+                                        Content="{Binding CopyDiagnosticsLabel}"
+                                        Command="{Binding CopyDiagnosticsCommand}" />
+                                <Button Classes="primary"
+                                        Content="{Binding OpenLogsLabel}"
+                                        Command="{Binding OpenLogsCommand}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding ActionStatus}"
+                                       Foreground="{DynamicResource DiscTextMutedBrush}" />
+                        </StackPanel>
+                    </controls:SectionCard>
+
+                    <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
+                                         Title="{Binding CurrentPageTitle}"
+                                         Description="{Binding CurrentPageDescription}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Row="1" Classes="job-dock" IsVisible="{Binding HasJobHistory}">
+                <Grid RowDefinitions="Auto,Auto">
+                    <Grid Margin="16,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <TextBlock Text="{Binding JobDockTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                            <Button Classes="ghost compact-action"
+                                    Content="{Binding JobDockClearLabel}"
+                                    Command="{Binding ClearCompletedJobsCommand}" />
+                            <Button Classes="ghost compact-action"
+                                    Content="{Binding JobDockDetailsLabel}"
+                                    Command="{Binding ToggleJobDockCommand}" />
+                        </StackPanel>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button Content="{Binding CopyDiagnosticsLabel}"
-                                Command="{Binding CopyDiagnosticsCommand}" />
-                        <Button Content="{Binding OpenLogsLabel}"
-                                Command="{Binding OpenLogsCommand}" />
+                    <ItemsControl Grid.Row="1" IsVisible="{Binding IsJobDockExpanded}" ItemsSource="{Binding Jobs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:JobDockItem">
+                                <Border Classes="job-dock-item">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Detail}"
+                                                       Classes="job-detail"
+                                                       TextWrapping="Wrap" />
+                                            <ProgressBar IsVisible="{Binding HasProgress}"
+                                                         Minimum="0"
+                                                         Maximum="1"
+                                                         Value="{Binding Progress}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="secondary compact-action"
+                                                Content="{Binding $parent[Window].DataContext.JobDockCancelLabel}"
+                                                Command="{Binding $parent[Window].DataContext.CancelJobCommand}"
+                                                CommandParameter="{Binding Id}"
+                                                IsVisible="{Binding IsRunning}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+            </Grid>
+        </Grid>
+        </Grid>
+
+        <ItemsControl ZIndex="20"
+                      Classes="toast-host"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Top"
+                      Margin="0,84,20,0"
+                      ItemsSource="{Binding Toasts}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ToastNotification">
+                    <Border Classes="toast-card">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Message}" Classes="toast-message" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Classes="ghost toast-dismiss"
+                                    Content="×"
+                                    AutomationProperties.Name="Dismiss notification"
+                                    Command="{Binding $parent[Window].DataContext.DismissToastCommand}"
+                                    CommandParameter="{Binding}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border ZIndex="30" Classes="modal-scrim" IsVisible="{Binding IsModalOpen}">
+            <Border Classes="modal-card">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{Binding ModalTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding ModalMessage}" Classes="modal-message" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button Classes="secondary"
+                                Content="{Binding ModalTertiaryLabel}"
+                                Command="{Binding RespondToPromptCommand}"
+                                CommandParameter="2"
+                                IsVisible="{Binding HasModalTertiary}" />
+                        <Button Classes="secondary"
+                                Content="{Binding ModalSecondaryLabel}"
+                                Command="{Binding RespondToPromptCommand}"
+                                CommandParameter="1"
+                                IsVisible="{Binding HasModalSecondary}" />
+                        <Button Classes="primary"
+                                Content="{Binding ModalPrimaryLabel}"
+                                Command="{Binding RespondToPromptCommand}"
+                                CommandParameter="0" />
                     </StackPanel>
-                    <TextBlock Text="{Binding ActionStatus}" Opacity="0.7" />
                 </StackPanel>
             </Border>
-        </StackPanel>
-    </ScrollViewer>
+        </Border>
+    </Grid>
 
 </Window>
