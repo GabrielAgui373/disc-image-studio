@@ -1,6 +1,6 @@
 # Desenvolvimento da GUI Linux/Avalonia
 
-Este documento descreve o baseline portátil da GUI do Disc Image Studio. A interface Avalonia está no início da implementação e exibe um Hello World; os motores de CD, DVD e Blu-ray, o Core, a CLI, ImageIO e ISO já fazem parte da solução Linux.
+Este documento descreve o desenvolvimento da GUI portátil do Disc Image Studio. O host Avalonia já compõe os serviços de plataforma, persiste preferências e recentes em diretórios XDG e apresenta uma tela técnica de diagnóstico; o shell de produto e as telas de projeto ainda serão construídos nas Tasks 06 e 07. Os motores de CD, DVD e Blu-ray, Core, CLI, ImageIO e ISO também fazem parte da solução Linux.
 
 O backlog completo está em [project-analysis/tasks/00.index.md](project-analysis/tasks/00.index.md).
 
@@ -60,7 +60,7 @@ Os testes portáveis bloqueiam referências acidentais a WPF, Windows Forms, Win
 Os contratos, ownership e regras de threading da camada portátil estão em [APPLICATION_LAYER.md](APPLICATION_LAYER.md).
 O pipeline compartilhado de geração está em [GENERATION_PIPELINE.md](GENERATION_PIPELINE.md).
 
-## Executar o Hello World
+## Executar o host Avalonia
 
 Execute dentro de uma sessão gráfica do Fedora:
 
@@ -68,7 +68,9 @@ Execute dentro de uma sessão gráfica do Fedora:
 dotnet run --project src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj
 ```
 
-A janela deve exibir `Hello, Linux!`. O backend desktop atual usa a detecção de plataforma do Avalonia e funciona em X11 ou XWayland. Executar em terminal/headless sem `DISPLAY` disponível não abre a janela.
+A janela de diagnóstico mostra informações de versão/runtime e diretórios XDG, além de ações para copiar o diagnóstico ou abrir a pasta de logs. O backend desktop requer uma sessão X11/XWayland; se `DISPLAY` estiver ausente, o processo encerra com uma mensagem de orientação em vez de uma falha pouco clara. A abertura da janela deve ser confirmada manualmente em desktop Fedora; o build/teste não substitui esse smoke visual.
+
+Preferências e recentes são gravados sob os caminhos XDG (`XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME` e `XDG_STATE_HOME`, com fallback para `~/.config`, `~/.local/share`, `~/.cache` e `~/.local/state`). Não é necessário executar como root.
 
 ## Publicar um smoke framework-dependent
 
@@ -94,7 +96,7 @@ Esse pacote exige o runtime .NET 10 instalado. Empacotamento self-contained, RPM
 
 | Área | WPF | Avalonia/Linux | Task responsável |
 | --- | --- | --- | --- |
-| Inicialização desktop | Completa | Hello World | 01, 05 |
+| Inicialização desktop | Completa | Host e diagnóstico técnico; smoke visual pendente | 01, 05 |
 | Home e ciclo do projeto | Completa | Não implementado | 07 |
 | Novo projeto/configurações | Completa | Não implementado | 07 |
 | Design/camadas/tom | Completa | Não implementado | 08, 09 |
@@ -103,8 +105,8 @@ Esse pacote exige o runtime .NET 10 instalado. Empacotamento self-contained, RPM
 | Exportação | Completa | Não implementado | 03, 11 |
 | Calibração | Completa | Não implementado | 12 |
 | Gravação | IMAPI/MMC | Não disponível | 13 |
-| Temas/localização | Completa | Tema Fluent padrão | 06, 14 |
-| Settings e Sobre | Completa | Não implementado | 05, 07 |
+| Temas/localização | Completa | Inglês inicial; preferências carregadas antes da janela | 05, 06, 14 |
+| Settings e Sobre | Completa | Persistência e diagnóstico técnico; telas ainda não implementadas | 05, 07 |
 | Empacotamento | MSIX/release Windows | Não implementado | 16 |
 
 ## Diagnóstico rápido

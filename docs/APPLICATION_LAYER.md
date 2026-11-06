@@ -12,7 +12,7 @@
 
 ## Ports e threading
 
-`IProjectDocumentStore`, `IFileSystem`, `IClock`, `IApplicationPaths`, `IUserInteraction` e `IApplicationEventPublisher` são implementados pelo host. A biblioteca fornece adapters básicos para relógio, filesystem e `ProjectJsonStore`.
+`IProjectDocumentStore`, `IFileSystem`, `IClock`, `IApplicationPaths`, `IUserInteraction`, `IApplicationEventPublisher` e os ports de plataforma (`IAppPaths`, file picker, clipboard, launcher, dispatcher, prompts, logging, cache e lifetime) são contratos sem dependência de Avalonia. O host Linux implementa os adapters Avalonia/XDG; a biblioteca fornece adapters básicos para relógio, filesystem e `ProjectJsonStore`. Settings e recentes usam stores JSON portáveis com escrita atômica.
 
 Persistência JSON é síncrona e ocorre no thread chamador. Hosts de UI devem chamar lifecycle em um worker quando o arquivo puder ser grande e retornar ao dispatcher somente para atualizar bindings. Eventos são publicados sincronamente; o adapter decide se precisa fazer dispatch. Jobs executam no scheduler escolhido pelo chamador, respeitam `CancellationToken` e não capturam um framework de UI.
 
