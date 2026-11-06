@@ -17,9 +17,12 @@ public sealed class NavigationState
 {
     public WorkspacePage Current { get; private set; } = WorkspacePage.Home;
 
-    public ApplicationResult NavigateTo(WorkspacePage destination, bool hasOpenProject)
+    public ApplicationResult NavigateTo(
+        WorkspacePage destination,
+        bool hasOpenProject,
+        bool allowProjectlessNavigation = false)
     {
-        if (RequiresProject(destination) && !hasOpenProject)
+        if (RequiresProject(destination) && !hasOpenProject && !allowProjectlessNavigation)
         {
             return ApplicationResult.Failure(
                 ApplicationErrorCode.NavigationRequiresProject,
