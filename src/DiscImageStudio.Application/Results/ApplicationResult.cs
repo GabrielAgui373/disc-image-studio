@@ -16,6 +16,7 @@ public enum ApplicationErrorCode
     JobNotFound,
     JobFailed,
     JobCanceled,
+    ApplicationShuttingDown,
 }
 
 public sealed record ApplicationError(
