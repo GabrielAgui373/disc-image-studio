@@ -57,6 +57,8 @@ O contrato reproduz o `DesignComposer` da WPF:
 | Pixels de origem antes da redução | 64 Mpx | limita o buffer transitório do decode a 256 MiB |
 | Tamanho do arquivo de origem | 256 MiB | rejeitado antes de decodificar |
 
+Medido na Task 08.5: composição de 8K com pico de 423 MiB; preparação da imagem de geração (composição de 8K mais PNG) com pico de 690 MiB, porque o StbImageWriteSharp filtra e comprime a imagem inteira em memória (≈270 MiB e ≈5,6 s). Hosts devem reservar 768 MiB para preparar uma imagem de geração.
+
 O pico estimado de uma composição é `N² × 4` bytes (saída) mais, por camada carregada, `largura × altura × 4 × 4/3` (imagem e pirâmide). Em 8K, com duas camadas de 4.096 × 4.096, isso dá cerca de 256 MiB + 2 × 85 MiB ≈ 430 MiB. O motor nunca aloca um segundo buffer do tamanho da saída: a conversão para alpha straight é feita no próprio buffer.
 
 ## API
