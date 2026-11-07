@@ -23,14 +23,13 @@ public static partial class RasterCodec
         return new(image.Width, image.Height, image.Data);
     }
 
-    private static void WritePng(string path, int width, int height, byte[] pixels, bool grayscale)
+    private static void WritePng(Stream output, int width, int height, byte[] pixels, bool grayscale)
     {
         if (!grayscale)
         {
             pixels = (byte[])pixels.Clone();
             SwapRedAndBlue(pixels);
         }
-        using FileStream output = File.Create(path);
         new ImageWriter().WritePng(pixels, width, height,
             grayscale ? WriteComponents.Grey : WriteComponents.RedGreenBlueAlpha, output);
     }
