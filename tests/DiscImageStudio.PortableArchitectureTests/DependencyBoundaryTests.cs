@@ -8,6 +8,7 @@ using DiscImageStudio.Dvd;
 using DiscImageStudio.Generation;
 using DiscImageStudio.ImageIO;
 using DiscImageStudio.Iso;
+using DiscImageStudio.Rendering;
 using DvdImageSolver.Encoding;
 using Xunit;
 
@@ -38,6 +39,7 @@ public sealed class DependencyBoundaryTests
         typeof(DvdEccBlockEncoder).Assembly,
         typeof(BluRayDiscModule).Assembly,
         typeof(DiscGenerationService).Assembly,
+        typeof(ImageComposer).Assembly,
     ];
 
     [Theory]
@@ -114,6 +116,7 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj",
             "src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj",
             "src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj",
+            "src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj",
             "src/DvdImageSolver/DvdImageSolver.csproj",
             "tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj",
         ];

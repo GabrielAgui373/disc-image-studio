@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>DiscImageStudio.Rendering</AssemblyName>
+    <RootNamespace>DiscImageStudio.Rendering</RootNamespace>
+    <Description>Portable, deterministic layer composition for Disc Image Studio (no WPF, Avalonia or native graphics dependency).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+  </ItemGroup>
+</Project>

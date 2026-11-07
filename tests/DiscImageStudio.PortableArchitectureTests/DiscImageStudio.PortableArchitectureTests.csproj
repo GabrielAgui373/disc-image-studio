@@ -28,5 +28,6 @@
     <ProjectReference Include="../../src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj" />
   </ItemGroup>
 </Project>

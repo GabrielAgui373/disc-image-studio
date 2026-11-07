@@ -59,6 +59,21 @@ O contrato reproduz o `DesignComposer` da WPF:
 
 O pico estimado de uma composição é `N² × 4` bytes (saída) mais, por camada carregada, `largura × altura × 4 × 4/3` (imagem e pirâmide). Em 8K, com duas camadas de 4.096 × 4.096, isso dá cerca de 256 MiB + 2 × 85 MiB ≈ 430 MiB. O motor nunca aloca um segundo buffer do tamanho da saída: a conversão para alpha straight é feita no próprio buffer.
 
+## API
+
+- `CompositionScene` e `CompositionLayer`: modelo imutável e validado da cena (raios, camadas, transformações, visibilidade e opacidade).
+- `ImageComposer.Compose(scene, size, images, cancellationToken)`: devolve `CompositionResult` com o `BgraRaster` straight e a lista de `CompositionIssue`. Uma camada ausente, ilegível ou acima dos limites é ignorada e reportada, sem falhar a cena.
+- `ILayerImageSource`: de onde vêm as imagens decodificadas. `FileLayerImageSource` lê do disco a cada chamada; o cache por revisão da Task 08.3 entra por essa interface.
+- `LayerImage`: imagem premultiplicada, já reduzida ao limite de lado, com a pirâmide construída sob demanda e compartilhável entre composições concorrentes.
+- `ImageComposer.SavePng` grava pelo `RasterCodec`. A gravação transacional para a geração é da Task 08.5.
+
+**Medição do motor**, na mesma máquina do spike, com uma cena de cinco camadas (foto 1.600 × 1.200, camada rotacionada com alpha, uma invisível, uma com 50% de opacidade e uma ausente) lidas de PNG:
+
+| Canvas | Tempo, incluindo decode | Pico de working set |
+| ---: | ---: | ---: |
+| 2.048 px | ~260 ms | 81 MiB |
+| 8.192 px | ~840 ms | 321 MiB |
+
 ## Cancelamento
 
 O token é verificado antes e depois do decode de cada camada, entre os níveis da pirâmide e em cada faixa de linhas durante a pintura (`ParallelOptions.CancellationToken`). Um cancelamento lança `OperationCanceledException` e nunca devolve uma composição parcial.
