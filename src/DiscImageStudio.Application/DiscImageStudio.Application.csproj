@@ -11,5 +11,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj" />
   </ItemGroup>
 </Project>
