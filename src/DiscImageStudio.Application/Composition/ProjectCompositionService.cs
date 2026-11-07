@@ -74,7 +74,8 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
                 layer.TranslateYMm,
                 layer.RotationDeg,
                 layer.Scale,
-                layer.Visible)));
+                layer.Visible,
+                layer.Opacity)));
     }
 
     /// <summary>Composes synchronously on the calling thread; callers keep it off the UI thread.</summary>

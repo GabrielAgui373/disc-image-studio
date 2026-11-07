@@ -136,7 +136,8 @@ public sealed class ProjectAssetService
                         layer.TranslateXMm,
                         layer.TranslateYMm,
                         layer.RotationDeg,
-                        layer.Scale)
+                        layer.Scale,
+                        layer.Opacity)
                     : layer)),
             },
             ProjectAssetKind.DataDirectory => workspace with

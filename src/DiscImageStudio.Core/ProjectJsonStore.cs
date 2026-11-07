@@ -26,7 +26,11 @@ public sealed record ProjectLayer(
     double TranslateXMm,
     double TranslateYMm,
     double RotationDeg,
-    double Scale);
+    double Scale,
+    // Schema 3 only. Null means fully opaque and is never written, so projects that do not use
+    // opacity stay schema 2 and keep opening in builds that predate this field.
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    double? Opacity = null);
 
 /// <summary>Where the next generation job writes, and the per-family output switches.</summary>
 public sealed record ProjectOutputs(
@@ -113,7 +117,12 @@ public sealed record ProjectDocument(
 /// can never leave a half-written project behind.</summary>
 public static class ProjectJsonStore
 {
+    /// <summary>The schema written for every project that does not need a newer feature.</summary>
     public const int CurrentSchemaVersion = 2;
+
+    /// <summary>Schema 3 adds per-layer <c>opacity</c>; it is written only when a layer uses it.</summary>
+    public const int LayerOpacitySchemaVersion = 3;
+
     private const int LegacySchemaVersion = 1;
     public const string FileExtension = ".discproj";
 
@@ -173,7 +182,7 @@ public static class ProjectJsonStore
         // but never written back: saving is what migrates an old file to the current schema.
         ProjectDocument clean = document with
         {
-            SchemaVersion = CurrentSchemaVersion,
+            SchemaVersion = RequiredSchemaVersion(document),
             ExtensionData = document.ExtensionData is { Count: > 0 } ? null : document.ExtensionData,
         };
         string temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
@@ -200,13 +209,25 @@ public static class ProjectJsonStore
         }
     }
 
+    /// <summary>
+    /// The lowest schema that can represent <paramref name="document"/>: 3 when any layer is not
+    /// fully opaque, otherwise 2. Writing the lowest version keeps files readable by older builds.
+    /// </summary>
+    public static int RequiredSchemaVersion(ProjectDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        return document.Layers.Any(layer => layer.Opacity is { } opacity && opacity < 1)
+            ? LayerOpacitySchemaVersion
+            : CurrentSchemaVersion;
+    }
+
     public static void Validate(ProjectDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion))
+        if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion or LayerOpacitySchemaVersion))
         {
             InvalidDataException exception = new(
-                $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion} 与 {CurrentSchemaVersion}。");
+                $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion}、{CurrentSchemaVersion} 与 {LayerOpacitySchemaVersion}。");
             exception.Data[UnsupportedSchemaVersionKey] = document.SchemaVersion;
             throw exception;
         }
@@ -385,6 +406,11 @@ public static class ProjectJsonStore
             if (!double.IsFinite(layer.Scale) || layer.Scale <= 0)
             {
                 throw new InvalidDataException($"图层 '{layer.Id}' 的 scale 必须是大于 0 的有限数值。");
+            }
+
+            if (layer.Opacity is { } opacity && (!double.IsFinite(opacity) || opacity < 0 || opacity > 1))
+            {
+                throw new InvalidDataException($"图层 '{layer.Id}' 的 opacity 必须在 0 到 1 之间。");
             }
         }
     }

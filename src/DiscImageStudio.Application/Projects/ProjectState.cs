@@ -45,7 +45,8 @@ public sealed record DesignLayerState
         double translateXMm,
         double translateYMm,
         double rotationDeg,
-        double scale)
+        double scale,
+        double opacity = 1.0)
     {
         Id = ProjectIdentity.RequireText(id, nameof(id));
         Name = ProjectIdentity.RequireText(name, nameof(name));
@@ -58,7 +59,13 @@ public sealed record DesignLayerState
             throw new ArgumentOutOfRangeException(nameof(scale), "Scale must be positive and finite.");
         }
 
+        if (!double.IsFinite(opacity) || opacity is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(opacity), "Opacity must be between 0 and 1.");
+        }
+
         Visible = visible;
+        Opacity = opacity;
         TranslateXMm = translateXMm;
         TranslateYMm = translateYMm;
         RotationDeg = rotationDeg;
@@ -80,6 +87,9 @@ public sealed record DesignLayerState
     public double RotationDeg { get; }
 
     public double Scale { get; }
+
+    /// <summary>From 0 to 1. Persisted only when below 1 (project schema 3).</summary>
+    public double Opacity { get; }
 
     private static void ValidateFinite(double value, string parameterName)
     {
