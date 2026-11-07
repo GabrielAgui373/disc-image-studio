@@ -26,6 +26,19 @@ public static partial class RasterCodec
         WritePng(output, width, height, pixels, grayscale);
     }
 
+    /// <summary>
+    /// Writes a straight-alpha BGRA32 raster as PNG and may reorder its channels in place to do
+    /// so, avoiding a full-size copy. The caller must not read <paramref name="raster"/> afterwards.
+    /// Meant for large one-shot buffers such as the 8192 px generation source.
+    /// </summary>
+    public static void SavePngConsumingBuffer(string path, BgraRaster raster)
+    {
+        ArgumentNullException.ThrowIfNull(raster);
+        ValidatePixels(raster.Width, raster.Height, raster.Pixels, grayscale: false);
+        using FileStream output = File.Create(path);
+        WritePng(output, raster.Width, raster.Height, raster.Pixels, grayscale: false, mayModifyPixels: true);
+    }
+
     /// <summary>Encodes a Gray8 or straight-alpha BGRA32 buffer as PNG bytes, without touching disk.</summary>
     public static byte[] EncodePng(int width, int height, byte[] pixels, bool grayscale)
     {

@@ -27,8 +27,10 @@ public static partial class RasterCodec
         return new(frame.PixelWidth, frame.PixelHeight, pixels);
     }
 
-    private static void WritePng(Stream output, int width, int height, byte[] pixels, bool grayscale)
+    private static void WritePng(Stream output, int width, int height, byte[] pixels, bool grayscale, bool mayModifyPixels = false)
     {
+        // WIC encodes BGRA32 directly, so the buffer is never modified here.
+        _ = mayModifyPixels;
         BitmapSource bitmap = BitmapSource.Create(width, height, 96, 96,
             grayscale ? PixelFormats.Gray8 : PixelFormats.Bgra32, null, pixels, checked(width * (grayscale ? 1 : 4)));
         PngBitmapEncoder encoder = new();

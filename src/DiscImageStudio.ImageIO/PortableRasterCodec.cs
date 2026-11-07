@@ -23,11 +23,12 @@ public static partial class RasterCodec
         return new(image.Width, image.Height, image.Data);
     }
 
-    private static void WritePng(Stream output, int width, int height, byte[] pixels, bool grayscale)
+    private static void WritePng(Stream output, int width, int height, byte[] pixels, bool grayscale, bool mayModifyPixels = false)
     {
         if (!grayscale)
         {
-            pixels = (byte[])pixels.Clone();
+            // Stb writes RGBA; a caller that hands over its buffer avoids the full-size clone.
+            pixels = mayModifyPixels ? pixels : (byte[])pixels.Clone();
             SwapRedAndBlue(pixels);
         }
         new ImageWriter().WritePng(pixels, width, height,
