@@ -308,7 +308,9 @@ public sealed class AvaloniaHostTests
                 new JsonRecentProjectStore(paths.RecentProjectsFilePath),
                 new JsonProjectDocumentStore(),
                 new PhysicalFileSystem()),
-            new AvaloniaThumbnailDecoder());
+            new AvaloniaThumbnailDecoder(),
+            new ProjectAssetService(new PhysicalFileSystem(), new PhysicalDirectoryScanner()),
+            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName)));
 
     private static string CreateTempDirectory()
     {

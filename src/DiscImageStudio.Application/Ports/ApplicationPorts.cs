@@ -18,6 +18,17 @@ public interface IFileSystem
     bool DirectoryExists(string path);
 }
 
+public readonly record struct ScannedEntry(string Path, bool IsDirectory);
+
+/// <summary>
+/// Read-only, bounded directory enumeration used to search for relocated assets. Implementations
+/// must skip symbolic links and inaccessible entries instead of throwing.
+/// </summary>
+public interface IDirectoryScanner
+{
+    IEnumerable<ScannedEntry> Enumerate(string root, int maximumDepth);
+}
+
 /// <summary>Platform-owned locations; no environment lookup is performed by use cases.</summary>
 public interface IApplicationPaths
 {
@@ -76,6 +87,27 @@ public sealed class PhysicalFileSystem : IFileSystem
     public bool FileExists(string path) => File.Exists(path);
 
     public bool DirectoryExists(string path) => Directory.Exists(path);
+}
+
+public sealed class PhysicalDirectoryScanner : IDirectoryScanner
+{
+    public IEnumerable<ScannedEntry> Enumerate(string root, int maximumDepth)
+    {
+        EnumerationOptions options = new()
+        {
+            RecurseSubdirectories = true,
+            MaxRecursionDepth = maximumDepth,
+            IgnoreInaccessible = true,
+            ReturnSpecialDirectories = false,
+            // Symbolic links are skipped so a search can never escape the chosen folder.
+            AttributesToSkip = FileAttributes.ReparsePoint | FileAttributes.System,
+        };
+        DirectoryInfo directory = new(root);
+        foreach (FileSystemInfo entry in directory.EnumerateFileSystemInfos("*", options))
+        {
+            yield return new ScannedEntry(entry.FullName, entry is DirectoryInfo);
+        }
+    }
 }
 
 public sealed class JsonProjectDocumentStore : IProjectDocumentStore

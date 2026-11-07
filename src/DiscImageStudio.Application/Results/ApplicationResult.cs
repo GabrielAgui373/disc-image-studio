@@ -11,6 +11,8 @@ public enum ApplicationErrorCode
     ProjectReadFailed,
     ProjectSchemaUnsupported,
     ProjectWriteFailed,
+    PresetReadFailed,
+    PresetWriteFailed,
     UserCanceled,
     NavigationRequiresProject,
     JobConflict,

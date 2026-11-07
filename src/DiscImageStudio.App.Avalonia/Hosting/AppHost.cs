@@ -10,6 +10,7 @@ using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Application.Settings;
+using DiscImageStudio.Core;
 
 namespace DiscImageStudio.App.Avalonia.Hosting;
 
@@ -118,7 +119,9 @@ public sealed class AppHost : IDisposable
             applicationEvents,
             settings,
             recentProjectsService,
-            new AvaloniaThumbnailDecoder());
+            new AvaloniaThumbnailDecoder(),
+            new ProjectAssetService(fileSystem, new PhysicalDirectoryScanner()),
+            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger));
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

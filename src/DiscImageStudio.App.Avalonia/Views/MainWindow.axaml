@@ -28,6 +28,7 @@
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveProjectCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveProjectAsCommand}" />
         <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding OpenProjectSettingsCommand}" />
         <KeyBinding Gesture="Escape" Command="{Binding DismissPromptCommand}" />
     </Window.KeyBindings>
 
@@ -197,12 +198,20 @@
                                     <Border Classes="project-dirty-badge" IsVisible="{Binding IsProjectDirty}">
                                         <TextBlock Text="{Binding ProjectDirtyLabel}" />
                                     </Border>
+                                    <Button Classes="project-missing-assets"
+                                            Content="{Binding MissingAssetsLabel}"
+                                            Command="{Binding OpenProjectSettingsCommand}"
+                                            IsVisible="{Binding HasMissingAssets}"
+                                            ToolTip.Tip="{Binding ProjectSettingsLabel}" />
                                 </StackPanel>
                                 <TextBlock Text="{Binding ProjectFilePath}"
                                            Classes="project-file-path"
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Classes="ghost compact-action"
+                                        Content="{Binding ProjectSettingsLabel}"
+                                        Command="{Binding OpenProjectSettingsCommand}" />
                                 <Button Classes="secondary compact-action"
                                         Content="{Binding SaveProjectAsLabel}"
                                         Command="{Binding SaveProjectAsCommand}" />
@@ -593,6 +602,10 @@
                 </ScrollViewer>
             </Border>
         </Border>
+
+        <views:ProjectSettingsDialog ZIndex="30"
+                                     DataContext="{Binding ProjectSettings}"
+                                     IsVisible="{Binding IsOpen}" />
 
         <Border ZIndex="31" Classes="modal-scrim" IsVisible="{Binding IsModalOpen}">
             <Border Classes="modal-card">

@@ -33,6 +33,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly JobCoordinator _jobs;
     private readonly IUiDispatcher _dispatcher;
     private readonly UserSettings _settings;
+    private readonly ProjectAssetService _assets;
+    private readonly UserPresetCatalog _presetCatalog;
+    private IReadOnlyList<ProjectPresetDefinition> _userPresets = [];
     private readonly List<IDisposable> _eventSubscriptions = [];
     private TaskCompletionSource<int>? _promptCompletion;
     private CancellationTokenRegistration _promptCancellation;
@@ -51,8 +54,12 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IApplicationEventStream applicationEvents,
         UserSettings settings,
         RecentProjectsService recentProjects,
-        IThumbnailDecoder thumbnails)
+        IThumbnailDecoder thumbnails,
+        ProjectAssetService assets,
+        UserPresetCatalog presets)
     {
+        _assets = assets ?? throw new ArgumentNullException(nameof(assets));
+        _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -187,9 +194,29 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             text,
             OpenProjectAsync);
         _ = Recent.RefreshAsync();
+
+        ProjectSettings = new ProjectSettingsViewModel(
+            projects,
+            _assets,
+            _presetCatalog,
+            filePicker,
+            text,
+            family => ProjectPresets.Where(preset => preset.Family == family).ToArray());
+        ProjectSettings.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(ProjectSettingsViewModel.IsOpen))
+            {
+                OnPropertyChanged(nameof(IsAnyDialogOpen));
+            }
+        };
+        ProjectSettingsLabel = text["project.action.settings"];
     }
 
     public RecentProjectsViewModel Recent { get; }
+
+    public ProjectSettingsViewModel ProjectSettings { get; }
+
+    public string ProjectSettingsLabel { get; }
 
     public string Title { get; }
     public string StatusTitle { get; }
@@ -358,7 +385,18 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     /// <summary>
     /// Window-level shortcuts (Ctrl+O/S/W) must not act on the project behind a dialog.
     /// </summary>
-    public bool IsAnyDialogOpen => IsModalOpen || IsNewProjectDialogOpen;
+    public bool IsAnyDialogOpen => IsModalOpen || IsNewProjectDialogOpen || ProjectSettings.IsOpen;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMissingAssets), nameof(MissingAssetsLabel))]
+    public partial int MissingAssetCount { get; private set; }
+
+    public bool HasMissingAssets => MissingAssetCount > 0;
+
+    public string MissingAssetsLabel => string.Format(
+        System.Globalization.CultureInfo.CurrentUICulture,
+        _text[MissingAssetCount == 1 ? "project.missingAssets.one" : "project.missingAssets.many"],
+        MissingAssetCount);
 
     [ObservableProperty]
     public partial bool IsNewProjectDialogOpen { get; private set; }
@@ -436,6 +474,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             return;
         }
 
+        _userPresets = _presetCatalog.LoadUserPresets();
         SelectHomeTemplate(SelectedHomeTemplate ?? HomeTemplates[0]);
         NewProjectError = null;
         IsNewProjectDialogOpen = true;
@@ -514,6 +553,17 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         await PersistProjectAsync(
             () => _projects.SaveProjectAsAsync(EnsureProjectFileExtension(path)),
             isSaveAs: true);
+    }
+
+    [RelayCommand]
+    private async Task OpenProjectSettingsAsync()
+    {
+        if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
+        {
+            return;
+        }
+
+        await ProjectSettings.OpenAsync();
     }
 
     [RelayCommand]
@@ -925,6 +975,28 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsProjectDirty = _projects.Dirty.IsDirty;
         ProjectName = project?.Identity.Name ?? string.Empty;
         ProjectFilePath = _projects.ProjectFilePath ?? string.Empty;
+        _ = RefreshMissingAssetsAsync();
+    }
+
+    /// <summary>
+    /// Counts missing assets off the UI thread. A project with missing assets still opens; the
+    /// toolbar only points the user to the recovery panel in project settings.
+    /// </summary>
+    private async Task RefreshMissingAssetsAsync()
+    {
+        ProjectWorkspace? project = _projects.Current;
+        string? path = _projects.ProjectFilePath;
+        if (project is null)
+        {
+            MissingAssetCount = 0;
+            return;
+        }
+
+        int missing = await Task.Run(() => _assets.Inspect(project, path).Count(asset => !asset.Exists));
+        if (ReferenceEquals(project, _projects.Current))
+        {
+            MissingAssetCount = missing;
+        }
     }
 
     private string GetSuggestedProjectDirectory()
@@ -1019,6 +1091,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         foreach (NewProjectPresetOption preset in ProjectPresets.Where(preset => preset.Family == family))
         {
             NewProjectPresets.Add(preset);
+        }
+
+        foreach (ProjectPresetDefinition preset in _userPresets.Where(preset => preset.Family == family))
+        {
+            NewProjectPresets.Add(NewProjectPresetOption.FromUserPreset(preset));
         }
 
         SelectedProjectPreset = NewProjectPresets.FirstOrDefault(preset => preset.Id == selectedId)
