@@ -310,7 +310,8 @@ public sealed class AvaloniaHostTests
                 new PhysicalFileSystem()),
             new AvaloniaThumbnailDecoder(),
             new ProjectAssetService(new PhysicalFileSystem(), new PhysicalDirectoryScanner()),
-            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName)));
+            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName)),
+            new DiscImageStudio.Application.Composition.ProjectCompositionService(57.5));
 
     private static string CreateTempDirectory()
     {

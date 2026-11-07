@@ -5,6 +5,7 @@ using DiscImageStudio.App.Avalonia.Diagnostics;
 using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
+using DiscImageStudio.Application.Composition;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
@@ -34,6 +35,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly IUiDispatcher _dispatcher;
     private readonly UserSettings _settings;
     private readonly ProjectAssetService _assets;
+    private readonly ProjectCompositionService _compositions;
     private readonly UserPresetCatalog _presetCatalog;
     private IReadOnlyList<ProjectPresetDefinition> _userPresets = [];
     private readonly List<IDisposable> _eventSubscriptions = [];
@@ -56,8 +58,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RecentProjectsService recentProjects,
         IThumbnailDecoder thumbnails,
         ProjectAssetService assets,
-        UserPresetCatalog presets)
+        UserPresetCatalog presets,
+        ProjectCompositionService compositions)
     {
+        _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
+        Preview = new CompositionPreviewViewModel(_compositions, projects, text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
@@ -215,6 +220,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     public RecentProjectsViewModel Recent { get; }
 
+    public CompositionPreviewViewModel Preview { get; }
+
     public ProjectSettingsViewModel ProjectSettings { get; }
 
     public string ProjectSettingsLabel { get; }
@@ -316,6 +323,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsPlaceholderPage { get; private set; }
+
+
+    [ObservableProperty]
+
+    public partial bool IsDesignPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -790,7 +802,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
         (CurrentPageTitle, CurrentPageDescription, CurrentPageBadge) = GetPagePresentation(current);
         IsHomePage = current == WorkspacePage.Home;
-        IsPlaceholderPage = !IsHomePage;
+        IsDesignPage = current == WorkspacePage.Design;
+        IsPlaceholderPage = !IsHomePage && !IsDesignPage;
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -884,6 +897,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     {
         RefreshProjectState();
         _ = Recent.RefreshAsync();
+        _ = Preview.RefreshAsync();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -904,6 +918,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void OnProjectClosed(ProjectClosed project)
     {
         RefreshProjectState();
+        Preview.Clear();
+        _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.closed"],
@@ -912,7 +928,15 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshNavigation();
     }
 
-    private void OnProjectDirtyChanged(ProjectDirtyChanged _) => RefreshProjectState();
+    private void OnProjectDirtyChanged(ProjectDirtyChanged change)
+    {
+        RefreshProjectState();
+        if (change.IsDirty)
+        {
+            // A persistent change may have touched layers or geometry; recompose the preview.
+            _ = Preview.RefreshAsync();
+        }
+    }
 
     private async Task<bool> OpenProjectAsync(string path)
     {
@@ -1246,6 +1270,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
                 _text["home.placeholder.title"],
                 _text["home.placeholder.description"],
                 "HOME"),
+            WorkspacePage.Design => (
+                _text["design.page.title"],
+                _text["design.page.description"],
+                "DESIGN"),
             WorkspacePage.Settings => (
                 _text["settings.placeholder.title"],
                 _text["settings.placeholder.description"],

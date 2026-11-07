@@ -402,6 +402,9 @@
                         </Expander>
                     </StackPanel>
 
+                    <views:CompositionPreviewView DataContext="{Binding Preview}"
+                                                  IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsDesignPage}" />
+
                     <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
                                          Title="{Binding CurrentPageTitle}"
                                          Description="{Binding CurrentPageDescription}" />

@@ -6,6 +6,7 @@ using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
 using DiscImageStudio.App.Avalonia.ViewModels;
 using DiscImageStudio.App.Avalonia.Views;
+using DiscImageStudio.Application.Composition;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Projects;
@@ -69,13 +70,16 @@ public sealed class AppHost : IDisposable
         JobCoordinator jobs = new(new SystemClock(), applicationEvents);
         PhysicalFileSystem fileSystem = new();
         JsonProjectDocumentStore projectDocuments = new();
+        // CD composes against the scheme's fixed image radius; the CD module owns that value.
+        ProjectCompositionService compositions = new(DiscImageStudio.Cd.CdDiscParameters.StandardImageOuterRadiusMm);
         ProjectLifecycleService projects = new(
             projectDocuments,
             fileSystem,
             new SystemClock(),
             prompts,
             applicationEvents,
-            recentProjects: recentProjects);
+            recentProjects: recentProjects,
+            thumbnails: compositions);
         RecentProjectsService recentProjectsService = new(recentProjects, projectDocuments, fileSystem);
         AvaloniaApplicationLifetime applicationLifetime = new(
             jobs,
@@ -121,7 +125,8 @@ public sealed class AppHost : IDisposable
             recentProjectsService,
             new AvaloniaThumbnailDecoder(),
             new ProjectAssetService(fileSystem, new PhysicalDirectoryScanner()),
-            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger));
+            new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger),
+            compositions);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

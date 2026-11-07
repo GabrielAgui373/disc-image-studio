@@ -1,3 +1,4 @@
+using DiscImageStudio.Application.Composition;
 using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Results;
@@ -36,6 +37,7 @@ public sealed class ProjectLifecycleService
     private readonly IUserInteraction _interaction;
     private readonly IApplicationEventPublisher _events;
     private readonly IRecentProjectStore? _recentProjects;
+    private readonly IProjectThumbnailRenderer? _thumbnails;
 
     public ProjectLifecycleService(
         IProjectDocumentStore store,
@@ -44,9 +46,11 @@ public sealed class ProjectLifecycleService
         IUserInteraction interaction,
         IApplicationEventPublisher? events = null,
         NavigationState? navigation = null,
-        IRecentProjectStore? recentProjects = null)
+        IRecentProjectStore? recentProjects = null,
+        IProjectThumbnailRenderer? thumbnails = null)
     {
         _recentProjects = recentProjects;
+        _thumbnails = thumbnails;
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -234,14 +238,14 @@ public sealed class ProjectLifecycleService
 
         try
         {
+            string fullPath = _fileSystem.GetFullPath(path);
             ProjectIdentity identity = new(
                 Current.Identity.Name,
                 Current.Identity.CreatedUtc,
                 _clock.UtcNow,
                 Current.Identity.CalibrationSessionPath,
-                Current.Identity.ThumbnailPngBase64);
+                RenderThumbnail(Current, fullPath, cancellationToken) ?? Current.Identity.ThumbnailPngBase64);
             ProjectWorkspace saved = Current with { Identity = identity };
-            string fullPath = _fileSystem.GetFullPath(path);
             _store.Save(fullPath, ProjectDocumentMapper.ToDocument(saved));
             Current = saved;
             ProjectFilePath = fullPath;
@@ -323,6 +327,31 @@ public sealed class ProjectLifecycleService
         Navigation.ProjectOpened();
         RecordRecent(fullPath, workspace);
         _events.Publish(new ProjectOpened(fullPath, workspace.Identity.Name));
+    }
+
+    /// <summary>
+    /// Renders the thumbnail written with the project. A design with nothing to paint, or any
+    /// rendering failure, keeps the previous thumbnail: a thumbnail never blocks a save.
+    /// </summary>
+    private string? RenderThumbnail(ProjectWorkspace workspace, string fullPath, CancellationToken cancellationToken)
+    {
+        if (_thumbnails is null || workspace.Design.Layers.Count == 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            return _thumbnails.RenderThumbnail(workspace, fullPath, cancellationToken);
+        }
+        catch (Exception exception) when (exception is IOException
+                                              or UnauthorizedAccessException
+                                              or InvalidDataException
+                                              or ArgumentException
+                                              or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     /// <summary>

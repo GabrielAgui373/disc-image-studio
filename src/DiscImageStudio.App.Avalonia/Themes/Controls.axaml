@@ -384,6 +384,30 @@
     <Setter Property="Padding" Value="12,10" />
   </Style>
 
+  <!-- Composition preview: a square stage whose neutral fill shows where the canvas is transparent. -->
+  <Style Selector="Border.composition-stage">
+    <Setter Property="Width" Value="440" />
+    <Setter Property="Height" Value="440" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  </Style>
+
+  <Style Selector="Ellipse.composition-ring">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="0.8" />
+    <Setter Property="StrokeDashArray" Value="4,3" />
+    <Setter Property="Opacity" Value="0.85" />
+  </Style>
+
+  <Style Selector="Border.composition-busy">
+    <Setter Property="Background" Value="{DynamicResource DiscOverlayBrush}" />
+  </Style>
+
+  <Style Selector="Border.composition-busy TextBlock">
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
   <Style Selector="Button.project-missing-assets">
     <Setter Property="Height" Value="22" />
     <Setter Property="Padding" Value="8,0" />
