@@ -491,12 +491,25 @@
             <Border Classes="new-project-dialog">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{DynamicResource DiscSpace4}" Margin="0,0,22,0">
-                        <StackPanel Spacing="{DynamicResource DiscSpace2}">
-                            <TextBlock Text="{Binding NewProjectTitle}" FontSize="22" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding NewProjectDescription}"
-                                       Classes="new-project-description"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace3}">
+                            <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                                <TextBlock Text="{Binding NewProjectTitle}" FontSize="22" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding NewProjectDescription}"
+                                           Classes="new-project-description"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Classes="ghost dialog-close"
+                                    Command="{Binding CancelNewProjectCommand}"
+                                    AutomationProperties.Name="{Binding CloseDialogLabel}"
+                                    ToolTip.Tip="{Binding CloseDialogLabel}">
+                                <Viewbox Width="14" Height="14">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Classes="dialog-close-icon" Data="M6,6 L18,18 M18,6 L6,18" />
+                                    </Canvas>
+                                </Viewbox>
+                            </Button>
+                        </Grid>
 
                         <StackPanel Spacing="{DynamicResource DiscSpace2}">
                             <TextBlock Text="{Binding NewProjectNameLabel}" FontSize="13" FontWeight="SemiBold" />

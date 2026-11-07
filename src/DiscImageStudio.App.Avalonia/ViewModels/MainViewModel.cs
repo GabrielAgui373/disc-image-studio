@@ -122,6 +122,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         NewProjectFileLabel = text["newProject.file.label"];
         CreateProjectLabel = text["newProject.create"];
         CancelLabel = text["prompt.cancel"];
+        CloseDialogLabel = text["dialog.close"];
         SaveProjectLabel = text["project.action.save"];
         SaveProjectAsLabel = text["project.action.saveAs"];
         CloseProjectLabel = text["project.action.close"];
@@ -267,6 +268,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string NewProjectFileLabel { get; }
     public string CreateProjectLabel { get; }
     public string CancelLabel { get; }
+    public string CloseDialogLabel { get; }
     public string SaveProjectLabel { get; }
     public string SaveProjectAsLabel { get; }
     public string CloseProjectLabel { get; }

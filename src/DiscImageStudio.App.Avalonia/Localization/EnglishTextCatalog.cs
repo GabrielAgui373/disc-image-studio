@@ -217,6 +217,7 @@ public sealed class EnglishTextCatalog : ITextCatalog
         ["prompt.save"] = "Save",
         ["prompt.discard"] = "Discard",
         ["prompt.cancel"] = "Cancel",
+        ["dialog.close"] = "Close",
         ["prompt.ok"] = "OK",
         ["shutdown.timeout.title"] = "Cleanup is still running",
         ["shutdown.timeout.message"] = "The application could not finish job cleanup within 10 seconds. Try closing again after the job stops.",
