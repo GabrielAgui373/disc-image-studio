@@ -49,6 +49,18 @@
       <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
       <SolidColorBrush x:Key="ExpanderContentBackground" Color="{DynamicResource DiscSurfaceColor}" />
       <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <!-- ComboBox drop-downs use the Disc palette instead of Fluent's stock selection blue. -->
+      <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="{DynamicResource DiscTextColor}" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <Color x:Key="DiscBackgroundColor">#11131A</Color>
@@ -96,6 +108,18 @@
       <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
       <SolidColorBrush x:Key="ExpanderContentBackground" Color="{DynamicResource DiscSurfaceColor}" />
       <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <!-- ComboBox drop-downs use the Disc palette instead of Fluent's stock selection blue. -->
+      <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="{DynamicResource DiscTextColor}" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 

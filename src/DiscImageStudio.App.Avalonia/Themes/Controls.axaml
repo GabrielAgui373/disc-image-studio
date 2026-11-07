@@ -139,11 +139,13 @@
 
   <Style Selector="ComboBox">
     <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="controls:RevealOnOpen.IsEnabled" Value="True" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
   </Style>
 
   <Style Selector="Expander">
     <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="controls:RevealOnOpen.IsEnabled" Value="True" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
   </Style>
 
@@ -839,8 +841,9 @@
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BoxShadow" Value="0 16 48 0 #66000000" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
-    <!-- The right inset is split with the scroll content so the overlay scrollbar never covers fields. -->
-    <Setter Property="Padding" Value="24,24,10,24" />
+    <!-- The right inset is split with the scroll content: the 22px content gutter holds the overlay
+         scrollbar even at its expanded (pointer-over) width, so it never covers fields. -->
+    <Setter Property="Padding" Value="24,24,4,24" />
     <Setter Property="MaxWidth" Value="760" />
     <Setter Property="MaxHeight" Value="720" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />

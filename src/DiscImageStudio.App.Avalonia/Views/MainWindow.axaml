@@ -473,7 +473,7 @@
                 IsVisible="{Binding IsNewProjectDialogOpen}">
             <Border Classes="new-project-dialog">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="{DynamicResource DiscSpace4}" Margin="0,0,14,0">
+                    <StackPanel Spacing="{DynamicResource DiscSpace4}" Margin="0,0,22,0">
                         <StackPanel Spacing="{DynamicResource DiscSpace2}">
                             <TextBlock Text="{Binding NewProjectTitle}" FontSize="22" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding NewProjectDescription}"
