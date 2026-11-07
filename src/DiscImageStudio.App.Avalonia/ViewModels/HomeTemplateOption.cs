@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using DiscImageStudio.Core;
 
 namespace DiscImageStudio.App.Avalonia.ViewModels;
 
@@ -14,7 +15,8 @@ public sealed partial class HomeTemplateOption : ObservableObject
         string description,
         string capacity,
         string badge,
-        string selectedLabel)
+        string selectedLabel,
+        OpticalDiscFamily family)
     {
         Id = string.IsNullOrWhiteSpace(id)
             ? throw new ArgumentException("A template id is required.", nameof(id))
@@ -34,6 +36,7 @@ public sealed partial class HomeTemplateOption : ObservableObject
         SelectedLabel = string.IsNullOrWhiteSpace(selectedLabel)
             ? throw new ArgumentException("A selected label is required.", nameof(selectedLabel))
             : selectedLabel;
+        Family = family;
     }
 
     public string Id { get; }
@@ -47,6 +50,8 @@ public sealed partial class HomeTemplateOption : ObservableObject
     public string Badge { get; }
 
     public string SelectedLabel { get; }
+
+    public OpticalDiscFamily Family { get; }
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }

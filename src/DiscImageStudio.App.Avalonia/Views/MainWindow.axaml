@@ -419,7 +419,124 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Border ZIndex="30" Classes="modal-scrim" IsVisible="{Binding IsModalOpen}">
+        <Border ZIndex="30"
+                Classes="modal-scrim new-project-scrim"
+                IsVisible="{Binding IsNewProjectDialogOpen}">
+            <Border Classes="new-project-dialog">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="{DynamicResource DiscSpace4}">
+                        <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                            <TextBlock Text="{Binding NewProjectTitle}" FontSize="22" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding NewProjectDescription}"
+                                       Classes="new-project-description"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                            <TextBlock Text="{Binding NewProjectNameLabel}" FontSize="13" FontWeight="SemiBold" />
+                            <TextBox Text="{Binding NewProjectName, Mode=TwoWay}"
+                                     PlaceholderText="{Binding NewProjectNameWatermark}"
+                                     AutomationProperties.Name="{Binding NewProjectNameLabel}" />
+                        </StackPanel>
+
+                        <controls:PathField Label="{Binding NewProjectDirectoryLabel}"
+                                            Text="{Binding NewProjectDirectory, Mode=TwoWay}"
+                                            Hint="{Binding NewProjectDirectoryHint}"
+                                            BrowseText="{Binding NewProjectBrowseLabel}"
+                                            BrowseCommand="{Binding BrowseNewProjectDirectoryCommand}"
+                                            ShowBrowse="True"
+                                            AutomationProperties.Name="{Binding NewProjectDirectoryLabel}" />
+
+                        <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                            <TextBlock Text="{Binding NewProjectFamilyLabel}" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding NewProjectFamilyHint}"
+                                       Classes="new-project-field-hint"
+                                       TextWrapping="Wrap" />
+                            <ItemsControl ItemsSource="{Binding HomeTemplates}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel ItemWidth="188" ItemHeight="76" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:HomeTemplateOption">
+                                        <Button Classes="new-project-family"
+                                                Classes.selected="{Binding IsSelected}"
+                                                Command="{Binding $parent[Window].DataContext.SelectHomeTemplateCommand}"
+                                                CommandParameter="{Binding}"
+                                                AutomationProperties.Name="{Binding Title}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                                <Border Classes="new-project-family-disc">
+                                                    <Ellipse Classes="new-project-family-disc-ring" />
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding Capacity}" Classes="new-project-family-capacity" />
+                                                </StackPanel>
+                                                <Border Grid.Column="2" Classes="media-template-badge">
+                                                    <TextBlock Text="{Binding Badge}" Classes="media-template-badge-text" />
+                                                </Border>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                            <TextBlock Text="{Binding NewProjectPresetLabel}" FontSize="13" FontWeight="SemiBold" />
+                            <ComboBox Classes="new-project-preset"
+                                      ItemsSource="{Binding NewProjectPresets}"
+                                      SelectedItem="{Binding SelectedProjectPreset, Mode=TwoWay}"
+                                      MaxDropDownHeight="280"
+                                      AutomationProperties.Name="{Binding NewProjectPresetLabel}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:NewProjectPresetOption">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Description}" Classes="new-project-preset-description" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <Expander Header="{Binding NewProjectAdvancedLabel}"
+                                  IsExpanded="{Binding IsNewProjectAdvancedOpen, Mode=TwoWay}">
+                            <StackPanel Margin="0,12,0,0" Spacing="{DynamicResource DiscSpace3}">
+                                <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                                    <TextBlock Text="{Binding NewProjectVolumeLabelText}" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBox Text="{Binding NewProjectVolumeLabel, Mode=TwoWay}"
+                                             AutomationProperties.Name="{Binding NewProjectVolumeLabelText}" />
+                                </StackPanel>
+                                <CheckBox Content="{Binding NewProjectOuterRingLabel}"
+                                          IsChecked="{Binding NewProjectFilesAtOuterRing, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Expander>
+
+                        <controls:SourceChip Text="{Binding NewProjectFileLabel}"
+                                             Detail="{Binding NewProjectFilePathPreview}" />
+
+                        <Border Classes="new-project-error" IsVisible="{Binding HasNewProjectError}">
+                            <TextBlock Text="{Binding NewProjectError}" TextWrapping="Wrap" />
+                        </Border>
+
+                        <ProgressBar IsVisible="{Binding IsCreatingProject}" IsIndeterminate="True" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                            <Button Classes="secondary"
+                                    Content="{Binding CancelLabel}"
+                                    Command="{Binding CancelNewProjectCommand}" />
+                            <Button Classes="primary"
+                                    Content="{Binding CreateProjectLabel}"
+                                    Command="{Binding CreateNewProjectCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Border>
+
+        <Border ZIndex="31" Classes="modal-scrim" IsVisible="{Binding IsModalOpen}">
             <Border Classes="modal-card">
                 <StackPanel Spacing="16">
                     <TextBlock Text="{Binding ModalTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />

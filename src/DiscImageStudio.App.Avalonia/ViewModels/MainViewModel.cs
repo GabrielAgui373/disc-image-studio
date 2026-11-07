@@ -9,12 +9,16 @@ using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Application.Results;
+using DiscImageStudio.Application.Settings;
+using DiscImageStudio.Core;
 
 namespace DiscImageStudio.App.Avalonia.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 {
     private readonly IAppPaths _paths;
+    private readonly IFilePickerService _filePicker;
+    private readonly IFileSystem _fileSystem;
     private readonly IClipboardService _clipboard;
     private readonly IExternalLauncher _launcher;
     private readonly ITextCatalog _text;
@@ -22,12 +26,15 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly ProjectLifecycleService _projects;
     private readonly JobCoordinator _jobs;
     private readonly IUiDispatcher _dispatcher;
+    private readonly UserSettings _settings;
     private readonly List<IDisposable> _eventSubscriptions = [];
     private TaskCompletionSource<int>? _promptCompletion;
     private CancellationTokenRegistration _promptCancellation;
 
     public MainViewModel(
         IAppPaths paths,
+        IFilePickerService filePicker,
+        IFileSystem fileSystem,
         IClipboardService clipboard,
         IExternalLauncher launcher,
         ITextCatalog text,
@@ -35,9 +42,12 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ProjectLifecycleService projects,
         JobCoordinator jobs,
         IUiDispatcher dispatcher,
-        IApplicationEventStream applicationEvents)
+        IApplicationEventStream applicationEvents,
+        UserSettings settings)
     {
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
         _launcher = launcher ?? throw new ArgumentNullException(nameof(launcher));
         _text = text ?? throw new ArgumentNullException(nameof(text));
@@ -45,6 +55,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         _projects = projects ?? throw new ArgumentNullException(nameof(projects));
         _jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _settings = (settings ?? throw new ArgumentNullException(nameof(settings))).Normalize();
         ArgumentNullException.ThrowIfNull(applicationEvents);
 
         Title = text["app.title"];
@@ -80,6 +91,22 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RecentProjectsEmptyDescription = text["home.recent.emptyDescription"];
         PlatformDetailsTitle = text["home.platform.title"];
         PlatformDetailsDescription = text["home.platform.description"];
+        NewProjectTitle = text["newProject.title"];
+        NewProjectDescription = text["newProject.description"];
+        NewProjectNameLabel = text["newProject.name.label"];
+        NewProjectNameWatermark = text["newProject.name.watermark"];
+        NewProjectDirectoryLabel = text["newProject.directory.label"];
+        NewProjectDirectoryHint = text["newProject.directory.hint"];
+        NewProjectBrowseLabel = text["newProject.browse"];
+        NewProjectFamilyLabel = text["newProject.family.label"];
+        NewProjectFamilyHint = text["newProject.family.hint"];
+        NewProjectPresetLabel = text["newProject.preset.label"];
+        NewProjectAdvancedLabel = text["newProject.advanced.label"];
+        NewProjectVolumeLabelText = text["newProject.volume.label"];
+        NewProjectOuterRingLabel = text["newProject.outerRing.label"];
+        NewProjectFileLabel = text["newProject.file.label"];
+        CreateProjectLabel = text["newProject.create"];
+        CancelLabel = text["prompt.cancel"];
 
         HomeTemplates =
         [
@@ -89,22 +116,30 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
                 text["home.template.cd.description"],
                 text["home.template.cd.capacity"],
                 "CD",
-                text["home.template.selectedBadge"]),
+                text["home.template.selectedBadge"],
+                OpticalDiscFamily.CompactDisc),
             new HomeTemplateOption(
                 "dvd",
                 text["home.template.dvd.title"],
                 text["home.template.dvd.description"],
                 text["home.template.dvd.capacity"],
                 "DVD",
-                text["home.template.selectedBadge"]),
+                text["home.template.selectedBadge"],
+                OpticalDiscFamily.Dvd),
             new HomeTemplateOption(
                 "bd",
                 text["home.template.bd.title"],
                 text["home.template.bd.description"],
                 text["home.template.bd.capacity"],
                 "BD",
-                text["home.template.selectedBadge"]),
+                text["home.template.selectedBadge"],
+                OpticalDiscFamily.BluRay),
         ];
+        ProjectPresets = CreateProjectPresets(text);
+        NewProjectDirectory = string.IsNullOrWhiteSpace(_settings.DefaultProjectDirectory)
+            ? paths.ProjectsDirectory
+            : _settings.DefaultProjectDirectory;
+        NewProjectVolumeLabel = text["newProject.defaultVolumeLabel"];
         SelectHomeTemplate(HomeTemplates[0]);
 
         HomeNavigation = CreateNavigationItem(WorkspacePage.Home, "navigation.home", "Alt+H");
@@ -162,6 +197,22 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string RecentProjectsEmptyDescription { get; }
     public string PlatformDetailsTitle { get; }
     public string PlatformDetailsDescription { get; }
+    public string NewProjectTitle { get; }
+    public string NewProjectDescription { get; }
+    public string NewProjectNameLabel { get; }
+    public string NewProjectNameWatermark { get; }
+    public string NewProjectDirectoryLabel { get; }
+    public string NewProjectDirectoryHint { get; }
+    public string NewProjectBrowseLabel { get; }
+    public string NewProjectFamilyLabel { get; }
+    public string NewProjectFamilyHint { get; }
+    public string NewProjectPresetLabel { get; }
+    public string NewProjectAdvancedLabel { get; }
+    public string NewProjectVolumeLabelText { get; }
+    public string NewProjectOuterRingLabel { get; }
+    public string NewProjectFileLabel { get; }
+    public string CreateProjectLabel { get; }
+    public string CancelLabel { get; }
     public WorkspaceNavigationItem HomeNavigation { get; }
     public WorkspaceNavigationItem DesignNavigation { get; }
     public WorkspaceNavigationItem PreviewNavigation { get; }
@@ -170,6 +221,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public WorkspaceNavigationItem SettingsNavigation { get; }
     public IReadOnlyList<WorkspaceNavigationItem> NavigationItems { get; }
     public IReadOnlyList<HomeTemplateOption> HomeTemplates { get; }
+    public IReadOnlyList<NewProjectPresetOption> ProjectPresets { get; }
+    public ObservableCollection<NewProjectPresetOption> NewProjectPresets { get; } = [];
     public ObservableCollection<JobDockItem> Jobs { get; } = [];
     public ObservableCollection<ToastNotification> Toasts { get; } = [];
     public bool HasJobHistory => Jobs.Count > 0;
@@ -243,6 +296,45 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [ObservableProperty]
     public partial string HomeActionStatus { get; private set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool IsNewProjectDialogOpen { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsNewProjectAdvancedOpen { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCreatingProject { get; private set; }
+
+    [ObservableProperty]
+    public partial string NewProjectName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NewProjectDirectory { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NewProjectVolumeLabel { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool NewProjectFilesAtOuterRing { get; set; }
+
+    [ObservableProperty]
+    public partial string NewProjectFilePathPreview { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string? NewProjectError { get; private set; }
+
+    public bool HasNewProjectError => !string.IsNullOrWhiteSpace(NewProjectError);
+
+    [ObservableProperty]
+    public partial NewProjectPresetOption? SelectedProjectPreset { get; set; }
+
+    partial void OnNewProjectErrorChanged(string? value)
+        => OnPropertyChanged(nameof(HasNewProjectError));
+
+    partial void OnNewProjectNameChanged(string value) => UpdateNewProjectFilePathPreview();
+
+    partial void OnNewProjectDirectoryChanged(string value) => UpdateNewProjectFilePathPreview();
+
     [RelayCommand]
     private async Task CopyDiagnosticsAsync()
     {
@@ -260,13 +352,87 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private void StartNewProject()
     {
+        if (IsModalOpen)
+        {
+            return;
+        }
+
         SelectHomeTemplate(SelectedHomeTemplate ?? HomeTemplates[0]);
-        HomeActionStatus = _text["home.action.preparing"];
+        NewProjectError = null;
+        IsNewProjectDialogOpen = true;
+        UpdateNewProjectFilePathPreview();
     }
 
     [RelayCommand]
     private void StartOpenProject()
         => HomeActionStatus = _text["home.action.openPreparing"];
+
+    [RelayCommand]
+    private void CancelNewProject()
+    {
+        if (IsCreatingProject)
+        {
+            return;
+        }
+
+        NewProjectError = null;
+        IsNewProjectDialogOpen = false;
+    }
+
+    [RelayCommand]
+    private async Task BrowseNewProjectDirectoryAsync()
+    {
+        try
+        {
+            string? directory = await _filePicker.OpenFolderAsync(
+                new FolderPickerRequest(NewProjectDirectoryLabel, NewProjectDirectory));
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                NewProjectDirectory = directory;
+            }
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            NewProjectError = _text["newProject.error.directoryUnavailable"];
+        }
+    }
+
+    [RelayCommand]
+    private async Task CreateNewProjectAsync()
+    {
+        if (IsCreatingProject)
+        {
+            return;
+        }
+
+        if (!TryBuildNewProjectRequest(out CreateProjectRequest request))
+        {
+            return;
+        }
+
+        IsCreatingProject = true;
+        NewProjectError = null;
+        try
+        {
+            ApplicationResult<ProjectWorkspace> result = await _projects.CreateProjectAsync(request);
+            if (!result.Succeeded)
+            {
+                NewProjectError = CreateProjectError(result.Error?.Code);
+                return;
+            }
+
+            IsNewProjectDialogOpen = false;
+            HomeActionStatus = string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["newProject.created"],
+                result.Value.Identity.Name);
+            RefreshNavigation();
+        }
+        finally
+        {
+            IsCreatingProject = false;
+        }
+    }
 
     [RelayCommand]
     private void SelectHomeTemplate(HomeTemplateOption? template)
@@ -282,6 +448,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         }
 
         SelectedHomeTemplate = template;
+        RefreshProjectPresets();
         HomeActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["home.templates.selected"],
@@ -339,6 +506,12 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private void DismissPrompt()
     {
+        if (IsNewProjectDialogOpen)
+        {
+            CancelNewProject();
+            return;
+        }
+
         if (ActivePrompt is not null)
         {
             CompletePrompt(ActivePrompt.CancelResult);
@@ -500,6 +673,155 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ActivePrompt = null;
         IsModalOpen = false;
         completion.TrySetResult(choice);
+    }
+
+    private void RefreshProjectPresets()
+    {
+        OpticalDiscFamily family = SelectedHomeTemplate?.Family ?? OpticalDiscFamily.CompactDisc;
+        string? selectedId = SelectedProjectPreset?.Id;
+        NewProjectPresets.Clear();
+        foreach (NewProjectPresetOption preset in ProjectPresets.Where(preset => preset.Family == family))
+        {
+            NewProjectPresets.Add(preset);
+        }
+
+        SelectedProjectPreset = NewProjectPresets.FirstOrDefault(preset => preset.Id == selectedId)
+            ?? NewProjectPresets.FirstOrDefault();
+    }
+
+    private bool TryBuildNewProjectRequest(out CreateProjectRequest request)
+    {
+        request = null!;
+        string name = NewProjectName.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            NewProjectError = _text["newProject.error.nameRequired"];
+            return false;
+        }
+
+        string directory = NewProjectDirectory.Trim();
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            NewProjectError = _text["newProject.error.directoryRequired"];
+            return false;
+        }
+
+        NewProjectPresetOption? preset = SelectedProjectPreset;
+        if (preset is null)
+        {
+            NewProjectError = _text["newProject.error.presetRequired"];
+            return false;
+        }
+
+        try
+        {
+            string projectPath = _fileSystem.GetFullPath(Path.Combine(directory, BuildProjectFileName(name)));
+            if (_fileSystem.FileExists(projectPath))
+            {
+                NewProjectError = _text["newProject.error.fileExists"];
+                return false;
+            }
+
+            string outputPath = Path.ChangeExtension(projectPath, ".iso");
+            request = new CreateProjectRequest(
+                projectPath,
+                name,
+                preset.Media,
+                new DeliveryState(
+                    outputPath,
+                    dataDirectory: string.Empty,
+                    NewProjectVolumeLabel.Trim(),
+                    NewProjectFilesAtOuterRing),
+                new DesignState(),
+                new ToneState(ToneProfile.Photo));
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            NewProjectError = _text["newProject.error.invalidPath"];
+            return false;
+        }
+    }
+
+    private string CreateProjectError(ApplicationErrorCode? code)
+        => code switch
+        {
+            ApplicationErrorCode.UserCanceled => _text["newProject.error.canceled"],
+            ApplicationErrorCode.ProjectWriteFailed => _text["newProject.error.writeFailed"],
+            _ => _text["newProject.error.createFailed"],
+        };
+
+    private void UpdateNewProjectFilePathPreview()
+    {
+        string name = NewProjectName.Trim();
+        string directory = NewProjectDirectory.Trim();
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(directory))
+        {
+            NewProjectFilePathPreview = string.Empty;
+            return;
+        }
+
+        try
+        {
+            NewProjectFilePathPreview = _fileSystem.GetFullPath(Path.Combine(directory, BuildProjectFileName(name)));
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            NewProjectFilePathPreview = string.Empty;
+        }
+    }
+
+    private static string BuildProjectFileName(string name)
+    {
+        char[] invalidCharacters = Path.GetInvalidFileNameChars();
+        string stem = new string(name.Trim().Select(character => invalidCharacters.Contains(character) ? '_' : character).ToArray())
+            .Trim()
+            .Trim('.');
+        return $"{(string.IsNullOrWhiteSpace(stem) ? "disc-project" : stem)}{ProjectJsonStore.FileExtension}";
+    }
+
+    private static IReadOnlyList<NewProjectPresetOption> CreateProjectPresets(ITextCatalog text)
+    {
+        DiscPresetJsonDocument catalog = DiscPresetJsonStore.LoadBuiltIn();
+        CdDiscPresetDefinition cd = catalog.CdPresets.FirstOrDefault(preset => preset.Id == "cd-80")
+            ?? throw new InvalidOperationException("The standard CD preset is missing from the catalog.");
+        DvdDiscPresetDefinition dvd = catalog.DvdPresets.FirstOrDefault(preset => preset.Id == "dvd-5-120mm")
+            ?? throw new InvalidOperationException("The standard DVD preset is missing from the catalog.");
+        BluRayDiscPresetDefinition bluRay = (catalog.BluRayPresets ?? [])
+            .FirstOrDefault(preset => preset.Id == "bd-r-sl-25gb")
+            ?? throw new InvalidOperationException("The standard Blu-ray preset is missing from the catalog.");
+
+        return
+        [
+            new NewProjectPresetOption(
+                cd.Id,
+                OpticalDiscFamily.CompactDisc,
+                text["newProject.preset.cd.title"],
+                text["newProject.preset.cd.description"],
+                new CdState(cd.InnerRadiusMm, cd.OuterRadiusMm, cd.Sectors, writeCue: true, interleave: true)),
+            new NewProjectPresetOption(
+                dvd.Id,
+                OpticalDiscFamily.Dvd,
+                text["newProject.preset.dvd.title"],
+                text["newProject.preset.dvd.description"],
+                new DvdState(
+                    dvd.InnerRadiusMm,
+                    dvd.OuterRadiusMm,
+                    dvd.TotalSectors,
+                    dvd.PitchLinear,
+                    dvd.PitchQuadratic,
+                    dvd.PitchCubic)),
+            new NewProjectPresetOption(
+                bluRay.Id,
+                OpticalDiscFamily.BluRay,
+                text["newProject.preset.bd.title"],
+                text["newProject.preset.bd.description"],
+                new BluRayState(
+                    bluRay.InnerRadiusMm,
+                    bluRay.OuterRadiusMm,
+                    bluRay.TotalSectors,
+                    bluRay.InvertMapping)),
+        ];
     }
 
     private (string Title, string Description, string Badge) GetPagePresentation(WorkspacePage page)

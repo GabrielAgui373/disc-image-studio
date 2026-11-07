@@ -66,9 +66,10 @@ public sealed class AppHost : IDisposable
         FileCacheManager cache = new(paths, logger);
         ApplicationEventHub applicationEvents = new();
         JobCoordinator jobs = new(new SystemClock(), applicationEvents);
+        PhysicalFileSystem fileSystem = new();
         ProjectLifecycleService projects = new(
             new JsonProjectDocumentStore(),
-            new PhysicalFileSystem(),
+            fileSystem,
             new SystemClock(),
             prompts,
             applicationEvents);
@@ -99,7 +100,19 @@ public sealed class AppHost : IDisposable
             text,
             about);
 
-        MainViewModel viewModel = new(paths, clipboard, launcher, text, about, projects, jobs, dispatcher, applicationEvents);
+        MainViewModel viewModel = new(
+            paths,
+            filePicker,
+            fileSystem,
+            clipboard,
+            launcher,
+            text,
+            about,
+            projects,
+            jobs,
+            dispatcher,
+            applicationEvents,
+            settings);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

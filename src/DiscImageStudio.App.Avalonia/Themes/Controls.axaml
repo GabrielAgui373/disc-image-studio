@@ -698,4 +698,88 @@
     <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="8,0" />
   </Style>
+
+  <Style Selector="Border.new-project-dialog">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="0 16 48 0 #66000000" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="24" />
+    <Setter Property="MaxWidth" Value="760" />
+    <Setter Property="MaxHeight" Value="720" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TextBlock.new-project-description">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.new-project-field-hint">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.new-project-preset-description">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="Button.new-project-family">
+    <Setter Property="Width" Value="176" />
+    <Setter Property="Height" Value="68" />
+    <Setter Property="Margin" Value="0,0,10,10" />
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" Easing="SineEaseOut" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.new-project-family:pointerover, Button.new-project-family.selected">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.new-project-family-disc">
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="18" />
+  </Style>
+
+  <Style Selector="Ellipse.new-project-family-disc-ring">
+    <Setter Property="Margin" Value="7" />
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="1.5" />
+  </Style>
+
+  <Style Selector="TextBlock.new-project-family-capacity">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="ComboBox.new-project-preset">
+    <Setter Property="MinHeight" Value="44" />
+  </Style>
+
+  <Style Selector="Border.new-project-error">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscDangerBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,9" />
+  </Style>
 </Styles>
