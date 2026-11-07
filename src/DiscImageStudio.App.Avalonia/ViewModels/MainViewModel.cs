@@ -6,6 +6,7 @@ using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
 using DiscImageStudio.Application.Composition;
+using DiscImageStudio.Application.Editing;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
@@ -36,6 +37,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly UserSettings _settings;
     private readonly ProjectAssetService _assets;
     private readonly ProjectCompositionService _compositions;
+    private readonly ProjectEditor _editor;
     private readonly UserPresetCatalog _presetCatalog;
     private IReadOnlyList<ProjectPresetDefinition> _userPresets = [];
     private readonly List<IDisposable> _eventSubscriptions = [];
@@ -59,8 +61,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IThumbnailDecoder thumbnails,
         ProjectAssetService assets,
         UserPresetCatalog presets,
-        ProjectCompositionService compositions)
+        ProjectCompositionService compositions,
+        ProjectEditor editor)
     {
+        _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
@@ -207,7 +211,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             _presetCatalog,
             filePicker,
             text,
-            family => ProjectPresets.Where(preset => preset.Family == family).ToArray());
+            family => ProjectPresets.Where(preset => preset.Family == family).ToArray(),
+            _editor);
         ProjectSettings.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(ProjectSettingsViewModel.IsOpen))
@@ -216,6 +221,79 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             }
         };
         ProjectSettingsLabel = text["project.action.settings"];
+        UndoLabel = text["history.undo"];
+        RedoLabel = text["history.redo"];
+        _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectWorkspaceChanged>(eventData => _dispatcher.Post(() => OnProjectWorkspaceChanged(eventData))));
+        _editor.HistoryChanged += (_, _) => _dispatcher.Post(RefreshHistoryState);
+        RefreshHistoryState();
+    }
+
+    public string UndoLabel { get; }
+
+    public string RedoLabel { get; }
+
+    [ObservableProperty]
+    public partial bool CanUndo { get; private set; }
+
+    [ObservableProperty]
+    public partial bool CanRedo { get; private set; }
+
+    [ObservableProperty]
+    public partial string UndoToolTip { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RedoToolTip { get; private set; } = string.Empty;
+
+    [RelayCommand]
+    private void Undo() => RunHistory(_editor.Undo, "history.undone");
+
+    [RelayCommand]
+    private void Redo() => RunHistory(_editor.Redo, "history.redone");
+
+    private void RunHistory(Func<ApplicationResult<EditOutcome>> step, string statusKey)
+    {
+        // Window shortcuts must not change the project behind a dialog or during a file operation.
+        if (!HasOpenProject || IsAnyDialogOpen || IsProjectOperationInProgress)
+        {
+            return;
+        }
+
+        ApplicationResult<EditOutcome> result = step();
+        if (result.Succeeded)
+        {
+            ProjectActionError = null;
+            ProjectActionStatus = string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text[statusKey],
+                HistoryText(result.Value.Label));
+        }
+
+        RefreshHistoryState();
+    }
+
+    private void RefreshHistoryState()
+    {
+        CanUndo = _editor.CanUndo;
+        CanRedo = _editor.CanRedo;
+        UndoToolTip = _editor.UndoLabel is { } undo
+            ? string.Format(System.Globalization.CultureInfo.CurrentUICulture, _text["history.undoTip"], HistoryText(undo))
+            : UndoLabel;
+        RedoToolTip = _editor.RedoLabel is { } redo
+            ? string.Format(System.Globalization.CultureInfo.CurrentUICulture, _text["history.redoTip"], HistoryText(redo))
+            : RedoLabel;
+    }
+
+    private string HistoryText(string label) => _text[$"history.label.{label}"];
+
+    private void OnProjectWorkspaceChanged(ProjectWorkspaceChanged change)
+    {
+        RefreshProjectState();
+        RefreshHistoryState();
+        if (!change.IsPreview)
+        {
+            // A committed change may have touched layers or geometry; recompose the preview.
+            _ = Preview.RefreshAsync();
+        }
     }
 
     public RecentProjectsViewModel Recent { get; }
@@ -896,6 +974,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void OnProjectOpened(ProjectOpened project)
     {
         RefreshProjectState();
+        RefreshHistoryState();
         _ = Recent.RefreshAsync();
         _ = Preview.RefreshAsync();
         ProjectActionStatus = string.Format(
@@ -918,6 +997,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void OnProjectClosed(ProjectClosed project)
     {
         RefreshProjectState();
+        RefreshHistoryState();
         Preview.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
@@ -928,15 +1008,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshNavigation();
     }
 
-    private void OnProjectDirtyChanged(ProjectDirtyChanged change)
-    {
-        RefreshProjectState();
-        if (change.IsDirty)
-        {
-            // A persistent change may have touched layers or geometry; recompose the preview.
-            _ = Preview.RefreshAsync();
-        }
-    }
+    private void OnProjectDirtyChanged(ProjectDirtyChanged change) => RefreshProjectState();
 
     private async Task<bool> OpenProjectAsync(string path)
     {

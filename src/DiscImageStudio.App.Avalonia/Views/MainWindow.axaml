@@ -28,6 +28,9 @@
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveProjectCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveProjectAsCommand}" />
         <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
         <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding OpenProjectSettingsCommand}" />
         <KeyBinding Gesture="Escape" Command="{Binding DismissPromptCommand}" />
     </Window.KeyBindings>
@@ -209,6 +212,28 @@
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Classes="ghost compact-action history-action"
+                                        Command="{Binding UndoCommand}"
+                                        IsEnabled="{Binding CanUndo}"
+                                        ToolTip.Tip="{Binding UndoToolTip}"
+                                        AutomationProperties.Name="{Binding UndoToolTip}">
+                                    <Viewbox Width="15" Height="15">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="history-icon" Data="M9,14 L4,9 L9,4 M4,9 H14 A6,6 0 0 1 14,21 H10" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+                                <Button Classes="ghost compact-action history-action"
+                                        Command="{Binding RedoCommand}"
+                                        IsEnabled="{Binding CanRedo}"
+                                        ToolTip.Tip="{Binding RedoToolTip}"
+                                        AutomationProperties.Name="{Binding RedoToolTip}">
+                                    <Viewbox Width="15" Height="15">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="history-icon" Data="M15,14 L20,9 L15,4 M20,9 H10 A6,6 0 0 0 10,21 H14" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
                                 <Button Classes="ghost compact-action"
                                         Content="{Binding ProjectSettingsLabel}"
                                         Command="{Binding OpenProjectSettingsCommand}" />

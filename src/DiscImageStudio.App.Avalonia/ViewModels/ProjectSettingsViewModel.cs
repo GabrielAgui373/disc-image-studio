@@ -4,6 +4,7 @@ using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.App.Avalonia.Localization;
+using DiscImageStudio.Application.Editing;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Application.Results;
@@ -82,6 +83,7 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
     private static readonly FilePickerType CalibrationFileType = new("Calibration session", ["*.json", "*"]);
 
     private readonly ProjectLifecycleService _projects;
+    private readonly ProjectEditor? _editor;
     private readonly ProjectAssetService _assets;
     private readonly UserPresetCatalog _presets;
     private readonly IFilePickerService _filePicker;
@@ -98,8 +100,10 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
         UserPresetCatalog presets,
         IFilePickerService filePicker,
         ITextCatalog text,
-        Func<OpticalDiscFamily, IReadOnlyList<NewProjectPresetOption>> standardPresets)
+        Func<OpticalDiscFamily, IReadOnlyList<NewProjectPresetOption>> standardPresets,
+        ProjectEditor? editor = null)
     {
+        _editor = editor;
         _projects = projects ?? throw new ArgumentNullException(nameof(projects));
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presets = presets ?? throw new ArgumentNullException(nameof(presets));
@@ -357,10 +361,13 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
             return;
         }
 
-        ApplicationResult result = _projects.ReplaceWorkspace(updated, "project-settings", "project-settings-dialog");
-        if (!result.Succeeded)
+        // Through the editor the whole dialog is one undoable step ("Undo Project settings").
+        ApplicationError? failure = _editor is not null
+            ? _editor.Apply(HistoryLabels.ProjectSettings, _ => updated).Error
+            : _projects.ReplaceWorkspace(updated, "project-settings", "project-settings-dialog").Error;
+        if (failure is not null)
         {
-            Error = result.Error?.Code == ApplicationErrorCode.NoProjectOpen
+            Error = failure.Code == ApplicationErrorCode.NoProjectOpen
                 ? _text["projectSettings.error.noProject"]
                 : _text["projectSettings.error.invalid"];
             return;

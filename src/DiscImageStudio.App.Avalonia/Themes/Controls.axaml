@@ -408,6 +408,18 @@
     <Setter Property="Foreground" Value="White" />
   </Style>
 
+  <Style Selector="Button.history-action">
+    <Setter Property="Width" Value="30" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+
+  <Style Selector="Path.history-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscTextBrush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+  </Style>
+
   <Style Selector="Button.project-missing-assets">
     <Setter Property="Height" Value="22" />
     <Setter Property="Padding" Value="8,0" />

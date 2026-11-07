@@ -130,7 +130,8 @@ public sealed class AppHost : IDisposable
             new AvaloniaThumbnailDecoder(),
             new ProjectAssetService(fileSystem, new PhysicalDirectoryScanner()),
             new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger),
-            compositions);
+            compositions,
+            new DiscImageStudio.Application.Editing.ProjectEditor(projects));
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {
