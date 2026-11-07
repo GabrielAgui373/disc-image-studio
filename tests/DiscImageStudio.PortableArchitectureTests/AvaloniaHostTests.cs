@@ -2,14 +2,17 @@ using System.Globalization;
 using Avalonia.Styling;
 using DiscImageStudio.App.Avalonia;
 using DiscImageStudio.App.Avalonia.Diagnostics;
+using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Hosting;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
 using DiscImageStudio.App.Avalonia.ViewModels;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Ports;
+using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Application.Results;
 using DiscImageStudio.Application.Settings;
+using DiscImageStudio.Core;
 using Xunit;
 
 namespace DiscImageStudio.PortableArchitectureTests;
@@ -100,6 +103,7 @@ public sealed class AvaloniaHostTests
         MemorySettingsStore settingsStore = new();
         AvaloniaApplicationLifetime lifetime = new(
             jobs,
+            CreateLifecycle(prompts),
             prompts,
             settingsStore,
             new UserSettings { Culture = "en", Theme = ApplicationTheme.Dark },
@@ -125,6 +129,7 @@ public sealed class AvaloniaHostTests
         FakePrompts prompts = new(confirmShutdown: false);
         AvaloniaApplicationLifetime lifetime = new(
             new JobCoordinator(new FixedClock()),
+            CreateLifecycle(prompts),
             prompts,
             new MemorySettingsStore(),
             new UserSettings(),
@@ -151,7 +156,7 @@ public sealed class AvaloniaHostTests
             paths.DataDirectory,
             paths.CacheDirectory,
             paths.LogsDirectory);
-        MainViewModel viewModel = new(paths, clipboard, launcher, new EnglishTextCatalog(), about);
+        MainViewModel viewModel = CreateViewModel(paths, clipboard, launcher, about, CreateLifecycle(new FakePrompts(confirmShutdown: true)));
 
         await viewModel.CopyDiagnosticsCommand.ExecuteAsync(null);
         await viewModel.OpenLogsCommand.ExecuteAsync(null);
@@ -159,6 +164,47 @@ public sealed class AvaloniaHostTests
         Assert.Contains("abc123", clipboard.Text, StringComparison.Ordinal);
         Assert.Equal(paths.LogsDirectory, launcher.LastPath);
         Assert.Equal("Logs folder opened.", viewModel.ActionStatus);
+    }
+
+    [Fact]
+    public async Task Shutdown_with_unsaved_project_keeps_session_when_prompt_is_canceled()
+    {
+        FakePrompts prompts = new(confirmShutdown: true, unsavedDecision: UnsavedChangesDecision.Cancel);
+        ProjectLifecycleService projects = CreateLifecycle(prompts);
+        string path = Path.Combine(CreateTempDirectory(), "shutdown.discproj");
+        Assert.True((await projects.CreateProjectAsync(CreateProjectRequest(path))).Succeeded);
+        projects.MarkDirty("layer-moved", "test");
+        AvaloniaApplicationLifetime lifetime = new(
+            new JobCoordinator(new FixedClock()),
+            projects,
+            prompts,
+            new MemorySettingsStore(),
+            new UserSettings(),
+            new EnglishTextCatalog(),
+            new RecordingLogger());
+
+        Assert.False(await lifetime.RequestShutdownAsync());
+
+        Assert.False(lifetime.IsShutdownStarted);
+        Assert.True(projects.HasOpenProject);
+        Assert.True(projects.Dirty.IsDirty);
+        Assert.Equal(1, prompts.UnsavedPromptCount);
+    }
+
+    [Fact]
+    public async Task Project_shortcuts_are_ignored_while_the_new_project_dialog_is_open()
+    {
+        FakePaths paths = new(CreateTempDirectory());
+        ProjectLifecycleService projects = CreateLifecycle(new FakePrompts(confirmShutdown: true));
+        MainViewModel viewModel = CreateViewModel(paths, new FakeClipboard(), new FakeLauncher(), CreateAbout(paths), projects);
+        string path = Path.Combine(paths.ProjectsDirectory, "shortcuts.discproj");
+        Assert.True((await projects.CreateProjectAsync(CreateProjectRequest(path))).Succeeded);
+
+        viewModel.StartNewProjectCommand.Execute(null);
+        await viewModel.CloseProjectCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsAnyDialogOpen);
+        Assert.True(projects.HasOpenProject);
     }
 
     [Fact]
@@ -211,6 +257,53 @@ public sealed class AvaloniaHostTests
         Assert.Contains("X11 or XWayland", error, StringComparison.Ordinal);
         Assert.Null(DisplayEnvironment.GetStartupError(key => key == "DISPLAY" ? ":0" : null, isLinux: true));
     }
+
+    private static ProjectLifecycleService CreateLifecycle(IUserInteraction interaction)
+        => new(
+            new JsonProjectDocumentStore(),
+            new PhysicalFileSystem(),
+            new FixedClock(),
+            interaction);
+
+    private static CreateProjectRequest CreateProjectRequest(string path)
+        => new(
+            path,
+            "Host project",
+            new CdState(24.5, 56.8, 359_849, writeCue: true, interleave: true),
+            new DeliveryState("output.wav", string.Empty, "CD_IMAGE"));
+
+    private static AboutInfo CreateAbout(FakePaths paths)
+        => new(
+            "1.0.0",
+            "abc123",
+            ".NET test",
+            "12.1.4",
+            "Linux test",
+            paths.ConfigDirectory,
+            paths.DataDirectory,
+            paths.CacheDirectory,
+            paths.LogsDirectory);
+
+    /// <summary>Single construction point so host-composition changes touch one place.</summary>
+    private static MainViewModel CreateViewModel(
+        FakePaths paths,
+        IClipboardService clipboard,
+        IExternalLauncher launcher,
+        AboutInfo about,
+        ProjectLifecycleService projects)
+        => new(
+            paths,
+            new FakeFilePicker(),
+            new PhysicalFileSystem(),
+            clipboard,
+            launcher,
+            new EnglishTextCatalog(),
+            about,
+            projects,
+            new JobCoordinator(new FixedClock()),
+            new InlineDispatcher(),
+            new ApplicationEventHub(),
+            new UserSettings());
 
     private static string CreateTempDirectory()
     {
@@ -271,14 +364,21 @@ public sealed class AvaloniaHostTests
         }
     }
 
-    private sealed class FakePrompts(bool confirmShutdown) : IUserPromptService
+    private sealed class FakePrompts(
+        bool confirmShutdown,
+        UnsavedChangesDecision unsavedDecision = UnsavedChangesDecision.Cancel) : IUserPromptService
     {
         public int ShutdownPromptCount { get; private set; }
+
+        public int UnsavedPromptCount { get; private set; }
 
         public Task<UnsavedChangesDecision> ConfirmUnsavedChangesAsync(
             UnsavedChangesRequest request,
             CancellationToken cancellationToken = default)
-            => Task.FromResult(UnsavedChangesDecision.Cancel);
+        {
+            UnsavedPromptCount++;
+            return Task.FromResult(unsavedDecision);
+        }
 
         public Task<bool> ConfirmShutdownAsync(int activeJobCount, CancellationToken cancellationToken = default)
         {
@@ -336,6 +436,37 @@ public sealed class AvaloniaHostTests
         {
             LastPath = path;
             return Task.FromResult(true);
+        }
+    }
+
+    private sealed class FakeFilePicker : IFilePickerService
+    {
+        public Task<IReadOnlyList<string>> OpenFilesAsync(
+            OpenFilePickerRequest request,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<string>>([]);
+
+        public Task<string?> SaveFileAsync(
+            SaveFilePickerRequest request,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<string?>(null);
+
+        public Task<string?> OpenFolderAsync(
+            FolderPickerRequest request,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<string?>(null);
+    }
+
+    private sealed class InlineDispatcher : IUiDispatcher
+    {
+        public bool CheckAccess() => true;
+
+        public void Post(Action action) => action();
+
+        public Task InvokeAsync(Action action, CancellationToken cancellationToken = default)
+        {
+            action();
+            return Task.CompletedTask;
         }
     }
 }

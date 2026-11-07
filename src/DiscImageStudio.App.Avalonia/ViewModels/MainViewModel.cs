@@ -343,6 +343,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     public bool HasProjectSurface => HasOpenProject || HasProjectActionStatus || HasProjectActionError;
 
+    /// <summary>
+    /// Window-level shortcuts (Ctrl+O/S/W) must not act on the project behind a dialog.
+    /// </summary>
+    public bool IsAnyDialogOpen => IsModalOpen || IsNewProjectDialogOpen;
+
     [ObservableProperty]
     public partial bool IsNewProjectDialogOpen { get; private set; }
 
@@ -428,7 +433,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task StartOpenProjectAsync()
     {
-        if (IsProjectOperationInProgress || IsNewProjectDialogOpen || IsModalOpen)
+        if (IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
         }
@@ -457,7 +462,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task SaveProjectAsync()
     {
-        if (!HasOpenProject || IsProjectOperationInProgress)
+        if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
         }
@@ -468,7 +473,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task SaveProjectAsAsync()
     {
-        if (!HasOpenProject || IsProjectOperationInProgress)
+        if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
         }
@@ -502,7 +507,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task CloseProjectAsync()
     {
-        if (!HasOpenProject || IsProjectOperationInProgress)
+        if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
         }
