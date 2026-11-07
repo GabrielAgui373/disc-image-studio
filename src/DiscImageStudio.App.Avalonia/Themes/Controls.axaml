@@ -794,6 +794,112 @@
     <Setter Property="Padding" Value="12,9" />
   </Style>
 
+  <Style Selector="Button.recent-card">
+    <Setter Property="Width" Value="232" />
+    <Setter Property="Height" Value="212" />
+    <Setter Property="Padding" Value="14" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="RenderTransform" Value="translateY(0px)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.18" Easing="SineEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.recent-card /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+  </Style>
+
+  <Style Selector="Button.recent-card:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="RenderTransform" Value="translateY(-2px)" />
+  </Style>
+
+  <Style Selector="Button.recent-card:pressed">
+    <Setter Property="RenderTransform" Value="translateY(0px)" />
+  </Style>
+
+  <Style Selector="Grid.recent-card-host.issue Button.recent-card">
+    <Setter Property="Opacity" Value="0.78" />
+  </Style>
+
+  <Style Selector="Border.recent-thumbnail">
+    <Setter Property="Width" Value="104" />
+    <Setter Property="Height" Value="104" />
+    <Setter Property="CornerRadius" Value="52" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BoxShadow" Value="0 2 8 0 #30000000" />
+  </Style>
+
+  <Style Selector="controls|DiscArt.recent-fallback-art">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.25" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- While the background probe runs the card shows dimmed family artwork as a placeholder. -->
+  <Style Selector="controls|DiscArt.recent-fallback-art.probing">
+    <Setter Property="Opacity" Value="0.45" />
+  </Style>
+
+  <Style Selector="Border.recent-status">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscDangerBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Padding" Value="7,2" />
+  </Style>
+
+  <Style Selector="Border.recent-status TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DiscDangerBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.recent-path">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="Button.recent-remove">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0,8,20,0" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+
+  <Style Selector="Grid.recent-card-host:pointerover Button.recent-remove, Button.recent-remove:focus-visible">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+
+  <Style Selector="Path.recent-remove-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="StrokeThickness" Value="2.2" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+  </Style>
+
+  <Style Selector="Button.recent-remove:pointerover Path.recent-remove-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscDangerBrush}" />
+  </Style>
+
   <Style Selector="Border.home-recent-empty">
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />

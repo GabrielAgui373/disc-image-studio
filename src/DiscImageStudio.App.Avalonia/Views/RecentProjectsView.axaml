@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls"
+             xmlns:vm="using:DiscImageStudio.App.Avalonia.ViewModels"
+             x:Class="DiscImageStudio.App.Avalonia.Views.RecentProjectsView"
+             x:DataType="vm:RecentProjectsViewModel">
+    <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel ItemWidth="244" ItemHeight="224" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:RecentProjectItem">
+                <!-- The remove button is a sibling of the card button, never nested inside it,
+                     so each control keeps its own focus, keyboard activation and automation name. -->
+                <Grid Classes="recent-card-host" Classes.issue="{Binding HasIssue}">
+                    <Button Classes="recent-card"
+                            Command="{Binding $parent[ItemsControl].((vm:RecentProjectsViewModel)DataContext).OpenCommand}"
+                            CommandParameter="{Binding}"
+                            AutomationProperties.Name="{Binding Name}"
+                            ToolTip.Tip="{Binding ProjectPath}">
+                        <StackPanel Spacing="10">
+                            <Grid Height="116">
+                                <Border Classes="recent-thumbnail" IsVisible="{Binding HasThumbnail}">
+                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                </Border>
+                                <controls:DiscArt Width="104"
+                                                  Height="104"
+                                                  Variant="{Binding FamilyVariant}"
+                                                  Classes="recent-fallback-art"
+                                                  Classes.probing="{Binding IsProbing}"
+                                                  IsVisible="{Binding !HasThumbnail}" />
+                                <Border Classes="media-template-badge"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top">
+                                    <TextBlock Text="{Binding FamilyBadge}" Classes="media-template-badge-text" />
+                                </Border>
+                                <Border Classes="recent-status"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Bottom"
+                                        IsVisible="{Binding HasIssue}">
+                                    <TextBlock Text="{Binding StatusLabel}" />
+                                </Border>
+                            </Grid>
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="{Binding Name}"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding ProjectPath}"
+                                           Classes="recent-path"
+                                           TextTrimming="LeadingCharacterEllipsis" />
+                                <TextBlock Text="{Binding OpenedLabel}" Classes="recent-path" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="ghost recent-remove"
+                            Command="{Binding $parent[ItemsControl].((vm:RecentProjectsViewModel)DataContext).RemoveCommand}"
+                            CommandParameter="{Binding}"
+                            AutomationProperties.Name="{Binding $parent[ItemsControl].((vm:RecentProjectsViewModel)DataContext).RemoveLabel}"
+                            ToolTip.Tip="{Binding $parent[ItemsControl].((vm:RecentProjectsViewModel)DataContext).RemoveLabel}">
+                        <Viewbox Width="12" Height="12">
+                            <Canvas Width="24" Height="24">
+                                <Path Classes="recent-remove-icon" Data="M6,6 L18,18 M18,6 L6,18" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DiscImageStudio.Application.Ports;
+using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
 
 namespace DiscImageStudio.Application.Settings;
@@ -59,6 +60,13 @@ public sealed class JsonRecentProjectStore : IRecentProjectStore
     public void Record(RecentProjectEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
+        string? normalized = ProjectPaths.TryNormalize(entry.ProjectPath);
+        if (normalized is null)
+        {
+            return;
+        }
+
+        entry = entry with { ProjectPath = normalized };
         List<RecentProjectEntry> entries = [entry];
         entries.AddRange(Load().Where(existing => !SamePath(existing.ProjectPath, entry.ProjectPath)));
         Save(Sanitize(entries));
@@ -92,17 +100,19 @@ public sealed class JsonRecentProjectStore : IRecentProjectStore
     private static IReadOnlyList<RecentProjectEntry> Sanitize(IEnumerable<RecentProjectEntry> entries)
     {
         List<RecentProjectEntry> result = [];
-        foreach (RecentProjectEntry entry in entries.OrderByDescending(entry => entry.LastOpenedUtc))
+        foreach (RecentProjectEntry candidate in entries.OrderByDescending(entry => entry?.LastOpenedUtc))
         {
-            if (string.IsNullOrWhiteSpace(entry.Name)
-                || string.IsNullOrWhiteSpace(entry.ProjectPath)
-                || !ProjectJsonStore.IsKnownFamily(entry.DiscFamily)
-                || result.Any(existing => SamePath(existing.ProjectPath, entry.ProjectPath)))
+            string? path = ProjectPaths.TryNormalize(candidate?.ProjectPath);
+            if (candidate is null
+                || path is null
+                || string.IsNullOrWhiteSpace(candidate.Name)
+                || !ProjectJsonStore.IsKnownFamily(candidate.DiscFamily)
+                || result.Any(existing => SamePath(existing.ProjectPath, path)))
             {
                 continue;
             }
 
-            result.Add(entry);
+            result.Add(candidate with { ProjectPath = path });
             if (result.Count == MaximumEntries)
             {
                 break;
@@ -112,6 +122,6 @@ public sealed class JsonRecentProjectStore : IRecentProjectStore
         return result;
     }
 
-    private static bool SamePath(string left, string right)
-        => string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+    /// <summary>Paths are deduplicated after normalization, with the platform's case rules.</summary>
+    private static bool SamePath(string left, string right) => ProjectPaths.AreSame(left, right);
 }

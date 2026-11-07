@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.App.Avalonia.Diagnostics;
 using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Localization;
+using DiscImageStudio.App.Avalonia.Platform;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
@@ -48,7 +49,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         JobCoordinator jobs,
         IUiDispatcher dispatcher,
         IApplicationEventStream applicationEvents,
-        UserSettings settings)
+        UserSettings settings,
+        RecentProjectsService recentProjects,
+        IThumbnailDecoder thumbnails)
     {
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
@@ -177,7 +180,16 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectClosed>(eventData => _dispatcher.Post(() => OnProjectClosed(eventData))));
         _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectDirtyChanged>(eventData => _dispatcher.Post(() => OnProjectDirtyChanged(eventData))));
         RefreshProjectState();
+
+        Recent = new RecentProjectsViewModel(
+            recentProjects ?? throw new ArgumentNullException(nameof(recentProjects)),
+            thumbnails ?? throw new ArgumentNullException(nameof(thumbnails)),
+            text,
+            OpenProjectAsync);
+        _ = Recent.RefreshAsync();
     }
+
+    public RecentProjectsViewModel Recent { get; }
 
     public string Title { get; }
     public string StatusTitle { get; }
@@ -819,6 +831,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void OnProjectOpened(ProjectOpened project)
     {
         RefreshProjectState();
+        _ = Recent.RefreshAsync();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -829,6 +842,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void OnProjectSaved(ProjectSaved project)
     {
         RefreshProjectState();
+        _ = Recent.RefreshAsync();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.saved"],
@@ -848,8 +862,13 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void OnProjectDirtyChanged(ProjectDirtyChanged _) => RefreshProjectState();
 
-    private async Task OpenProjectAsync(string path)
+    private async Task<bool> OpenProjectAsync(string path)
     {
+        if (IsProjectOperationInProgress || IsAnyDialogOpen)
+        {
+            return false;
+        }
+
         IsProjectOperationInProgress = true;
         ProjectActionError = null;
         try
@@ -859,6 +878,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             {
                 ProjectActionError = GetProjectOpenError(result.Error);
             }
+
+            return result.Succeeded;
         }
         finally
         {

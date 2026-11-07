@@ -303,7 +303,12 @@ public sealed class AvaloniaHostTests
             new JobCoordinator(new FixedClock()),
             new InlineDispatcher(),
             new ApplicationEventHub(),
-            new UserSettings());
+            new UserSettings(),
+            new RecentProjectsService(
+                new JsonRecentProjectStore(paths.RecentProjectsFilePath),
+                new JsonProjectDocumentStore(),
+                new PhysicalFileSystem()),
+            new AvaloniaThumbnailDecoder());
 
     private static string CreateTempDirectory()
     {

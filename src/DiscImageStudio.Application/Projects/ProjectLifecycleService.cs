@@ -1,6 +1,7 @@
 using DiscImageStudio.Application.Navigation;
 using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Results;
+using DiscImageStudio.Application.Settings;
 using DiscImageStudio.Core;
 
 namespace DiscImageStudio.Application.Projects;
@@ -34,6 +35,7 @@ public sealed class ProjectLifecycleService
     private readonly IClock _clock;
     private readonly IUserInteraction _interaction;
     private readonly IApplicationEventPublisher _events;
+    private readonly IRecentProjectStore? _recentProjects;
 
     public ProjectLifecycleService(
         IProjectDocumentStore store,
@@ -41,8 +43,10 @@ public sealed class ProjectLifecycleService
         IClock clock,
         IUserInteraction interaction,
         IApplicationEventPublisher? events = null,
-        NavigationState? navigation = null)
+        NavigationState? navigation = null,
+        IRecentProjectStore? recentProjects = null)
     {
+        _recentProjects = recentProjects;
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -242,6 +246,7 @@ public sealed class ProjectLifecycleService
             Current = saved;
             ProjectFilePath = fullPath;
             Dirty.AcceptChanges();
+            RecordRecent(fullPath, saved);
             _events.Publish(new ProjectDirtyChanged(false, null));
             _events.Publish(new ProjectSaved(fullPath, saved.Identity.Name));
             return Task.FromResult(ApplicationResult<ProjectWorkspace>.Success(saved));
@@ -316,6 +321,20 @@ public sealed class ProjectLifecycleService
         ProjectFilePath = fullPath;
         Dirty.AcceptChanges();
         Navigation.ProjectOpened();
+        RecordRecent(fullPath, workspace);
         _events.Publish(new ProjectOpened(fullPath, workspace.Identity.Name));
     }
+
+    /// <summary>
+    /// Records the project in the history before the open/save event is published, so
+    /// presentation layers refreshing on that event already see it. The store degrades to a
+    /// logged warning on I/O failure; history never blocks a project operation.
+    /// </summary>
+    private void RecordRecent(string fullPath, ProjectWorkspace workspace)
+        => _recentProjects?.Record(new RecentProjectEntry(
+            workspace.Identity.Name,
+            RecentProjectsService.ToFamilyToken(workspace.Media.Family),
+            fullPath,
+            _clock.UtcNow,
+            workspace.Identity.ThumbnailPngBase64));
 }

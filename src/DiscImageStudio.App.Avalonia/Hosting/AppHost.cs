@@ -67,12 +67,15 @@ public sealed class AppHost : IDisposable
         ApplicationEventHub applicationEvents = new();
         JobCoordinator jobs = new(new SystemClock(), applicationEvents);
         PhysicalFileSystem fileSystem = new();
+        JsonProjectDocumentStore projectDocuments = new();
         ProjectLifecycleService projects = new(
-            new JsonProjectDocumentStore(),
+            projectDocuments,
             fileSystem,
             new SystemClock(),
             prompts,
-            applicationEvents);
+            applicationEvents,
+            recentProjects: recentProjects);
+        RecentProjectsService recentProjectsService = new(recentProjects, projectDocuments, fileSystem);
         AvaloniaApplicationLifetime applicationLifetime = new(
             jobs,
             projects,
@@ -113,7 +116,9 @@ public sealed class AppHost : IDisposable
             jobs,
             dispatcher,
             applicationEvents,
-            settings);
+            settings,
+            recentProjectsService,
+            new AvaloniaThumbnailDecoder());
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {
