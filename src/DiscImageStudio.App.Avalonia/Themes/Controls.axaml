@@ -11,9 +11,31 @@
     <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
   </Style>
 
+  <!--
+    Fluent's Button template paints its own pointer-over/pressed/disabled brushes directly on
+    PART_ContentPresenter, which hides every Background/Foreground set by the classes below and
+    skips their transitions. Design-system buttons keep the presenter bound to the Button so the
+    class styles (and their BrushTransitions) stay the single source of truth for each state.
+  -->
+  <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.secondary /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.ghost /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.navigation-item /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.stage-item /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.media-template /template/ ContentPresenter#PART_ContentPresenter,
+                   Button.new-project-family /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+  </Style>
+
+  <Style Selector="Button.primary:disabled, Button.secondary:disabled, Button.ghost:disabled">
+    <Setter Property="Opacity" Value="0.45" />
+  </Style>
+
   <Style Selector="Button.primary">
     <Setter Property="Background" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscOnAccentBrush}" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
     <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
@@ -28,7 +50,7 @@
     </Setter>
   </Style>
 
-  <Style Selector="Button.primary:pointerover">
+  <Style Selector="Button.primary:pointerover, Button.primary:pressed">
     <Setter Property="Background" Value="{DynamicResource DiscAccentHoverBrush}" />
   </Style>
 
@@ -46,12 +68,14 @@
     <Setter Property="Transitions">
       <Transitions>
         <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.18" Easing="SineEaseOut" />
       </Transitions>
     </Setter>
   </Style>
 
-  <Style Selector="Button.secondary:pointerover">
+  <Style Selector="Button.secondary:pointerover, Button.secondary:pressed">
     <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
   <Style Selector="Button.ghost">
@@ -70,7 +94,7 @@
     </Setter>
   </Style>
 
-  <Style Selector="Button.ghost:pointerover">
+  <Style Selector="Button.ghost:pointerover, Button.ghost:pressed">
     <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
   </Style>
 
@@ -78,8 +102,29 @@
     <Setter Property="Width" Value="36" />
     <Setter Property="Height" Value="36" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="FontSize" Value="22" />
-    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Path.sidebar-toggle-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscTextBrush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+  </Style>
+
+  <Style Selector="Button.sidebar-toggle Path.sidebar-toggle-collapse">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <Style Selector="Button.sidebar-toggle Path.sidebar-toggle-expand">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+
+  <Style Selector="Button.sidebar-toggle.collapsed Path.sidebar-toggle-collapse">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+
+  <Style Selector="Button.sidebar-toggle.collapsed Path.sidebar-toggle-expand">
+    <Setter Property="IsVisible" Value="True" />
   </Style>
 
   <Style Selector="TextBox">
@@ -89,6 +134,17 @@
     <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
     <Setter Property="Height" Value="{DynamicResource DiscControlHeight}" />
     <Setter Property="Padding" Value="10,0" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+  </Style>
+
+  <Style Selector="Expander">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
   </Style>
 
   <!-- Shell chrome intentionally leaves the window frame to the Linux desktop. -->
@@ -97,6 +153,8 @@
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
     <Setter Property="BorderThickness" Value="0,0,0,1" />
     <Setter Property="Padding" Value="{DynamicResource DiscHeaderPadding}" />
+    <!-- Keeps the header from jumping when the compact layout hides the subtitle. -->
+    <Setter Property="MinHeight" Value="72" />
   </Style>
 
   <Style Selector="Border.shell-sidebar">
@@ -567,39 +625,92 @@
   </Style>
 
   <Style Selector="Border.home-disc-illustration">
-    <Setter Property="Width" Value="154" />
-    <Setter Property="Height" Value="154" />
-    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
-    <Setter Property="CornerRadius" Value="77" />
+    <Setter Property="Width" Value="168" />
+    <Setter Property="Height" Value="168" />
+    <Setter Property="CornerRadius" Value="84" />
     <Setter Property="HorizontalAlignment" Value="Center" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
-  <Style Selector="Ellipse.home-disc-outer">
-    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="StrokeThickness" Value="2" />
-    <Setter Property="Fill" Value="{DynamicResource DiscSurfaceBrush}" />
+  <!-- Optical disc artwork. Radii follow a 120 mm disc scaled to 100 units: 7.5 mm hole,
+       16.5 mm clamping area, 23 mm mirror band, 58 mm data edge and 60 mm rim. -->
+  <Style Selector="controls|DiscArt">
+    <Setter Property="Width" Value="44" />
+    <Setter Property="Height" Value="44" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <!-- The canvas reserves room around the disc so its drop shadow is never clipped. -->
+        <Viewbox Stretch="Uniform">
+          <Canvas Width="108" Height="108">
+            <Canvas Canvas.Left="4" Canvas.Top="3">
+            <Border Classes="disc-art-shadow" Width="100" Height="100" CornerRadius="50" />
+            <Path x:Name="PART_Data" Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z" Fill="{DynamicResource DiscArtCdSurfaceBrush}" />
+            <Path Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z" Fill="{DynamicResource DiscArtGlossBrush}" />
+            <Canvas IsHitTestVisible="False">
+                <Ellipse Classes="disc-art-groove" Canvas.Left="6" Canvas.Top="6" Width="88" Height="88" />
+                <Ellipse Classes="disc-art-groove" Canvas.Left="11.5" Canvas.Top="11.5" Width="77" Height="77" />
+                <Ellipse Classes="disc-art-groove" Canvas.Left="17.5" Canvas.Top="17.5" Width="65" Height="65" />
+                <Ellipse Classes="disc-art-groove" Canvas.Left="24" Canvas.Top="24" Width="52" Height="52" />
+            </Canvas>
+            <Path Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M1.7,50 A48.3,48.3 0 1 0 98.3,50 A48.3,48.3 0 1 0 1.7,50 Z" Fill="{DynamicResource DiscArtRimBrush}" />
+            <Path Data="F0 M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z M36.25,50 A13.75,13.75 0 1 0 63.75,50 A13.75,13.75 0 1 0 36.25,50 Z" Fill="{DynamicResource DiscArtMirrorBrush}" />
+            <Path Data="F0 M36.25,50 A13.75,13.75 0 1 0 63.75,50 A13.75,13.75 0 1 0 36.25,50 Z M43.75,50 A6.25,6.25 0 1 0 56.25,50 A6.25,6.25 0 1 0 43.75,50 Z" Fill="{DynamicResource DiscArtHubBrush}" />
+            <Ellipse Classes="disc-art-stacking-ring" Canvas.Left="40.6" Canvas.Top="40.6" Width="18.8" Height="18.8" />
+            <Ellipse Classes="disc-art-outline" Canvas.Left="0.3" Canvas.Top="0.3" Width="99.4" Height="99.4" />
+            <Ellipse Classes="disc-art-outline" Canvas.Left="43.75" Canvas.Top="43.75" Width="12.5" Height="12.5" />
+            </Canvas>
+          </Canvas>
+        </Viewbox>
+      </ControlTemplate>
+    </Setter>
   </Style>
 
-  <Style Selector="Ellipse.home-disc-inner">
-    <Setter Property="Stroke" Value="{DynamicResource DiscBorderBrush}" />
-    <Setter Property="StrokeThickness" Value="2" />
-    <Setter Property="Fill" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  <Style Selector="controls|DiscArt[Variant=dvd] /template/ Path#PART_Data">
+    <Setter Property="Fill" Value="{DynamicResource DiscArtDvdSurfaceBrush}" />
   </Style>
 
-  <Style Selector="Ellipse.home-disc-hub">
-    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
+  <Style Selector="controls|DiscArt[Variant=bd] /template/ Path#PART_Data">
+    <Setter Property="Fill" Value="{DynamicResource DiscArtBdSurfaceBrush}" />
   </Style>
 
-  <Style Selector="Path.home-disc-highlight">
-    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="StrokeThickness" Value="3" />
-    <Setter Property="StrokeLineCap" Value="Round" />
+  <Style Selector="Border.disc-art-shadow">
+    <Setter Property="BoxShadow" Value="0 2 6 0 #38000000" />
+  </Style>
+
+  <Style Selector="Ellipse.disc-art-groove">
+    <Setter Property="Stroke" Value="#2EFFFFFF" />
+    <Setter Property="StrokeThickness" Value="0.45" />
+  </Style>
+
+  <Style Selector="Ellipse.disc-art-stacking-ring">
+    <Setter Property="Stroke" Value="#38000000" />
+    <Setter Property="StrokeThickness" Value="0.6" />
+  </Style>
+
+  <Style Selector="Ellipse.disc-art-outline">
+    <Setter Property="Stroke" Value="#40000000" />
+    <Setter Property="StrokeThickness" Value="0.6" />
+  </Style>
+
+  <Style Selector="controls|DiscArt.hero">
+    <Setter Property="Width" Value="132" />
+    <Setter Property="Height" Value="132" />
+    <Setter Property="RenderTransform" Value="rotate(0deg)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:1.4" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- A slow spin moves the iridescent sheen, as a real disc catching the light. -->
+  <Style Selector="Border.home-hero:pointerover controls|DiscArt.hero">
+    <Setter Property="RenderTransform" Value="rotate(120deg)" />
   </Style>
 
   <Style Selector="Button.media-template">
     <Setter Property="Width" Value="232" />
-    <Setter Property="Height" Value="164" />
+    <Setter Property="Height" Value="176" />
     <Setter Property="Margin" Value="0,0,12,12" />
     <Setter Property="Padding" Value="16" />
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
@@ -608,7 +719,8 @@
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="VerticalContentAlignment" Value="Stretch" />
-    <Setter Property="RenderTransform" Value="scale(1)" />
+    <!-- Integer translation keeps text crisp; fractional scale blurred and shifted the labels. -->
+    <Setter Property="RenderTransform" Value="translateY(0px)" />
     <Setter Property="Transitions">
       <Transitions>
         <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
@@ -619,9 +731,12 @@
   </Style>
 
   <Style Selector="Button.media-template:pointerover">
-    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="RenderTransform" Value="scale(1.015)" />
+    <Setter Property="RenderTransform" Value="translateY(-2px)" />
+  </Style>
+
+  <Style Selector="Button.media-template:pressed">
+    <Setter Property="RenderTransform" Value="translateY(0px)" />
   </Style>
 
   <Style Selector="Button.media-template.selected">
@@ -629,31 +744,21 @@
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
-  <Style Selector="Button.media-template:focus">
+  <Style Selector="Button.media-template:focus-visible">
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
-  <Style Selector="Border.media-template-disc">
-    <Setter Property="Width" Value="48" />
-    <Setter Property="Height" Value="48" />
-    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
-    <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="24" />
-  </Style>
-
-  <Style Selector="Ellipse.media-template-disc-ring">
-    <Setter Property="Margin" Value="7" />
-    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="StrokeThickness" Value="1.5" />
-  </Style>
-
-  <Style Selector="Ellipse.media-template-disc-core">
-    <Setter Property="Width" Value="8" />
-    <Setter Property="Height" Value="8" />
-    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="HorizontalAlignment" Value="Center" />
+  <Style Selector="Border.media-template-selected-chip">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Padding" Value="6,3" />
     <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.media-template-selected-chip TextBlock">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscOnAccentBrush}" />
   </Style>
 
   <Style Selector="Border.media-template-badge">
@@ -677,12 +782,6 @@
   <Style Selector="TextBlock.media-template-description">
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
-  </Style>
-
-  <Style Selector="TextBlock.media-template-selected">
-    <Setter Property="FontSize" Value="11" />
-    <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
   <Style Selector="Border.home-selection-status">
@@ -740,7 +839,8 @@
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BoxShadow" Value="0 16 48 0 #66000000" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
-    <Setter Property="Padding" Value="24" />
+    <!-- The right inset is split with the scroll content so the overlay scrollbar never covers fields. -->
+    <Setter Property="Padding" Value="24,24,10,24" />
     <Setter Property="MaxWidth" Value="760" />
     <Setter Property="MaxHeight" Value="720" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -763,10 +863,10 @@
   </Style>
 
   <Style Selector="Button.new-project-family">
-    <Setter Property="Width" Value="176" />
-    <Setter Property="Height" Value="68" />
-    <Setter Property="Margin" Value="0,0,10,10" />
-    <Setter Property="Padding" Value="10" />
+    <Setter Property="Height" Value="64" />
+    <Setter Property="Margin" Value="0,0,10,0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Padding" Value="12,10" />
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
@@ -781,24 +881,13 @@
     </Setter>
   </Style>
 
-  <Style Selector="Button.new-project-family:pointerover, Button.new-project-family.selected">
-    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+  <Style Selector="Button.new-project-family:pointerover">
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
-  <Style Selector="Border.new-project-family-disc">
-    <Setter Property="Width" Value="36" />
-    <Setter Property="Height" Value="36" />
-    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
-    <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="18" />
-  </Style>
-
-  <Style Selector="Ellipse.new-project-family-disc-ring">
-    <Setter Property="Margin" Value="7" />
-    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="StrokeThickness" Value="1.5" />
+  <Style Selector="Button.new-project-family.selected">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
   </Style>
 
   <Style Selector="TextBlock.new-project-family-capacity">

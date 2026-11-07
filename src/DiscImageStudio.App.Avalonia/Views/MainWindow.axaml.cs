@@ -42,7 +42,7 @@ public partial class MainWindow : Window
 
         ApplySidebarState(isCollapsed, showLabels: !isCollapsed);
         HeaderSubtitle.IsVisible = !isCompact;
-        SidebarToggleButton.Content = isCollapsed ? "☰" : "‹";
+        SidebarToggleButton.Classes.Set("collapsed", isCollapsed);
         ToolTip.SetTip(SidebarToggleButton, isCollapsed ? "Expand sidebar" : "Collapse sidebar");
     }
 
@@ -61,7 +61,7 @@ public partial class MainWindow : Window
         CancellationToken cancellationToken = _sidebarTransitionCancellation.Token;
 
         HeaderSubtitle.IsVisible = true;
-        SidebarToggleButton.Content = isCollapsed ? "☰" : "‹";
+        SidebarToggleButton.Classes.Set("collapsed", isCollapsed);
         ToolTip.SetTip(SidebarToggleButton, isCollapsed ? "Expand sidebar" : "Collapse sidebar");
 
         try

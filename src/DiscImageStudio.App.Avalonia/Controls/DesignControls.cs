@@ -241,3 +241,20 @@ public sealed class EmptyState : ContentControl
         set => SetValue(IsActionVisibleProperty, value);
     }
 }
+
+/// <summary>
+/// Vector artwork of an optical disc drawn to real 120 mm proportions (center hole, clamping
+/// area, mirror band, data area and rim). <see cref="Variant"/> selects the recording dye look:
+/// <c>cd</c> silver, <c>dvd</c> violet and <c>bd</c> deep blue. The artwork scales to any size.
+/// </summary>
+public sealed class DiscArt : TemplatedControl
+{
+    public static readonly StyledProperty<string> VariantProperty =
+        AvaloniaProperty.Register<DiscArt, string>(nameof(Variant), "cd");
+
+    public string Variant
+    {
+        get => GetValue(VariantProperty);
+        set => SetValue(VariantProperty, value);
+    }
+}

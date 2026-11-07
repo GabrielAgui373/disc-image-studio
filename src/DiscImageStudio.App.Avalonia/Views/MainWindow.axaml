@@ -37,9 +37,15 @@
                 <Button x:Name="SidebarToggleButton"
                         Classes="ghost sidebar-toggle"
                         Click="ToggleSidebar_Click"
-                        Content="☰"
                         AutomationProperties.Name="Toggle sidebar"
-                        ToolTip.Tip="Toggle sidebar" />
+                        ToolTip.Tip="Toggle sidebar">
+                    <Viewbox Width="18" Height="18">
+                        <Canvas Width="24" Height="24">
+                            <Path Classes="sidebar-toggle-icon sidebar-toggle-expand" Data="M4,7 H20 M4,12 H20 M4,17 H20" />
+                            <Path Classes="sidebar-toggle-icon sidebar-toggle-collapse" Data="M15,5 L8,12 L15,19" />
+                        </Canvas>
+                    </Viewbox>
+                </Button>
 
                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
@@ -69,8 +75,8 @@
                 <DockPanel LastChildFill="True">
                     <StackPanel DockPanel.Dock="Bottom"
                                 HorizontalAlignment="Stretch"
-                                Margin="4,14,4,4"
-                                Spacing="4">
+                                Margin="0,14,0,0"
+                                Spacing="2">
                         <Button Classes="navigation-item"
                                 Command="{Binding SettingsNavigation.NavigateCommand}"
                                 Classes.current="{Binding SettingsNavigation.IsCurrent}"
@@ -180,6 +186,8 @@
                                          Badge="{Binding CurrentPageBadge}"
                                          IsBadgeVisible="True" />
 
+                    <StackPanel Spacing="{DynamicResource DiscSpace2}"
+                                IsVisible="{Binding HasProjectSurface}">
                     <Border Classes="project-toolbar" IsVisible="{Binding HasOpenProject}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                             <StackPanel Spacing="3" VerticalAlignment="Center">
@@ -215,6 +223,7 @@
                             IsVisible="{Binding HasProjectActionError}">
                         <TextBlock Text="{Binding ProjectActionError}" TextWrapping="Wrap" />
                     </Border>
+                    </StackPanel>
 
                     <Border Classes="navigation-notice"
                             IsVisible="{Binding HasNavigationNotice}">
@@ -230,10 +239,12 @@
                                     <TextBlock Text="{Binding HomeHeroEyebrow}" Classes="home-eyebrow" />
                                     <TextBlock Text="{Binding HomeHeroTitle}"
                                                Classes="home-hero-title"
+                                               HorizontalAlignment="Left"
                                                TextAlignment="Left"
                                                TextWrapping="Wrap" />
                                     <TextBlock Text="{Binding HomeHeroDescription}"
                                                Classes="home-hero-description"
+                                               HorizontalAlignment="Left"
                                                TextAlignment="Left"
                                                TextWrapping="Wrap" />
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
@@ -247,13 +258,7 @@
                                 </StackPanel>
 
                                 <Border Grid.Column="1" Classes="home-disc-illustration">
-                                    <Canvas Width="132" Height="132">
-                                        <Ellipse Canvas.Left="10" Canvas.Top="10" Width="112" Height="112" Classes="home-disc-outer" />
-                                        <Ellipse Canvas.Left="30" Canvas.Top="30" Width="72" Height="72" Classes="home-disc-inner" />
-                                        <Ellipse Canvas.Left="58" Canvas.Top="58" Width="16" Height="16" Classes="home-disc-hub" />
-                                        <Path Data="M69,10 A59,59 0 0 1 122,56"
-                                              Classes="home-disc-highlight" />
-                                    </Canvas>
+                                    <controls:DiscArt Classes="hero" Variant="{Binding SelectedHomeTemplate.Id, FallbackValue=cd}" />
                                 </Border>
                             </Grid>
                         </Border>
@@ -264,7 +269,7 @@
                                 <ItemsControl ItemsSource="{Binding HomeTemplates}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <WrapPanel ItemWidth="244" ItemHeight="176" />
+                                            <WrapPanel ItemWidth="244" ItemHeight="188" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
@@ -274,30 +279,32 @@
                                                     Command="{Binding $parent[Window].DataContext.SelectHomeTemplateCommand}"
                                                     CommandParameter="{Binding}"
                                                     AutomationProperties.Name="{Binding Title}">
-                                                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
-                                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                                        <Border Classes="media-template-disc">
-                                                            <Grid>
-                                                                <Ellipse Classes="media-template-disc-ring" />
-                                                                <Ellipse Classes="media-template-disc-core" />
-                                                            </Grid>
-                                                        </Border>
-                                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                                            <TextBlock Text="{Binding Capacity}" Classes="media-template-capacity" />
-                                                        </StackPanel>
-                                                        <Border Grid.Column="2" Classes="media-template-badge">
+                                                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <controls:DiscArt Variant="{Binding Id}" HorizontalAlignment="Left" />
+                                                        <Border Grid.Column="1"
+                                                                Classes="media-template-badge"
+                                                                VerticalAlignment="Top"
+                                                                IsVisible="{Binding !IsSelected}">
                                                             <TextBlock Text="{Binding Badge}" Classes="media-template-badge-text" />
                                                         </Border>
+                                                        <Border Grid.Column="1"
+                                                                Classes="media-template-selected-chip"
+                                                                VerticalAlignment="Top"
+                                                                IsVisible="{Binding IsSelected}">
+                                                            <TextBlock Text="{Binding SelectedLabel}" />
+                                                        </Border>
                                                     </Grid>
-                                                    <TextBlock Grid.Row="1"
+                                                    <StackPanel Grid.Row="1" Spacing="2">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Capacity}"
+                                                                   Classes="media-template-capacity"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Row="2"
                                                                Text="{Binding Description}"
                                                                Classes="media-template-description"
                                                                TextWrapping="Wrap" />
-                                                    <TextBlock Grid.Row="2"
-                                                               Text="{Binding SelectedLabel}"
-                                                               Classes="media-template-selected"
-                                                               IsVisible="{Binding IsSelected}" />
                                                 </Grid>
                                             </Button>
                                         </DataTemplate>
@@ -328,7 +335,8 @@
                                         <Button Classes="ghost home-open-recent"
                                                 Content="{Binding OpenProjectLabel}"
                                                 Command="{Binding StartOpenProjectCommand}"
-                                                HorizontalAlignment="Left" />
+                                                HorizontalAlignment="Left"
+                                                Margin="-8,2,0,0" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -371,7 +379,8 @@
                                             Command="{Binding OpenLogsCommand}" />
                                 </StackPanel>
                                 <TextBlock Text="{Binding ActionStatus}"
-                                           Foreground="{DynamicResource DiscTextMutedBrush}" />
+                                           Foreground="{DynamicResource DiscTextMutedBrush}"
+                                           IsVisible="{Binding ActionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             </StackPanel>
                         </Expander>
                     </StackPanel>
@@ -464,7 +473,7 @@
                 IsVisible="{Binding IsNewProjectDialogOpen}">
             <Border Classes="new-project-dialog">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="{DynamicResource DiscSpace4}">
+                    <StackPanel Spacing="{DynamicResource DiscSpace4}" Margin="0,0,14,0">
                         <StackPanel Spacing="{DynamicResource DiscSpace2}">
                             <TextBlock Text="{Binding NewProjectTitle}" FontSize="22" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding NewProjectDescription}"
@@ -492,10 +501,11 @@
                             <TextBlock Text="{Binding NewProjectFamilyHint}"
                                        Classes="new-project-field-hint"
                                        TextWrapping="Wrap" />
-                            <ItemsControl ItemsSource="{Binding HomeTemplates}">
+                            <!-- The right margin of the last card is cancelled so the row spans the field width. -->
+                            <ItemsControl ItemsSource="{Binding HomeTemplates}" Margin="0,0,-10,0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel ItemWidth="188" ItemHeight="76" />
+                                        <UniformGrid Rows="1" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -505,17 +515,17 @@
                                                 Command="{Binding $parent[Window].DataContext.SelectHomeTemplateCommand}"
                                                 CommandParameter="{Binding}"
                                                 AutomationProperties.Name="{Binding Title}">
-                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                                <Border Classes="new-project-family-disc">
-                                                    <Ellipse Classes="new-project-family-disc-ring" />
-                                                </Border>
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                <controls:DiscArt Variant="{Binding Id}" Width="36" Height="36" />
                                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" />
-                                                    <TextBlock Text="{Binding Capacity}" Classes="new-project-family-capacity" />
+                                                    <TextBlock Text="{Binding Title}"
+                                                               FontSize="13"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Capacity}"
+                                                               Classes="new-project-family-capacity"
+                                                               TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
-                                                <Border Grid.Column="2" Classes="media-template-badge">
-                                                    <TextBlock Text="{Binding Badge}" Classes="media-template-badge-text" />
-                                                </Border>
                                             </Grid>
                                         </Button>
                                     </DataTemplate>
