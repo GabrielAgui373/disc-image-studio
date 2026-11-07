@@ -59,6 +59,7 @@ Os testes portáveis bloqueiam referências acidentais a WPF, Windows Forms, Win
 
 Os contratos, ownership e regras de threading da camada portátil estão em [APPLICATION_LAYER.md](APPLICATION_LAYER.md).
 O pipeline compartilhado de geração está em [GENERATION_PIPELINE.md](GENERATION_PIPELINE.md).
+A decisão e o contrato da composição de imagem portátil estão em [IMAGE_COMPOSITION.md](IMAGE_COMPOSITION.md).
 
 ## Executar o host Avalonia
 
