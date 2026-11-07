@@ -935,12 +935,15 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             return _text["project.error.operationCanceled"];
         }
 
+        if (error?.Code == ApplicationErrorCode.ProjectSchemaUnsupported)
+        {
+            return _text["openProject.error.unsupportedSchema"];
+        }
+
         return error?.Exception switch
         {
             UnauthorizedAccessException => _text["openProject.error.permissionDenied"],
             FileNotFoundException or DirectoryNotFoundException => _text["openProject.error.notFound"],
-            InvalidDataException when error.Detail?.Contains("schema", StringComparison.OrdinalIgnoreCase) == true
-                => _text["openProject.error.unsupportedSchema"],
             InvalidDataException => _text["openProject.error.invalidFile"],
             _ => _text["openProject.error.readFailed"],
         };

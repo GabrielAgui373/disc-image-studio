@@ -86,6 +86,37 @@ public sealed class ApplicationServiceTests
     }
 
     [Fact]
+    public async Task Opening_an_unsupported_schema_reports_a_stable_error_code()
+    {
+        string path = Path.Combine(CreateTempDirectory(), "future.discproj");
+        ProjectLifecycleService writer = CreateLifecycle(new QueueInteraction());
+        Assert.True((await writer.CreateProjectAsync(CreateRequest(path))).Succeeded);
+        string json = File.ReadAllText(path);
+        Assert.Contains("\"schemaVersion\": 2", json, StringComparison.Ordinal);
+        File.WriteAllText(path, json.Replace("\"schemaVersion\": 2", "\"schemaVersion\": 99", StringComparison.Ordinal));
+        ProjectLifecycleService reader = CreateLifecycle(new QueueInteraction());
+
+        ApplicationResult<ProjectWorkspace> opened = await reader.OpenProjectAsync(path);
+
+        Assert.False(opened.Succeeded);
+        Assert.Equal(ApplicationErrorCode.ProjectSchemaUnsupported, opened.Error?.Code);
+        Assert.False(reader.HasOpenProject);
+    }
+
+    [Fact]
+    public async Task Opening_malformed_json_is_a_read_failure_not_a_schema_failure()
+    {
+        string path = Path.Combine(CreateTempDirectory(), "broken.discproj");
+        File.WriteAllText(path, "{ \"schemaVersion\": 2, ");
+        ProjectLifecycleService lifecycle = CreateLifecycle(new QueueInteraction());
+
+        ApplicationResult<ProjectWorkspace> opened = await lifecycle.OpenProjectAsync(path);
+
+        Assert.Equal(ApplicationErrorCode.ProjectReadFailed, opened.Error?.Code);
+        Assert.IsType<InvalidDataException>(opened.Error?.Exception);
+    }
+
+    [Fact]
     public async Task Exclusive_job_rejects_concurrent_work_and_can_be_canceled()
     {
         JobCoordinator coordinator = new(new TestClock(DateTimeOffset.UtcNow));

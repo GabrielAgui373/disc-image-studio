@@ -125,6 +125,13 @@ public sealed class ProjectLifecycleService
             OpenWorkspace(fullPath, workspace);
             return ApplicationResult<ProjectWorkspace>.Success(workspace);
         }
+        catch (InvalidDataException exception) when (ProjectJsonStore.IsUnsupportedSchema(exception))
+        {
+            return ApplicationResult<ProjectWorkspace>.Failure(
+                ApplicationErrorCode.ProjectSchemaUnsupported,
+                exception.Message,
+                exception);
+        }
         catch (Exception exception) when (exception is ArgumentException or InvalidDataException or IOException or UnauthorizedAccessException)
         {
             return ApplicationResult<ProjectWorkspace>.Failure(

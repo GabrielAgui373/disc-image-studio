@@ -9,6 +9,7 @@ public enum ApplicationErrorCode
     InvalidRequest,
     NoProjectOpen,
     ProjectReadFailed,
+    ProjectSchemaUnsupported,
     ProjectWriteFailed,
     UserCanceled,
     NavigationRequiresProject,

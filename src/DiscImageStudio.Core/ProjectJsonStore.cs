@@ -116,6 +116,16 @@ public static class ProjectJsonStore
     public const int CurrentSchemaVersion = 2;
     private const int LegacySchemaVersion = 1;
     public const string FileExtension = ".discproj";
+
+    /// <summary>
+    /// <see cref="Exception.Data"/> key set on the <see cref="InvalidDataException"/> thrown for
+    /// a <c>schemaVersion</c> this build cannot read. The exception type stays unchanged for
+    /// existing handlers; hosts use <see cref="IsUnsupportedSchema"/> instead of the message.
+    /// </summary>
+    public const string UnsupportedSchemaVersionKey = "DiscImageStudio.UnsupportedSchemaVersion";
+
+    public static bool IsUnsupportedSchema(Exception exception)
+        => exception is InvalidDataException && exception.Data.Contains(UnsupportedSchemaVersionKey);
     public const string FileFilter = "Disc Image Studio 工程|*.discproj";
 
     // 256px PNG of a photographic design stays under ~200K base64 chars; the cap keeps a
@@ -195,8 +205,10 @@ public static class ProjectJsonStore
         ArgumentNullException.ThrowIfNull(document);
         if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion))
         {
-            throw new InvalidDataException(
+            InvalidDataException exception = new(
                 $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion} 与 {CurrentSchemaVersion}。");
+            exception.Data[UnsupportedSchemaVersionKey] = document.SchemaVersion;
+            throw exception;
         }
 
         if (document.SchemaVersion == LegacySchemaVersion
