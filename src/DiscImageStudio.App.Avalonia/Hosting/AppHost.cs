@@ -107,7 +107,11 @@ public sealed class AppHost : IDisposable
             projects,
             settings,
             text,
-            about);
+            about,
+            // Generation sources are disposable composites; they live in the XDG cache folder.
+            new DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer(
+                compositions,
+                Path.Combine(paths.CacheDirectory, "generation")));
 
         MainViewModel viewModel = new(
             paths,
@@ -189,4 +193,5 @@ public sealed record HostServices(
     ProjectLifecycleService Projects,
     UserSettings Settings,
     ITextCatalog Text,
-    AboutInfo About);
+    AboutInfo About,
+    DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer Generation);

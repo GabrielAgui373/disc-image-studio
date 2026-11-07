@@ -152,6 +152,58 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
         return Convert.ToBase64String(png);
     }
 
+    /// <summary>
+    /// Composes the project at <see cref="GenerationSize"/> and writes it transactionally into
+    /// <paramref name="directory"/>: the PNG is written under a hidden <c>.partial</c> name and only
+    /// renamed to its final name once complete, so a canceled or failed run never leaves a
+    /// half-written source image behind. The 8192 px buffer is released before this returns.
+    /// Blocking; callers run it off the UI thread.
+    /// </summary>
+    public GenerationSourceImage PrepareGenerationSource(
+        ProjectWorkspace workspace,
+        string? projectFilePath,
+        string directory,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(directory);
+        Directory.CreateDirectory(directory);
+        string name = $"generation-source-{Guid.NewGuid():N}.png";
+        string finalPath = Path.Combine(directory, name);
+        string partialPath = Path.Combine(directory, $".{name}.partial");
+        try
+        {
+            int painted;
+            IReadOnlyList<CompositionIssue> issues;
+            {
+                // Scoped so the composition buffer is unreachable once the PNG is written.
+                ProjectComposition composition = Compose(workspace, projectFilePath, GenerationSize, cancellationToken);
+                painted = composition.PaintedLayerCount;
+                issues = composition.Issues;
+                cancellationToken.ThrowIfCancellationRequested();
+                RasterCodec.SavePngConsumingBuffer(partialPath, composition.Image);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            File.Move(partialPath, finalPath, overwrite: false);
+            return new GenerationSourceImage(finalPath, GenerationSize, painted, issues);
+        }
+        finally
+        {
+            if (File.Exists(partialPath))
+            {
+                File.Delete(partialPath);
+            }
+        }
+    }
+
+    public Task<GenerationSourceImage> PrepareGenerationSourceAsync(
+        ProjectWorkspace workspace,
+        string? projectFilePath,
+        string directory,
+        CancellationToken cancellationToken = default)
+        => Task.Run(() => PrepareGenerationSource(workspace, projectFilePath, directory, cancellationToken), cancellationToken);
+
     /// <summary>Releases cached layers and compositions, for example when the project closes.</summary>
     public void Clear()
     {
