@@ -168,7 +168,7 @@
 
             <Grid Grid.Column="1" RowDefinitions="*,Auto">
             <ScrollViewer Grid.Row="0" Padding="{DynamicResource DiscPagePadding}">
-                <StackPanel MaxWidth="960"
+                <StackPanel MaxWidth="1280"
                             HorizontalAlignment="Stretch"
                             Spacing="{DynamicResource DiscSpace5}">
                     <controls:PageHeader Title="{Binding CurrentPageTitle}"
@@ -176,81 +176,165 @@
                                          Badge="{Binding CurrentPageBadge}"
                                          IsBadgeVisible="True" />
 
-                    <Border Classes="stage-bar">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding NavigationItems}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:WorkspaceNavigationItem">
-                                        <Button Classes="stage-item"
-                                                Classes.current="{Binding IsCurrent}"
-                                                Command="{Binding NavigateCommand}"
-                                                AutomationProperties.Name="{Binding Label}"
-                                                ToolTip.Tip="{Binding ToolTip}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{Binding Label}" />
-                                                <TextBlock Text="{Binding Shortcut}" Classes="stage-shortcut" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Border>
-
                     <Border Classes="navigation-notice"
                             IsVisible="{Binding HasNavigationNotice}">
                         <TextBlock Text="{Binding NavigationNotice}" TextWrapping="Wrap" />
                     </Border>
 
-                    <controls:SectionCard IsVisible="{Binding IsHomePage}"
-                                          Title="{Binding AboutTitle}"
-                                          Description="Platform details are available for troubleshooting and support.">
-                        <StackPanel Spacing="16">
-                            <Grid ColumnDefinitions="Auto,*"
-                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="20"
-                                  RowSpacing="10">
-                                <TextBlock Grid.Row="0" Text="{Binding VersionLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProductVersion}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="1" Text="{Binding CommitLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Commit}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="2" Text="{Binding RuntimeLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DotnetRuntime}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="3" Text="{Binding AvaloniaLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AvaloniaVersion}" />
-                                <TextBlock Grid.Row="4" Text="{Binding OperatingSystemLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OperatingSystem}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="5" Text="{Binding ConfigDirectoryLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ConfigDirectory}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="6" Text="{Binding DataDirectoryLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="7" Text="{Binding CacheDirectoryLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CacheDirectory}" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="8" Text="{Binding LogsDirectoryLabel}" Opacity="0.65" />
-                                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding LogsDirectory}" TextWrapping="Wrap" />
+                    <StackPanel IsVisible="{Binding IsHomePage}" Spacing="{DynamicResource DiscSpace5}">
+                        <Border Classes="home-hero">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace5}">
+                                <StackPanel Spacing="{DynamicResource DiscSpace3}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding HomeHeroEyebrow}" Classes="home-eyebrow" />
+                                    <TextBlock Text="{Binding HomeHeroTitle}"
+                                               Classes="home-hero-title"
+                                               TextAlignment="Left"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding HomeHeroDescription}"
+                                               Classes="home-hero-description"
+                                               TextAlignment="Left"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                                        <Button Classes="primary"
+                                                Content="{Binding NewProjectLabel}"
+                                                Command="{Binding StartNewProjectCommand}" />
+                                        <Button Classes="secondary"
+                                                Content="{Binding OpenProjectLabel}"
+                                                Command="{Binding StartOpenProjectCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Grid.Column="1" Classes="home-disc-illustration">
+                                    <Canvas Width="132" Height="132">
+                                        <Ellipse Canvas.Left="10" Canvas.Top="10" Width="112" Height="112" Classes="home-disc-outer" />
+                                        <Ellipse Canvas.Left="30" Canvas.Top="30" Width="72" Height="72" Classes="home-disc-inner" />
+                                        <Ellipse Canvas.Left="58" Canvas.Top="58" Width="16" Height="16" Classes="home-disc-hub" />
+                                        <Path Data="M69,10 A59,59 0 0 1 122,56"
+                                              Classes="home-disc-highlight" />
+                                    </Canvas>
+                                </Border>
                             </Grid>
+                        </Border>
 
-                            <controls:SourceChip Text="Platform services"
-                                                 Detail="XDG paths, diagnostics and lifecycle management are active." />
+                        <controls:SectionCard Title="{Binding HomeTemplatesTitle}"
+                                              Description="{Binding HomeTemplatesDescription}">
+                            <StackPanel Spacing="{DynamicResource DiscSpace4}">
+                                <ItemsControl ItemsSource="{Binding HomeTemplates}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemWidth="244" ItemHeight="176" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:HomeTemplateOption">
+                                            <Button Classes="media-template"
+                                                    Classes.selected="{Binding IsSelected}"
+                                                    Command="{Binding $parent[Window].DataContext.SelectHomeTemplateCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    AutomationProperties.Name="{Binding Title}">
+                                                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                        <Border Classes="media-template-disc">
+                                                            <Grid>
+                                                                <Ellipse Classes="media-template-disc-ring" />
+                                                                <Ellipse Classes="media-template-disc-core" />
+                                                            </Grid>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding Capacity}" Classes="media-template-capacity" />
+                                                        </StackPanel>
+                                                        <Border Grid.Column="2" Classes="media-template-badge">
+                                                            <TextBlock Text="{Binding Badge}" Classes="media-template-badge-text" />
+                                                        </Border>
+                                                    </Grid>
+                                                    <TextBlock Grid.Row="1"
+                                                               Text="{Binding Description}"
+                                                               Classes="media-template-description"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Grid.Row="2"
+                                                               Text="{Binding SelectedLabel}"
+                                                               Classes="media-template-selected"
+                                                               IsVisible="{Binding IsSelected}" />
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
 
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Button Classes="secondary"
-                                        Content="{Binding CopyDiagnosticsLabel}"
-                                        Command="{Binding CopyDiagnosticsCommand}" />
-                                <Button Classes="primary"
-                                        Content="{Binding OpenLogsLabel}"
-                                        Command="{Binding OpenLogsCommand}" />
+                                <Border Classes="home-selection-status">
+                                    <TextBlock Text="{Binding HomeActionStatus}" TextWrapping="Wrap" />
+                                </Border>
                             </StackPanel>
-                            <TextBlock Text="{Binding ActionStatus}"
-                                       Foreground="{DynamicResource DiscTextMutedBrush}" />
-                        </StackPanel>
-                    </controls:SectionCard>
+                        </controls:SectionCard>
+
+                        <controls:SectionCard Title="{Binding RecentProjectsTitle}"
+                                              Description="{Binding RecentProjectsDescription}">
+                            <Border Classes="home-recent-empty">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                                    <Border Classes="home-folder-icon">
+                                        <Canvas Width="38" Height="32">
+                                            <Path Data="M3,9 H16 L20,13 H35 V28 H3 Z" Classes="home-folder-shape" />
+                                            <Path Data="M3,9 V6 H15 L19,10" Classes="home-folder-tab" />
+                                        </Canvas>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="{Binding RecentProjectsEmptyTitle}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding RecentProjectsEmptyDescription}"
+                                                   Classes="home-recent-description"
+                                                   TextWrapping="Wrap" />
+                                        <Button Classes="ghost home-open-recent"
+                                                Content="{Binding OpenProjectLabel}"
+                                                Command="{Binding StartOpenProjectCommand}"
+                                                HorizontalAlignment="Left" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </controls:SectionCard>
+
+                        <Expander Header="{Binding PlatformDetailsTitle}">
+                            <StackPanel Spacing="{DynamicResource DiscSpace3}" Margin="0,12,0,0">
+                                <TextBlock Text="{Binding PlatformDetailsDescription}"
+                                           Classes="home-platform-description"
+                                           TextWrapping="Wrap" />
+                                <Grid ColumnDefinitions="Auto,*"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                                      ColumnSpacing="20"
+                                      RowSpacing="8">
+                                    <TextBlock Grid.Row="0" Text="{Binding VersionLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProductVersion}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="1" Text="{Binding CommitLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Commit}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="2" Text="{Binding RuntimeLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DotnetRuntime}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="3" Text="{Binding AvaloniaLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AvaloniaVersion}" />
+                                    <TextBlock Grid.Row="4" Text="{Binding OperatingSystemLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OperatingSystem}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="5" Text="{Binding ConfigDirectoryLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ConfigDirectory}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="6" Text="{Binding DataDirectoryLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="7" Text="{Binding CacheDirectoryLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CacheDirectory}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Row="8" Text="{Binding LogsDirectoryLabel}" Opacity="0.65" />
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding LogsDirectory}" TextWrapping="Wrap" />
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button Classes="secondary"
+                                            Content="{Binding CopyDiagnosticsLabel}"
+                                            Command="{Binding CopyDiagnosticsCommand}" />
+                                    <Button Classes="secondary"
+                                            Content="{Binding OpenLogsLabel}"
+                                            Command="{Binding OpenLogsCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding ActionStatus}"
+                                           Foreground="{DynamicResource DiscTextMutedBrush}" />
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
 
                     <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
                                          Title="{Binding CurrentPageTitle}"

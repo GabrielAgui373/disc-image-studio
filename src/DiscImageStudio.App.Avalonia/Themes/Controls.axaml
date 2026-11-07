@@ -502,4 +502,200 @@
       </ControlTemplate>
     </Setter>
   </Style>
+
+  <Style Selector="Border.home-hero">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="28" />
+    <Setter Property="BoxShadow" Value="0 8 28 0 #1A000000" />
+  </Style>
+
+  <Style Selector="TextBlock.home-eyebrow">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="LetterSpacing" Value="1.2" />
+  </Style>
+
+  <Style Selector="TextBlock.home-hero-title">
+    <Setter Property="FontSize" Value="24" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="MaxWidth" Value="560" />
+  </Style>
+
+  <Style Selector="TextBlock.home-hero-description">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="MaxWidth" Value="600" />
+  </Style>
+
+  <Style Selector="Border.home-disc-illustration">
+    <Setter Property="Width" Value="154" />
+    <Setter Property="Height" Value="154" />
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="CornerRadius" Value="77" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Ellipse.home-disc-outer">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+    <Setter Property="Fill" Value="{DynamicResource DiscSurfaceBrush}" />
+  </Style>
+
+  <Style Selector="Ellipse.home-disc-inner">
+    <Setter Property="Stroke" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+    <Setter Property="Fill" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  </Style>
+
+  <Style Selector="Ellipse.home-disc-hub">
+    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Path.home-disc-highlight">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="3" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+  </Style>
+
+  <Style Selector="Button.media-template">
+    <Setter Property="Width" Value="232" />
+    <Setter Property="Height" Value="164" />
+    <Setter Property="Margin" Value="0,0,12,12" />
+    <Setter Property="Padding" Value="16" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" Easing="SineEaseOut" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.18" Easing="SineEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="SineEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.media-template:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="RenderTransform" Value="scale(1.015)" />
+  </Style>
+
+  <Style Selector="Button.media-template.selected">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.media-template:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.media-template-disc">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="24" />
+  </Style>
+
+  <Style Selector="Ellipse.media-template-disc-ring">
+    <Setter Property="Margin" Value="7" />
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="1.5" />
+  </Style>
+
+  <Style Selector="Ellipse.media-template-disc-core">
+    <Setter Property="Width" Value="8" />
+    <Setter Property="Height" Value="8" />
+    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.media-template-badge">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Padding" Value="6,3" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TextBlock.media-template-badge-text">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.media-template-capacity">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.media-template-description">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.media-template-selected">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.home-selection-status">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,9" />
+  </Style>
+
+  <Style Selector="Border.home-recent-empty">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+
+  <Style Selector="Border.home-folder-icon">
+    <Setter Property="Width" Value="54" />
+    <Setter Property="Height" Value="54" />
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Path.home-folder-shape">
+    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Path.home-folder-tab">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentHoverBrush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+  </Style>
+
+  <Style Selector="TextBlock.home-recent-description">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.home-platform-description">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="Button.home-open-recent">
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Padding" Value="8,0" />
+  </Style>
 </Styles>

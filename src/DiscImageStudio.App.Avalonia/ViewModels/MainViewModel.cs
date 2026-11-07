@@ -67,6 +67,45 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         JobDockCancelLabel = text["jobDock.cancel"];
         JobDockClearLabel = text["jobDock.clear"];
         JobDockDetailsLabel = text["jobDock.details"];
+        HomeHeroEyebrow = text["home.hero.eyebrow"];
+        HomeHeroTitle = text["home.hero.title"];
+        HomeHeroDescription = text["home.hero.description"];
+        NewProjectLabel = text["home.action.newProject"];
+        OpenProjectLabel = text["home.action.openProject"];
+        HomeTemplatesTitle = text["home.templates.title"];
+        HomeTemplatesDescription = text["home.templates.description"];
+        RecentProjectsTitle = text["home.recent.title"];
+        RecentProjectsDescription = text["home.recent.description"];
+        RecentProjectsEmptyTitle = text["home.recent.emptyTitle"];
+        RecentProjectsEmptyDescription = text["home.recent.emptyDescription"];
+        PlatformDetailsTitle = text["home.platform.title"];
+        PlatformDetailsDescription = text["home.platform.description"];
+
+        HomeTemplates =
+        [
+            new HomeTemplateOption(
+                "cd",
+                text["home.template.cd.title"],
+                text["home.template.cd.description"],
+                text["home.template.cd.capacity"],
+                "CD",
+                text["home.template.selectedBadge"]),
+            new HomeTemplateOption(
+                "dvd",
+                text["home.template.dvd.title"],
+                text["home.template.dvd.description"],
+                text["home.template.dvd.capacity"],
+                "DVD",
+                text["home.template.selectedBadge"]),
+            new HomeTemplateOption(
+                "bd",
+                text["home.template.bd.title"],
+                text["home.template.bd.description"],
+                text["home.template.bd.capacity"],
+                "BD",
+                text["home.template.selectedBadge"]),
+        ];
+        SelectHomeTemplate(HomeTemplates[0]);
 
         HomeNavigation = CreateNavigationItem(WorkspacePage.Home, "navigation.home", "Alt+H");
         DesignNavigation = CreateNavigationItem(WorkspacePage.Design, "navigation.design", "Alt+D");
@@ -110,6 +149,19 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string JobDockCancelLabel { get; }
     public string JobDockClearLabel { get; }
     public string JobDockDetailsLabel { get; }
+    public string HomeHeroEyebrow { get; }
+    public string HomeHeroTitle { get; }
+    public string HomeHeroDescription { get; }
+    public string NewProjectLabel { get; }
+    public string OpenProjectLabel { get; }
+    public string HomeTemplatesTitle { get; }
+    public string HomeTemplatesDescription { get; }
+    public string RecentProjectsTitle { get; }
+    public string RecentProjectsDescription { get; }
+    public string RecentProjectsEmptyTitle { get; }
+    public string RecentProjectsEmptyDescription { get; }
+    public string PlatformDetailsTitle { get; }
+    public string PlatformDetailsDescription { get; }
     public WorkspaceNavigationItem HomeNavigation { get; }
     public WorkspaceNavigationItem DesignNavigation { get; }
     public WorkspaceNavigationItem PreviewNavigation { get; }
@@ -117,6 +169,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public WorkspaceNavigationItem BurnNavigation { get; }
     public WorkspaceNavigationItem SettingsNavigation { get; }
     public IReadOnlyList<WorkspaceNavigationItem> NavigationItems { get; }
+    public IReadOnlyList<HomeTemplateOption> HomeTemplates { get; }
     public ObservableCollection<JobDockItem> Jobs { get; } = [];
     public ObservableCollection<ToastNotification> Toasts { get; } = [];
     public bool HasJobHistory => Jobs.Count > 0;
@@ -184,6 +237,12 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [ObservableProperty]
     public partial string? ActionStatus { get; private set; }
 
+    [ObservableProperty]
+    public partial HomeTemplateOption? SelectedHomeTemplate { get; private set; }
+
+    [ObservableProperty]
+    public partial string HomeActionStatus { get; private set; } = string.Empty;
+
     [RelayCommand]
     private async Task CopyDiagnosticsAsync()
     {
@@ -196,6 +255,37 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     {
         bool opened = await _launcher.OpenPathAsync(_paths.LogsDirectory);
         ActionStatus = opened ? _text["action.logsOpened"] : _text["action.logsOpenFailed"];
+    }
+
+    [RelayCommand]
+    private void StartNewProject()
+    {
+        SelectHomeTemplate(SelectedHomeTemplate ?? HomeTemplates[0]);
+        HomeActionStatus = _text["home.action.preparing"];
+    }
+
+    [RelayCommand]
+    private void StartOpenProject()
+        => HomeActionStatus = _text["home.action.openPreparing"];
+
+    [RelayCommand]
+    private void SelectHomeTemplate(HomeTemplateOption? template)
+    {
+        if (template is null)
+        {
+            return;
+        }
+
+        foreach (HomeTemplateOption candidate in HomeTemplates)
+        {
+            candidate.IsSelected = ReferenceEquals(candidate, template);
+        }
+
+        SelectedHomeTemplate = template;
+        HomeActionStatus = string.Format(
+            System.Globalization.CultureInfo.CurrentUICulture,
+            _text["home.templates.selected"],
+            template.Title);
     }
 
     [RelayCommand]
