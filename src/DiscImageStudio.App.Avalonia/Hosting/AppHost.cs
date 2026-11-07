@@ -75,6 +75,7 @@ public sealed class AppHost : IDisposable
             applicationEvents);
         AvaloniaApplicationLifetime applicationLifetime = new(
             jobs,
+            projects,
             prompts,
             settingsStore,
             settings,

@@ -16,6 +16,11 @@ namespace DiscImageStudio.App.Avalonia.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 {
+    private static readonly FilePickerType ProjectFileType = new(
+        "Disc Image Studio project",
+        ["*.discproj"],
+        ["application/json"]);
+
     private readonly IAppPaths _paths;
     private readonly IFilePickerService _filePicker;
     private readonly IFileSystem _fileSystem;
@@ -107,6 +112,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         NewProjectFileLabel = text["newProject.file.label"];
         CreateProjectLabel = text["newProject.create"];
         CancelLabel = text["prompt.cancel"];
+        SaveProjectLabel = text["project.action.save"];
+        SaveProjectAsLabel = text["project.action.saveAs"];
+        CloseProjectLabel = text["project.action.close"];
+        ProjectFileLabel = text["project.file.label"];
+        ProjectDirtyLabel = text["project.dirty"];
 
         HomeTemplates =
         [
@@ -162,6 +172,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         _eventSubscriptions.Add(applicationEvents.Subscribe<JobStarted>(eventData => _dispatcher.Post(() => OnJobStarted(eventData))));
         _eventSubscriptions.Add(applicationEvents.Subscribe<JobProgressReported>(eventData => _dispatcher.Post(() => OnJobProgress(eventData))));
         _eventSubscriptions.Add(applicationEvents.Subscribe<JobFinished>(eventData => _dispatcher.Post(() => OnJobFinished(eventData))));
+        _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectOpened>(eventData => _dispatcher.Post(() => OnProjectOpened(eventData))));
+        _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectSaved>(eventData => _dispatcher.Post(() => OnProjectSaved(eventData))));
+        _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectClosed>(eventData => _dispatcher.Post(() => OnProjectClosed(eventData))));
+        _eventSubscriptions.Add(applicationEvents.Subscribe<ProjectDirtyChanged>(eventData => _dispatcher.Post(() => OnProjectDirtyChanged(eventData))));
+        RefreshProjectState();
     }
 
     public string Title { get; }
@@ -213,6 +228,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string NewProjectFileLabel { get; }
     public string CreateProjectLabel { get; }
     public string CancelLabel { get; }
+    public string SaveProjectLabel { get; }
+    public string SaveProjectAsLabel { get; }
+    public string CloseProjectLabel { get; }
+    public string ProjectFileLabel { get; }
+    public string ProjectDirtyLabel { get; }
     public WorkspaceNavigationItem HomeNavigation { get; }
     public WorkspaceNavigationItem DesignNavigation { get; }
     public WorkspaceNavigationItem PreviewNavigation { get; }
@@ -297,6 +317,33 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public partial string HomeActionStatus { get; private set; } = string.Empty;
 
     [ObservableProperty]
+    public partial bool HasOpenProject { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsProjectDirty { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsProjectOperationInProgress { get; private set; }
+
+    [ObservableProperty]
+    public partial string ProjectName { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProjectFilePath { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string? ProjectActionStatus { get; private set; }
+
+    [ObservableProperty]
+    public partial string? ProjectActionError { get; private set; }
+
+    public bool HasProjectActionStatus => !string.IsNullOrWhiteSpace(ProjectActionStatus);
+
+    public bool HasProjectActionError => !string.IsNullOrWhiteSpace(ProjectActionError);
+
+    public bool HasProjectSurface => HasOpenProject || HasProjectActionStatus || HasProjectActionError;
+
+    [ObservableProperty]
     public partial bool IsNewProjectDialogOpen { get; private set; }
 
     [ObservableProperty]
@@ -331,6 +378,21 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     partial void OnNewProjectErrorChanged(string? value)
         => OnPropertyChanged(nameof(HasNewProjectError));
 
+    partial void OnProjectActionErrorChanged(string? value)
+    {
+        OnPropertyChanged(nameof(HasProjectActionError));
+        OnPropertyChanged(nameof(HasProjectSurface));
+    }
+
+    partial void OnProjectActionStatusChanged(string? value)
+    {
+        OnPropertyChanged(nameof(HasProjectActionStatus));
+        OnPropertyChanged(nameof(HasProjectSurface));
+    }
+
+    partial void OnHasOpenProjectChanged(bool value)
+        => OnPropertyChanged(nameof(HasProjectSurface));
+
     partial void OnNewProjectNameChanged(string value) => UpdateNewProjectFilePathPreview();
 
     partial void OnNewProjectDirectoryChanged(string value) => UpdateNewProjectFilePathPreview();
@@ -364,8 +426,109 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     }
 
     [RelayCommand]
-    private void StartOpenProject()
-        => HomeActionStatus = _text["home.action.openPreparing"];
+    private async Task StartOpenProjectAsync()
+    {
+        if (IsProjectOperationInProgress || IsNewProjectDialogOpen || IsModalOpen)
+        {
+            return;
+        }
+
+        IReadOnlyList<string> paths;
+        try
+        {
+            paths = await _filePicker.OpenFilesAsync(new OpenFilePickerRequest(
+                _text["openProject.title"],
+                SuggestedDirectory: GetSuggestedProjectDirectory(),
+                FileTypes: [ProjectFileType]));
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            ProjectActionError = _text["openProject.error.pickerUnavailable"];
+            return;
+        }
+
+        string? path = paths.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            await OpenProjectAsync(path);
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveProjectAsync()
+    {
+        if (!HasOpenProject || IsProjectOperationInProgress)
+        {
+            return;
+        }
+
+        await PersistProjectAsync(() => _projects.SaveProjectAsync(), isSaveAs: false);
+    }
+
+    [RelayCommand]
+    private async Task SaveProjectAsAsync()
+    {
+        if (!HasOpenProject || IsProjectOperationInProgress)
+        {
+            return;
+        }
+
+        string? path;
+        try
+        {
+            path = await _filePicker.SaveFileAsync(new SaveFilePickerRequest(
+                _text["saveAs.title"],
+                SuggestedFileName: GetSuggestedProjectFileName(),
+                SuggestedDirectory: GetSuggestedProjectDirectory(),
+                DefaultExtension: ProjectJsonStore.FileExtension.TrimStart('.'),
+                FileTypes: [ProjectFileType]));
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            ProjectActionError = _text["saveAs.error.pickerUnavailable"];
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        await PersistProjectAsync(
+            () => _projects.SaveProjectAsAsync(EnsureProjectFileExtension(path)),
+            isSaveAs: true);
+    }
+
+    [RelayCommand]
+    private async Task CloseProjectAsync()
+    {
+        if (!HasOpenProject || IsProjectOperationInProgress)
+        {
+            return;
+        }
+
+        IsProjectOperationInProgress = true;
+        ProjectActionError = null;
+        try
+        {
+            ApplicationResult result = await Task.Run(() => _projects.CloseProjectAsync());
+            if (!result.Succeeded)
+            {
+                ProjectActionError = result.Error?.Code == ApplicationErrorCode.UserCanceled
+                    ? _text["project.error.operationCanceled"]
+                    : _text["project.error.closeFailed"];
+                return;
+            }
+
+            // The ProjectClosed event handler publishes the formatted status message.
+        }
+        finally
+        {
+            IsProjectOperationInProgress = false;
+            RefreshProjectState();
+            RefreshNavigation();
+        }
+    }
 
     [RelayCommand]
     private void CancelNewProject()
@@ -426,6 +589,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
                 System.Globalization.CultureInfo.CurrentUICulture,
                 _text["newProject.created"],
                 result.Value.Identity.Name);
+            RefreshProjectState();
             RefreshNavigation();
         }
         finally
@@ -646,6 +810,149 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             ShowToast(_text["toast.jobCanceled"], job.Name, ToastSeverity.Info, TimeSpan.FromSeconds(4));
         }
     }
+
+    private void OnProjectOpened(ProjectOpened project)
+    {
+        RefreshProjectState();
+        ProjectActionStatus = string.Format(
+            System.Globalization.CultureInfo.CurrentUICulture,
+            _text["project.status.opened"],
+            project.ProjectName);
+        RefreshNavigation();
+    }
+
+    private void OnProjectSaved(ProjectSaved project)
+    {
+        RefreshProjectState();
+        ProjectActionStatus = string.Format(
+            System.Globalization.CultureInfo.CurrentUICulture,
+            _text["project.status.saved"],
+            project.ProjectName);
+    }
+
+    private void OnProjectClosed(ProjectClosed project)
+    {
+        RefreshProjectState();
+        ProjectActionStatus = string.Format(
+            System.Globalization.CultureInfo.CurrentUICulture,
+            _text["project.status.closed"],
+            project.ProjectName);
+        HomeActionStatus = ProjectActionStatus;
+        RefreshNavigation();
+    }
+
+    private void OnProjectDirtyChanged(ProjectDirtyChanged _) => RefreshProjectState();
+
+    private async Task OpenProjectAsync(string path)
+    {
+        IsProjectOperationInProgress = true;
+        ProjectActionError = null;
+        try
+        {
+            ApplicationResult<ProjectWorkspace> result = await Task.Run(() => _projects.OpenProjectAsync(path));
+            if (!result.Succeeded)
+            {
+                ProjectActionError = GetProjectOpenError(result.Error);
+            }
+        }
+        finally
+        {
+            IsProjectOperationInProgress = false;
+            RefreshProjectState();
+            RefreshNavigation();
+        }
+    }
+
+    private async Task PersistProjectAsync(
+        Func<Task<ApplicationResult<ProjectWorkspace>>> persist,
+        bool isSaveAs)
+    {
+        IsProjectOperationInProgress = true;
+        ProjectActionError = null;
+        try
+        {
+            ApplicationResult<ProjectWorkspace> result = await Task.Run(persist);
+            if (!result.Succeeded)
+            {
+                ProjectActionError = GetProjectSaveError(result.Error);
+                return;
+            }
+
+            ProjectActionStatus = isSaveAs
+                ? _text["project.status.savedAs"]
+                : string.Format(
+                    System.Globalization.CultureInfo.CurrentUICulture,
+                    _text["project.status.saved"],
+                    result.Value.Identity.Name);
+        }
+        finally
+        {
+            IsProjectOperationInProgress = false;
+            RefreshProjectState();
+        }
+    }
+
+    private void RefreshProjectState()
+    {
+        ProjectWorkspace? project = _projects.Current;
+        HasOpenProject = project is not null;
+        IsProjectDirty = _projects.Dirty.IsDirty;
+        ProjectName = project?.Identity.Name ?? string.Empty;
+        ProjectFilePath = _projects.ProjectFilePath ?? string.Empty;
+    }
+
+    private string GetSuggestedProjectDirectory()
+    {
+        string? currentDirectory = string.IsNullOrWhiteSpace(_projects.ProjectFilePath)
+            ? null
+            : Path.GetDirectoryName(_projects.ProjectFilePath);
+        return !string.IsNullOrWhiteSpace(currentDirectory)
+            ? currentDirectory
+            : string.IsNullOrWhiteSpace(_settings.DefaultProjectDirectory)
+                ? _paths.ProjectsDirectory
+                : _settings.DefaultProjectDirectory;
+    }
+
+    private string GetSuggestedProjectFileName()
+    {
+        string? currentFileName = string.IsNullOrWhiteSpace(_projects.ProjectFilePath)
+            ? null
+            : Path.GetFileName(_projects.ProjectFilePath);
+        return !string.IsNullOrWhiteSpace(currentFileName)
+            ? currentFileName
+            : BuildProjectFileName(ProjectName);
+    }
+
+    private static string EnsureProjectFileExtension(string path)
+        => string.Equals(Path.GetExtension(path), ProjectJsonStore.FileExtension, StringComparison.OrdinalIgnoreCase)
+            ? path
+            : Path.ChangeExtension(path, ProjectJsonStore.FileExtension);
+
+    private string GetProjectOpenError(ApplicationError? error)
+    {
+        if (error?.Code == ApplicationErrorCode.UserCanceled)
+        {
+            return _text["project.error.operationCanceled"];
+        }
+
+        return error?.Exception switch
+        {
+            UnauthorizedAccessException => _text["openProject.error.permissionDenied"],
+            FileNotFoundException or DirectoryNotFoundException => _text["openProject.error.notFound"],
+            InvalidDataException when error.Detail?.Contains("schema", StringComparison.OrdinalIgnoreCase) == true
+                => _text["openProject.error.unsupportedSchema"],
+            InvalidDataException => _text["openProject.error.invalidFile"],
+            _ => _text["openProject.error.readFailed"],
+        };
+    }
+
+    private string GetProjectSaveError(ApplicationError? error)
+        => error?.Exception switch
+        {
+            UnauthorizedAccessException => _text["saveProject.error.permissionDenied"],
+            InvalidDataException or ArgumentException => _text["saveProject.error.invalidProject"],
+            _ => _text["saveProject.error.writeFailed"],
+        };
 
     private void ShowToast(string title, string message, ToastSeverity severity, TimeSpan lifetime)
     {

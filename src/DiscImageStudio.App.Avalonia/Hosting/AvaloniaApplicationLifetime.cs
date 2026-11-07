@@ -1,6 +1,7 @@
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.Application.Jobs;
 using DiscImageStudio.Application.Ports;
+using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Application.Settings;
 
 namespace DiscImageStudio.App.Avalonia.Hosting;
@@ -10,6 +11,7 @@ public sealed class AvaloniaApplicationLifetime : IApplicationLifetime, IDisposa
     private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(10);
 
     private readonly JobCoordinator _jobs;
+    private readonly ProjectLifecycleService _projects;
     private readonly IUserPromptService _prompts;
     private readonly ISettingsStore _settingsStore;
     private readonly ITextCatalog _text;
@@ -20,6 +22,7 @@ public sealed class AvaloniaApplicationLifetime : IApplicationLifetime, IDisposa
 
     public AvaloniaApplicationLifetime(
         JobCoordinator jobs,
+        ProjectLifecycleService projects,
         IUserPromptService prompts,
         ISettingsStore settingsStore,
         UserSettings settings,
@@ -27,6 +30,7 @@ public sealed class AvaloniaApplicationLifetime : IApplicationLifetime, IDisposa
         IAppLogger logger)
     {
         _jobs = jobs;
+        _projects = projects;
         _prompts = prompts;
         _settingsStore = settingsStore;
         _settings = settings;
@@ -54,6 +58,17 @@ public sealed class AvaloniaApplicationLifetime : IApplicationLifetime, IDisposa
 
             int activeJobs = _jobs.RunningJobIds.Count;
             if (activeJobs > 0 && !await _prompts.ConfirmShutdownAsync(activeJobs, cancellationToken))
+            {
+                return false;
+            }
+
+            // Opening another project, closing a project, and leaving the application all use
+            // the same lifecycle policy: save, discard, or cancel through IUserInteraction.
+            // This keeps a dismissed shutdown from changing the current project session.
+            DiscImageStudio.Application.Results.ApplicationResult close = await _projects.CloseProjectAsync(
+                context: "exit-application",
+                cancellationToken);
+            if (!close.Succeeded)
             {
                 return false;
             }

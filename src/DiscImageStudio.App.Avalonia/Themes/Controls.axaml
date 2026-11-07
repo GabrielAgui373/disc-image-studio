@@ -289,6 +289,41 @@
     <Setter Property="Padding" Value="12,10" />
   </Style>
 
+  <Style Selector="Border.project-toolbar">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+
+  <Style Selector="Border.project-dirty-badge">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Padding" Value="7,2" />
+  </Style>
+
+  <Style Selector="Border.project-dirty-badge TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.project-file-path, TextBlock.project-action-status">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="Border.project-action-error">
+    <Setter Property="Background" Value="#22D95757" />
+    <Setter Property="BorderBrush" Value="#99D95757" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+
   <Style Selector="Border.job-dock">
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />

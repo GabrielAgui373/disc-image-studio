@@ -5,7 +5,7 @@ namespace DiscImageStudio.App.Avalonia.ViewModels;
 
 /// <summary>
 /// Presentation-only choice shown on Home before the project creation workflow is opened.
-/// The selected option is intentionally not persisted or used to create a project here.
+/// The selection seeds a new-project draft, but is not persisted until creation succeeds.
 /// </summary>
 public sealed partial class HomeTemplateOption : ObservableObject
 {

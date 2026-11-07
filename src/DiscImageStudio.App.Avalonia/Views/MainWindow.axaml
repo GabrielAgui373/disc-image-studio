@@ -23,6 +23,10 @@
         <KeyBinding Gesture="Alt+E" Command="{Binding NavigateExportCommand}" />
         <KeyBinding Gesture="Alt+B" Command="{Binding NavigateBurnCommand}" />
         <KeyBinding Gesture="Alt+S" Command="{Binding NavigateSettingsCommand}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding StartOpenProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveProjectAsCommand}" />
+        <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseProjectCommand}" />
         <KeyBinding Gesture="Escape" Command="{Binding DismissPromptCommand}" />
     </Window.KeyBindings>
 
@@ -175,6 +179,42 @@
                                          Subtitle="{Binding CurrentPageDescription}"
                                          Badge="{Binding CurrentPageBadge}"
                                          IsBadgeVisible="True" />
+
+                    <Border Classes="project-toolbar" IsVisible="{Binding HasOpenProject}">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <StackPanel Spacing="3" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding ProjectName}" FontWeight="SemiBold" />
+                                    <Border Classes="project-dirty-badge" IsVisible="{Binding IsProjectDirty}">
+                                        <TextBlock Text="{Binding ProjectDirtyLabel}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{Binding ProjectFilePath}"
+                                           Classes="project-file-path"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Classes="secondary compact-action"
+                                        Content="{Binding SaveProjectAsLabel}"
+                                        Command="{Binding SaveProjectAsCommand}" />
+                                <Button Classes="primary compact-action"
+                                        Content="{Binding SaveProjectLabel}"
+                                        Command="{Binding SaveProjectCommand}" />
+                                <Button Classes="ghost compact-action"
+                                        Content="{Binding CloseProjectLabel}"
+                                        Command="{Binding CloseProjectCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="{Binding ProjectActionStatus}"
+                               Classes="project-action-status"
+                               IsVisible="{Binding HasProjectActionStatus}" />
+
+                    <Border Classes="project-action-error"
+                            IsVisible="{Binding HasProjectActionError}">
+                        <TextBlock Text="{Binding ProjectActionError}" TextWrapping="Wrap" />
+                    </Border>
 
                     <Border Classes="navigation-notice"
                             IsVisible="{Binding HasNavigationNotice}">
