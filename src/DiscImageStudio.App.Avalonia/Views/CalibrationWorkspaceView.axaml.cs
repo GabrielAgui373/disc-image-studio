@@ -19,8 +19,11 @@ public partial class CalibrationWorkspaceView : UserControl
     private void ApplyLayout(double width)
     {
         bool stacked = width < StackedBelowWidth;
-        Panes.ColumnDefinitions = stacked ? new ColumnDefinitions("*") : new ColumnDefinitions("*,340");
-        Grid.SetColumn(SidePane, stacked ? 0 : 1);
-        Grid.SetRow(SidePane, stacked ? 2 : 1);
+        foreach ((Grid panes, Control side) in new (Grid, Control)[] { (Panes, SidePane), (PhotoPanes, PhotoSide) })
+        {
+            panes.ColumnDefinitions = stacked ? new ColumnDefinitions("*") : new ColumnDefinitions("*,340");
+            Grid.SetColumn(side, stacked ? 0 : 1);
+            Grid.SetRow(side, stacked ? 1 : 0);
+        }
     }
 }

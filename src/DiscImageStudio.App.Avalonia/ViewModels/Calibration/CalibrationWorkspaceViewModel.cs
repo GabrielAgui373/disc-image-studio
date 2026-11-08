@@ -261,6 +261,9 @@ public sealed partial class CalibrationWorkspaceViewModel : ObservableObject
         LinkedSessionText = string.Empty;
         IsLinkedSessionBroken = false;
         ClearRun();
+        ResetPhoto();
+        CurrentStep = CalibrationStep.Target;
+        OnLinkedSessionChanged();
     }
 
     // ---- Commands ----
@@ -402,6 +405,7 @@ public sealed partial class CalibrationWorkspaceViewModel : ObservableObject
         }
 
         LoadLinkedSession(workspace);
+        OnLinkedSessionChanged();
         if (resetFamily)
         {
             Family = _linkedSession is { } linked ? FamilyOf(linked.Target.Parameters.Kind) : workspace.Media.Family;

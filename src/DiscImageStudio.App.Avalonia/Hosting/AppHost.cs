@@ -156,6 +156,8 @@ public sealed class AppHost : IDisposable
             launcher,
             clipboard);
         viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
+        viewModel.CalibrationWorkspace.AttachRecovery(
+            DiscImageStudio.Application.Calibration.CalibrationRecoveryStore.Under(paths, new DiscImageStudio.Application.Ports.SystemClock()));
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

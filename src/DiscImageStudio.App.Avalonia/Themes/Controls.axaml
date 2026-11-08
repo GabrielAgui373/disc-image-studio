@@ -410,20 +410,42 @@
   </Style>
 
   <!-- Calibration page -->
-  <Style Selector="Border.calibration-step">
+  <Style Selector="Button.calibration-step">
     <Setter Property="Padding" Value="12,6" />
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="TextElement.Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
-    <Setter Property="TextElement.FontWeight" Value="SemiBold" />
-    <Setter Property="TextElement.FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
 
-  <Style Selector="Border.calibration-step.active">
+  <Style Selector="Button.calibration-step /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+  </Style>
+
+  <Style Selector="Button.calibration-step:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Button.calibration-step.active">
     <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
-    <Setter Property="TextElement.Foreground" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.calibration-step:disabled">
+    <Setter Property="Opacity" Value="0.55" />
+  </Style>
+
+  <Style Selector="Border.calibration-canvas">
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
   </Style>
 
   <Style Selector="Border.calibration-preview">
