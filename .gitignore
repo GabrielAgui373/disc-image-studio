@@ -25,10 +25,4 @@ __pycache__/
 *.key
 
 # Linux GUI working documentation: kept locally, not versioned
-docs/project-analysis/
-docs/APPLICATION_LAYER.md
-docs/DESIGN_EDITING.md
-docs/GENERATION_PIPELINE.md
-docs/IMAGE_COMPOSITION.md
-docs/LINUX_GUI_DEVELOPMENT.md
-docs/PREVIEW_AND_READBACK.md
+docs/tasks/

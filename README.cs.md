@@ -2,8 +2,6 @@
 
 [简体中文](README.md) | [繁體中文](README.zh-TW.md) | [English](README.en.md) | [日本語](README.ja.md) | [Türkçe](README.tr.md) | [Español](README.es.md) | **Čeština**
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>Všestranný nástroj pro generování a vypalování viditelných obrazů na optické disky</h2>
 
 Disc Image Studio je multiplatformní nástroj pro generování a vypalování obrazů na povrch disků, který vám pomůže vypálit obrazy viditelné pouhým okem na jakýkoli DVD / CD / jednovrstvý Blu-ray disk pomocí jakékoli vypalovací mechaniky.
@@ -21,25 +19,9 @@ Disc Image Studio je multiplatformní nástroj pro generování a vypalování 
 
 ---
 
-## Výsledky
-
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
----
-
 ## Přehled
 
 Disc Image Studio převádí obrázek na data, která splňují omezení fyzické vrstvy disků CD, DVD a jednovrstvých BD-R. Po vypálení se na povrchu disku zobrazí vzor viditelný pouhým okem.
-
-## Náhled rozhraní
-
-![Domů: šablony a nedávné projekty](docs/images/ui-home.png)
-
-![Návrh: plátno vrstev a ovládání tónu](docs/images/ui-design.png)
-
-![Export: světlý motiv a výstupní obraz](docs/images/ui-export.png)
 
 ---
 
@@ -65,25 +47,21 @@ Přímé vypalování je experimentální. Používejte pouze testovací média,
 
 ### Generování dat disku
 
-- **Podpora CD**: Podporuje jakékoli CD. Exportuje zvukové stopy WAV s hlavičkami formátu a doprovodnými soubory CUE kompatibilními s vypalovacím softwarem, jako jsou cdrecord a ImgBurn; k dispozici je také export surových zvukových stop RAW. Viz [kompatibilita vypalování CD](docs/CD_AUDIO_COMPATIBILITY.md).
+- **Podpora CD**: Podporuje jakékoli CD. Exportuje zvukové stopy WAV s hlavičkami formátu a doprovodnými soubory CUE kompatibilními s vypalovacím softwarem, jako jsou cdrecord a ImgBurn; k dispozici je také export surových zvukových stop RAW.
 - **Podpora DVD**: Podporuje jakékoli DVD. Exportuje obrazy ISO.
-- **Podpora Blu-ray**: Podporuje jakýkoli jednovrstvý BD-R 25 GB v režimu pouhého kreslení a se soubory UDF 2.01. Viz [ADDING_BLURAY.md](docs/ADDING_BLURAY.md).
+- **Podpora Blu-ray**: Podporuje jakýkoli jednovrstvý BD-R 25 GB v režimu pouhého kreslení a se soubory UDF 2.01.
 - **Soubory na disku**: U CD, DVD a Blu-ray můžete vybrat složku a umístit její soubory na vnitřní nebo vnější okruh přímo na stránce Návrh, případně tato nastavení upravit na stránce Export. Nastavení se ukládá s projektem.
 - **Náhled oblasti souborů**: Projekce návrhu hybridních disků a zpětné čtení výstupu zvýrazňují oblast souborů včetně systému souborů žlutě.
-- **Schémata šedi podle média**: CD i DVD používají dvě černo-bílé úrovně: `0D / AA` pro CD a `A5 / 92` v prokládané doméně DVD. Viz [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md).
+- **Schémata šedi podle média**: CD i DVD používají dvě černo-bílé úrovně: `0D / AA` pro CD a `A5 / 92` v prokládané doméně DVD.
 - **Nástroj pro dithering šedi**: Samostatný program dokáže zpracovat zdrojový obrázek na dvouúrovňový černo-bílý PNG `0/255`. Podporuje otevírání nebo přetahování zdrojových obrázků, náhledy vedle sebe a bezztrátový export PNG. Viz [návod k použití a sestavení](tools/FourLevelDither/README.md).
-- **Předvolby disků**: Vestavěné parametry disků pokrývají několik značek CD, DVD a BD. Můžete také přispět vlastními kalibrovanými daty; viz [údržba předvoleb](docs/DISC_PRESETS.md).
-
+- **Předvolby disků**: Vestavěné parametry disků pokrývají několik značek CD, DVD a BD. Můžete také přispět vlastními kalibrovanými daty.
 ### Asistovaná kalibrace
 
 Disc Image Studio nabízí inteligentní a přesný pracovní postup asistované kalibrace. Ve srovnání s ruční vizuální kalibrací zlepšuje algoritmus asistované kalibrace přesnost určitelných fyzických parametrů povrchu disku z 10<sup>-6</sup> na 10<sup>-14</sup>. Před kalibrací vytváří konstantní rozteč stop znatelně zakřivené radiální křížové čáry. Po opětovném vygenerování a vypálení s parametry kubické rozteče stop získanými asistovanou kalibrací jsou čáry blíže přímým radiálním čarám.
 
 | Před kalibrací · Konstantní rozteč stop | Po kalibraci · Kubická rozteč stop |
 | --- | --- |
-| ![Fotografie DVD před kalibrací: znatelně zakřivené radiální křížové čáry](docs/images/verbatim-dvd-calibration-before.jpg) | ![Fotografie DVD po kalibraci: radiální křížové čáry jsou blíže přímkám](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-Postup a parametry najdete v [průvodci asistovanou kalibrací](docs/CALIBRATION.md).
 
 ### Vypalování
 
@@ -110,8 +88,6 @@ Regresní kontroly sestavení:
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-Pravidla verzování, EXE generované CI, kontroly konceptů vydání, balení MSIX a postup podepisování najdete v [průvodci vydáním](docs/RELEASING.md).
 
 ## Příkazová řádka
 
@@ -161,23 +137,12 @@ src/DvdImageSolver/          Izolovaný motor pro kódování a řešení DVD
 tests/                       Architektonické regresní testy bez testovacího rámce třetí strany
 packaging/                   Manifest MSIX a skripty pro balení
 tools/                       Samostatné nástroje a skripty pro generování prostředků
-docs/                        Dokumentace architektury, motorů, předvoleb, vydání a další
 ```
 
 ## Dokumentace
 
 | Dokument | Obsah |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Abstrakce modulů, hranice mezi vrstvami a pravidla rozšiřování |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | Nastavení jazyka a údržba překladových zdrojů |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | Konvence řešiče omezení obrazu DVD NRZI, kódovací řetězec a pokrytí autotestů |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | Formáty zvukových stop CD, pořadí bajtů a řešení duchů (ghosting) |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | Fyzikální model modulu Blu-ray, generování a vypalování a rozšiřovací body |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | Vrstvený formát JSON a pravidla slučování upravitelných předvoleb disků |
-| [CALIBRATION.md](docs/CALIBRATION.md) | Rektifikace fotografií (vyznačení nejvnějšího fyzického okraje disku a okraje středového otvoru), kalibrace křivek a proložení kubické rozteče stop DVD |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | Přezkoumání fyzikálních modelů generování CD / DVD |
-| [VALIDATION.md](docs/VALIDATION.md) | Místní záznamy ověřování sestavení, regresí a testů na fyzických discích |
-| [RELEASING.md](docs/RELEASING.md) | Vydání na GitHubu, balení MSIX, testy podepisování a postup odeslání do Storu |
 | [CHANGELOG.md](CHANGELOG.md) | Historie změn verzí |
 
 ## Referenční normy

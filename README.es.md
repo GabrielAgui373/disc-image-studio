@@ -2,8 +2,6 @@
 
 [简体中文](README.md) | [繁體中文](README.zh-TW.md) | [English](README.en.md) | [日本語](README.ja.md) | [Türkçe](README.tr.md) | **Español** | [Čeština](README.cs.md)
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>Una herramienta integral para generar y grabar imágenes visibles en discos ópticos</h2>
 
 Disc Image Studio es una herramienta multiplataforma de generación y grabación de imágenes en la superficie de discos que te ayuda a grabar imágenes visibles a simple vista en cualquier DVD / CD / disco Blu-ray de una capa con cualquier grabadora.
@@ -25,10 +23,6 @@ Disc Image Studio es una herramienta multiplataforma de generación y grabación
 <a id="效果预览"></a>
 ## Resultados
 
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
 ---
 
 <a id="overview"></a>
@@ -40,12 +34,6 @@ Disc Image Studio convierte una imagen en datos que cumplen las restricciones de
 <a id="interface-preview"></a>
 <a id="界面预览"></a>
 ## Vista de la interfaz
-
-![Inicio: plantillas y proyectos recientes](docs/images/ui-home.es.png)
-
-![Diseño: lienzo de capas y controles de tono](docs/images/ui-design.es.png)
-
-![Exportar: tema claro e imagen de salida](docs/images/ui-export.es.png)
 
 ---
 
@@ -83,15 +71,14 @@ La grabación en directo es experimental. Usa únicamente discos de prueba que p
 <a id="光盘数据生成"></a>
 ### Generación de datos de disco
 
-- **Compatibilidad CD**: admite cualquier CD. Exporta pistas de audio WAV con cabeceras de formato y archivos CUE asociados, compatibles con programas de grabación como cdrecord e ImgBurn; también permite exportar pistas de audio RAW. Consulta la [compatibilidad de grabación CD](docs/CD_AUDIO_COMPATIBILITY.md).
+- **Compatibilidad CD**: admite cualquier CD. Exporta pistas de audio WAV con cabeceras de formato y archivos CUE asociados, compatibles con programas de grabación como cdrecord e ImgBurn; también permite exportar pistas de audio RAW.
 - **Compatibilidad DVD**: admite cualquier DVD. Exporta imágenes ISO.
-- **Compatibilidad Blu-ray**: admite cualquier BD-R de 25 GB y una capa, con modo de sólo dibujo y archivos UDF 2.01. Consulta [ADDING_BLURAY.md](docs/ADDING_BLURAY.md).
+- **Compatibilidad Blu-ray**: admite cualquier BD-R de 25 GB y una capa, con modo de sólo dibujo y archivos UDF 2.01.
 - **Archivos en el disco**: para CD, DVD y Blu-ray, selecciona una carpeta y coloca sus archivos en la zona interior o exterior desde Diseño, o ajusta estas opciones en Exportar. Los ajustes se guardan con el proyecto.
 - **Vista previa de la zona de archivos**: las proyecciones del diseño de discos híbridos y la relectura del archivo generado resaltan en amarillo la zona de archivos, incluido el sistema de archivos.
-- **Esquemas de gris según el medio**: CD y DVD usan dos niveles de blanco y negro: `0D / AA` para CD y `A5 / 92` en el dominio aleatorizado de DVD. Consulta [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md).
+- **Esquemas de gris según el medio**: CD y DVD usan dos niveles de blanco y negro: `0D / AA` para CD y `A5 / 92` en el dominio aleatorizado de DVD.
 - **Herramienta de tramado en escala de grises**: un programa independiente también puede convertir una imagen de origen en un PNG en blanco y negro de dos niveles `0/255`. Permite abrir o arrastrar imágenes de origen, compararlas en vistas paralelas y exportar PNG sin pérdida. Consulta las [instrucciones de uso y compilación](tools/FourLevelDither/README.md).
-- **Preajustes de discos**: los parámetros integrados abarcan varias marcas de CD, DVD y BD. También puedes aportar tus propios datos calibrados; consulta el [mantenimiento de preajustes](docs/DISC_PRESETS.md).
-
+- **Preajustes de discos**: los parámetros integrados abarcan varias marcas de CD, DVD y BD. También puedes aportar tus propios datos calibrados.
 <a id="assisted-calibration"></a>
 <a id="辅助标定"></a>
 ### Calibración asistida
@@ -100,10 +87,7 @@ Disc Image Studio ofrece un flujo de calibración asistida inteligente y preciso
 
 | Antes de calibrar · Paso de pista constante | Después de calibrar · Paso de pista cúbico |
 | --- | --- |
-| ![Foto del DVD antes de calibrar: líneas radiales de referencia visiblemente curvas](docs/images/verbatim-dvd-calibration-before.jpg) | ![Foto del DVD después de calibrar: líneas radiales de referencia más próximas a rectas](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-Consulta la [guía de calibración asistida](docs/CALIBRATION.md) para conocer el procedimiento y los parámetros.
 
 <a id="burning"></a>
 <a id="刻录"></a>
@@ -136,8 +120,6 @@ Pruebas de regresión:
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-Consulta la [guía de publicación](docs/RELEASING.md) para conocer las reglas de versiones, los EXE generados por CI, la revisión de borradores de versiones, el empaquetado MSIX y la firma.
 
 <a id="command-line"></a>
 <a id="命令行"></a>
@@ -191,7 +173,6 @@ src/DvdImageSolver/          Motor aislado de codificación/resolución DVD
 tests/                       Regresiones de arquitectura sin framework de pruebas externo
 packaging/                   Manifiesto MSIX y scripts de empaquetado
 tools/                       Utilidades independientes y scripts para generar recursos
-docs/                        Documentación de arquitectura, motores, preajustes y publicación
 ```
 
 <a id="documentation"></a>
@@ -200,16 +181,6 @@ docs/                        Documentación de arquitectura, motores, preajustes
 
 | Documento | Contenido |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Abstracciones de módulos, límites entre capas y reglas de extensión |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | Configuración del idioma y mantenimiento de traducciones |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | Convenciones del solucionador de restricciones de imagen NRZI DVD, cadena de codificación y cobertura de autopruebas |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | Formatos de pistas CD, orden de bytes y diagnóstico de imágenes fantasma |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | Modelo físico del módulo Blu-ray, generación/grabación y puntos de extensión |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | Formato JSON por capas y reglas de combinación de preajustes editables |
-| [CALIBRATION.md](docs/CALIBRATION.md) | Rectificación de fotos (borde exterior físico y borde del orificio central), calibración de curvas y ajuste de paso de pista DVD cúbico |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | Revisión de los modelos físicos de generación CD / DVD |
-| [VALIDATION.md](docs/VALIDATION.md) | Registros locales de compilación, regresiones y pruebas con discos físicos |
-| [RELEASING.md](docs/RELEASING.md) | Versiones de GitHub, empaquetado MSIX, pruebas de firma y envío a Store |
 | [CHANGELOG.md](CHANGELOG.md) | Historial de cambios |
 
 <a id="reference-standards"></a>

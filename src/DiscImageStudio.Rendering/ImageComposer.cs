@@ -31,7 +31,7 @@ public sealed record CompositionResult(BgraRaster Image, IReadOnlyList<Compositi
 
 /// <summary>
 /// Deterministic, framework-free layer composer. It reproduces the WPF DesignComposer
-/// geometry (see docs/IMAGE_COMPOSITION.md): a transparent square canvas centred on the disc,
+/// geometry: a transparent square canvas centred on the disc,
 /// layers sized by the content-ring fit rule, rotated about their centre and translated in
 /// millimetres, painted bottom-first with source-over in premultiplied alpha.
 /// </summary>

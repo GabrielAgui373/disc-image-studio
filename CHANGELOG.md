@@ -157,7 +157,7 @@
 
 ## 首次 GitHub 发布前的开发记录
 
-以下为累计开发过程记录，验证状态反映各条记录对应的阶段；当前验证范围以 `docs/VALIDATION.md` 为准。
+以下为累计开发过程记录，验证状态反映各条记录对应的阶段。
 
 - 新增 GitHub Actions 发布策略：以 `Directory.Build.props` 统一维护版本，仅在合并到 `main` 的变更同时修改版本与发布日志且完整版本变化时，经过 CI 和最终单文件验证后自动生成版本标签、自包含 Windows x64 EXE 与 GitHub Release 草稿；支持 alpha/beta/rc，发布说明包含 SHA-256，维护者检查后公开，已公开制品不覆盖。MSIX 保留手动通道并复用 CI，默认读取同一版本配置。
 - CD 文件输出默认改为标准 WAV（44.1 kHz、16 位、双声道 PCM），同时生成 `FILE ... WAVE` CUE：cdrecord 可直接读取 WAV，ImgBurn 打开配套 CUE；旧 `.raw` 仍保持大端字节序。WAV 在延迟交织完成后转为小端，CD 流式刻录显式采用相同的无头小端 PCM，修正与 IMAPI 音频输入约定不一致的问题。音轨预览支持 WAV 的 RIFF 块解析与字节序归一化。新增非对称音频样本和 Windows RAW 镜像字节保留回归。

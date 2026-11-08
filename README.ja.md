@@ -2,8 +2,6 @@
 
 [简体中文](README.md) | [繁體中文](README.zh-TW.md) | [English](README.en.md) | **日本語** | [Türkçe](README.tr.md) | [Español](README.es.md) | [Čeština](README.cs.md)
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>光ディスクの記録面に可視画像を生成・書き込みするオールインワンツール</h2>
 
 Disc Image Studio は、あらゆる記録ドライブを使って、あらゆる DVD / CD / 単層 Blu-ray ディスクの記録面に肉眼で見える画像を刻むための、マルチプラットフォーム対応のディスク記録面画像生成・書き込みツールです。
@@ -19,25 +17,9 @@ Disc Image Studio は、あらゆる記録ドライブを使って、あらゆ�
 
 ---
 
-## 作例
-
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
----
-
 ## 概要
 
 Disc Image Studio は、1 枚の画像を CD、DVD、片面一層 BD-R ディスクの物理層の制約を満たすデータに変換します。書き込み後、ディスクの記録面に肉眼で見える模様が浮かび上がります。
-
-## 画面プレビュー
-
-![ホーム：テンプレートと最近のプロジェクト](docs/images/ui-home.png)
-
-![デザイン：レイヤーキャンバスとトーン調整](docs/images/ui-design.png)
-
-![エクスポート：ライトテーマと出力イメージ](docs/images/ui-export.png)
 
 ---
 
@@ -63,14 +45,14 @@ Windows では `win-x64.exe` で終わるファイルをダウンロードして
 
 ### ディスクデータの生成
 
-- **CD 対応**：あらゆる CD に対応します。フォーマットヘッダー付きの WAV 音声トラックと対応する CUE をエクスポートでき、cdrecord、ImgBurn などの書き込みソフトと互換性があります。RAW 音声トラックのエクスポートも可能です。詳しくは [CD 書き込み互換性の説明](docs/CD_AUDIO_COMPATIBILITY.md)をご覧ください。
+- **CD 対応**：あらゆる CD に対応します。フォーマットヘッダー付きの WAV 音声トラックと対応する CUE をエクスポートでき、cdrecord、ImgBurn などの書き込みソフトと互換性があります。RAW 音声トラックのエクスポートも可能です。
 - **DVD 対応**：あらゆる DVD に対応します。ISO イメージをエクスポートできます。
-- **Blu-ray 対応**：あらゆる片面一層 BD-R 25 GB に対応し、描画のみのモードと UDF 2.01 ファイルをサポートします。詳しくは [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) をご覧ください。
+- **Blu-ray 対応**：あらゆる片面一層 BD-R 25 GB に対応し、描画のみのモードと UDF 2.01 ファイルをサポートします。
 - **ディスク同梱ファイル**：CD／DVD／Blu-ray では、保存するフォルダーと内周／外周の配置をデザインページで直接選択でき、エクスポートページでも調整できます。設定はプロジェクトとともに保存されます。
 - **ファイル領域プレビュー**：ハイブリッドディスクのデザイン投影と完成品の読み戻しでは、ファイル領域（ファイルシステムを含む）が黄色で示されます。
-- **メディア別の階調方式**：CD と DVD はいずれも白黒 2 階調を使用し、CD は `0D / AA`、DVD はスクランブル領域で `A5 / 92` を使用します。詳しくは [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) をご覧ください。
+- **メディア別の階調方式**：CD と DVD はいずれも白黒 2 階調を使用し、CD は `0D / AA`、DVD はスクランブル領域で `A5 / 92` を使用します。
 - **階調ディザリングツール**：独立したプログラムで、元画像を `0/255` の白黒 2 階調 PNG に変換することもできます。元画像を開く／ドラッグして読み込む操作、並べてのプレビュー、ロスレス PNG エクスポートに対応しています。詳しくは[使い方とビルド方法](tools/FourLevelDither/README.md)をご覧ください。
-- **ディスクプリセット**：CD／DVD／BD にわたる複数ブランドのディスクパラメーターを内蔵しています。ご自身でキャリブレーションしたデータをご提供いただくことも歓迎します。詳しくは[プリセットのメンテナンス](docs/DISC_PRESETS.md)をご覧ください。
+- **ディスクプリセット**：CD／DVD／BD にわたる複数ブランドのディスクパラメーターを内蔵しています。ご自身でキャリブレーションしたデータをご提供いただくことも歓迎します。
 
 ### 補助キャリブレーション
 
@@ -78,11 +60,7 @@ Disc Image Studio は、インテリジェントで高精度な補助キャリ�
 
 | キャリブレーション前 · 一定トラックピッチ | キャリブレーション後 · 3 次トラックピッチ |
 | --- | --- |
-| ![キャリブレーション前の DVD 実写：放射方向の十字線がはっきり曲がっている](docs/images/verbatim-dvd-calibration-before.jpg) | ![キャリブレーション後の DVD 実写：放射方向の十字線が直線に近づいている](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-
-手順とパラメーターについては[補助キャリブレーションの説明](docs/CALIBRATION.md)をご覧ください。
 
 ### 書き込み
 
@@ -109,8 +87,6 @@ dotnet run --project src/DiscImageStudio.App --configuration Release
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-バージョン規則、CI による EXE 生成、Release ドラフトの確認、MSIX パッケージングと署名の手順については[リリースガイド](docs/RELEASING.md)をご覧ください。
 
 ## コマンドライン
 
@@ -160,23 +136,12 @@ src/DvdImageSolver/          分離を保った DVD エンコード/ソルバー
 tests/                       サードパーティのテストフレームワークを使わないアーキテクチャ回帰テスト
 packaging/                   MSIX マニフェストとパッケージングスクリプト
 tools/                       独立した補助ツールとアセット生成スクリプト
-docs/                        アーキテクチャ、エンジン、プリセット、リリースなどのドキュメント
 ```
 
 ## ドキュメント
 
 | ドキュメント | 内容 |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | モジュールの抽象化、レイヤー間の境界と拡張ルール |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | UI 言語の設定、システム言語のフォールバックと翻訳リソースのメンテナンス |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | DVD NRZI 画像制約ソルバーの規約、エンコードチェーンとセルフテストの範囲 |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | CD 音声トラックの形式、バイトオーダーとゴースト（多重像）のトラブルシューティング |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | Blu-ray モジュールの物理モデル、生成/書き込みの流れと拡張ポイント |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | 編集可能なディスクプリセットの階層型 JSON 形式とマージ規則 |
-| [CALIBRATION.md](docs/CALIBRATION.md) | 写真補正（ディスク実物の最外縁と中心穴の縁を枠で指定）、曲線キャリブレーションと DVD の 3 次トラックピッチフィッティング |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | CD / DVD 生成物理モデルの再検証 |
-| [VALIDATION.md](docs/VALIDATION.md) | 各回のビルド、回帰テスト、実ディスクテストのローカル検証記録 |
-| [RELEASING.md](docs/RELEASING.md) | GitHub Release、MSIX パッケージング、署名テストとストア申請の手順 |
 | [CHANGELOG.md](CHANGELOG.md) | バージョンごとの変更履歴 |
 
 ## 参考規格

@@ -1,6 +1,6 @@
 namespace DiscImageStudio.Rendering;
 
-/// <summary>Documented bounds of the composer; see docs/IMAGE_COMPOSITION.md.</summary>
+/// <summary>Documented bounds of the composer.</summary>
 public static class CompositionLimits
 {
     /// <summary>Largest canvas side: the generation size the disc engines consume.</summary>

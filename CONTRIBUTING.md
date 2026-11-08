@@ -31,7 +31,7 @@ dotnet run --project src/DiscImageStudio.App --configuration Release
 
 ## 模块边界
 
-改代码前请先读[架构说明](docs/ARCHITECTURE.md)。核心取舍：外壳不依赖任何一种光盘编码，介质专用逻辑留在对应模块。提交评审会重点检查以下规则：
+核心取舍：外壳不依赖任何一种光盘编码，介质专用逻辑留在对应模块。提交评审会重点检查以下规则：
 
 1. 不要把 CD/DVD/未来蓝光的物理调制、纠错、扇区组织或文件系统细节放进 `DiscImageStudio.Core` 或共享层。
 2. 模块不得从 GUI 控件读取状态，输入全部来自 `DiscJobRequest`；模块不得直接显示窗口。
@@ -58,22 +58,21 @@ dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Rel
 
 按改动内容补充验证，并在描述中写明结果：
 
-- 改动图片布局、流式刻录或盘片预设解析时，对照 [VALIDATION.md](docs/VALIDATION.md) 的对应回归项复核结论。
-- 改动 GUI 时，用屏幕外渲染截图自检关键页面，必要时更新 `docs/images/`。
+- 改动 GUI 时，用屏幕外渲染截图自检关键页面。
 - 延迟交织、EFMPlus、ECC 等编码链改动后，`selftest` 覆盖项不变时也请说明变化原因。
 
 ## 提交与 Pull Request
 
 1. Fork（或从 `main` 拉出）一个功能分支，一个分支只解决一件事，保持差异可评审。
 2. 提交信息的标题和正文都使用英语。标题简短说明改动，正文按需说明行为变化、验证方式与大文件影响。每次发布的 Release notes 都提供中文和英文两节。
-3. PR 描述写清动机、改动口径与验证结果；涉及用户可见行为时，同步更新 `CHANGELOG.md` 的 Unreleased 段与相关 `docs/` 文档。
+3. PR 描述写清动机、改动口径与验证结果；涉及用户可见行为时，同步更新 `CHANGELOG.md` 的 Unreleased 段。
 4. 提交后确认 GitHub Actions 的 `build` 工作流为绿色。
 
 大改动（新模块、新 UI 页面、刻录层契约变更）建议先开 Issue 或 Draft PR 讨论方案，再写实现。
 
 ## 版本与发布
 
-采用 `main` 加短期功能分支，以及按修复、功能、不兼容变化递增的语义化版本。日常贡献把变更记入 `CHANGELOG.md` 的 `Unreleased`；维护者在同一个发布准备 PR 中更新 `Directory.Build.props` 的版本配置和对应版本记录，合并到 `main` 后由 GitHub Actions 自动生成版本标签与 Release 草稿。普通代码 push 不生成 Release。完整触发条件、预发布后缀、草稿审核与重试规则见[发布指南](docs/RELEASING.md)。
+采用 `main` 加短期功能分支，以及按修复、功能、不兼容变化递增的语义化版本。日常贡献把变更记入 `CHANGELOG.md` 的 `Unreleased`；维护者在同一个发布准备 PR 中更新 `Directory.Build.props` 的版本配置和对应版本记录，合并到 `main` 后由 GitHub Actions 自动生成版本标签与 Release 草稿。普通代码 push 不生成 Release。
 
 ## 许可证
 
