@@ -19,6 +19,9 @@ public enum BurnSourceKind
 {
     Project,
     CalibrationTarget,
+
+    /// <summary>Generated while it is burned, without an image file (Task 04).</summary>
+    Generated,
 }
 
 /// <summary>A file the page can burn: the project's published image or its calibration target.</summary>
@@ -103,6 +106,11 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
     public string IrreversibleText => _text["burn.confirm.irreversible"];
 
     public string BluRayWarningText => _text["burn.confirm.bluray"];
+
+    public string GeneratedWarningText => _text["burn.confirm.generated"];
+
+    [ObservableProperty]
+    public partial bool ShowGeneratedWarning { get; private set; }
 
     public string AcknowledgeLabel => _text["burn.confirm.acknowledge"];
 
@@ -203,6 +211,25 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
     public partial string OutcomeText { get; private set; } = string.Empty;
 
     /// <summary>Called once by the shell.</summary>
+    /// <summary>Called once by the shell: what "Generate and burn" needs.</summary>
+    public void AttachGeneration(
+        DiscImageStudio.App.Avalonia.Generation.ExportPlanner planner,
+        DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer preparer,
+        IDiscGenerationService generation)
+    {
+        _planner = planner ?? throw new ArgumentNullException(nameof(planner));
+        _preparer = preparer ?? throw new ArgumentNullException(nameof(preparer));
+        _generation = generation ?? throw new ArgumentNullException(nameof(generation));
+    }
+
+    private DiscImageStudio.App.Avalonia.Generation.ExportPlanner? _planner;
+    private DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer? _preparer;
+    private IDiscGenerationService? _generation;
+    private CancellationTokenSource? _planningGenerated;
+
+    /// <summary>The key of the generated source; it has no file.</summary>
+    private const string GeneratedKey = "generate://project";
+
     public void AttachJobs(JobCoordinator jobs)
     {
         _jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
@@ -327,12 +354,15 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
             ByteSize.Format(media.FreeBytes(mode)),
             (double)source.Bytes / media.FreeBytes(mode) * 100)));
         ConfirmRows.Add(new(_text["burn.row.speed"], SelectedSpeed?.Label ?? _text["burn.speed.max"]));
-        ConfirmRows.Add(new(_text["burn.row.source"], string.Format(
-            CultureInfo.CurrentUICulture,
-            _text["burn.value.source"],
-            System.IO.Path.GetFileName(source.Path),
-            source.Sha256 is { Length: >= 16 } hash ? hash[..16] : _text["burn.value.noManifest"])));
+        ConfirmRows.Add(new(_text["burn.row.source"], source.Kind == BurnSourceKind.Generated
+            ? string.Format(CultureInfo.CurrentUICulture, _text["burn.value.generated"], _generatedSummary)
+            : string.Format(
+                CultureInfo.CurrentUICulture,
+                _text["burn.value.source"],
+                System.IO.Path.GetFileName(source.Path),
+                source.Sha256 is { Length: >= 16 } hash ? hash[..16] : _text["burn.value.noManifest"])));
         ShowBluRayWarning = mode == OpticalBurnMediaKind.BluRayData;
+        ShowGeneratedWarning = source.Kind == BurnSourceKind.Generated;
         Acknowledged = false;
         _confirmedFingerprint = Fingerprint();
         Notice = string.Empty;
@@ -363,18 +393,25 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
             return;
         }
 
-        OpticalBurnSource burnSource;
-        try
+        OpticalBurnRequest? request = null;
+        if (source.Kind != BurnSourceKind.Generated)
         {
-            burnSource = OpticalBurnSources.FromArtifact(source.Path, mode);
-        }
-        catch (OpticalBurnException exception)
-        {
-            ShowFailure(exception);
-            return;
+            try
+            {
+                request = OpticalBurnSources.FromArtifact(source.Path, mode).ToRequest(device.Status.Device.Id, SelectedSpeed?.Speed, device.Status.Media?.Identity);
+            }
+            catch (OpticalBurnException exception)
+            {
+                ShowFailure(exception);
+                return;
+            }
         }
 
-        OpticalBurnRequest request = burnSource.ToRequest(device.Status.Device.Id, SelectedSpeed?.Speed, device.Status.Media?.Identity);
+        ProjectWorkspace? workspace = _projects.Current;
+        string? projectFile = _projects.ProjectFilePath;
+        string deviceId = device.Status.Device.Id;
+        OpticalWriteSpeed? speed = SelectedSpeed?.Speed;
+        string? identity = device.Status.Media?.Identity;
         _confirmedFingerprint = null;
         Phase = BurnPhase.Running;
         StageText = _text["burn.stage.prepare"];
@@ -382,12 +419,40 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
         ProgressText = string.Empty;
         OpticalBurnResult? result = null;
         ApplicationResult<JobCompletion> job = await jobs.StartJobAsync(
-            new JobRequest(string.Format(CultureInfo.CurrentUICulture, _text["burn.job.name"], System.IO.Path.GetFileName(source.Path))),
+            new JobRequest(string.Format(
+                CultureInfo.CurrentUICulture,
+                _text["burn.job.name"],
+                source.Kind == BurnSourceKind.Generated ? source.Title : System.IO.Path.GetFileName(source.Path))),
             async context =>
             {
                 _jobId = context.JobId;
                 Progress<OpticalBurnProgress> progress = new(update => ShowProgress(update, context.Progress));
-                result = await _burner.BurnAsync(request, progress, context.CancellationToken);
+                if (request is not null)
+                {
+                    result = await _burner.BurnAsync(request, progress, context.CancellationToken);
+                    return;
+                }
+
+                // Generate and burn: compose the 8192 px source, plan again and feed the recorder
+                // from the pipeline's stream. The plan must still describe what was confirmed.
+                await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => StageText = _text["burn.stage.composing"]);
+                using DiscImageStudio.App.Avalonia.Generation.PreparedGeneration prepared = await _preparer!.PrepareAsync(
+                    workspace!, projectFile, workspace!.Delivery.OutputPath, directBurn: true, context.CancellationToken);
+                GenerationPlan plan = await _generation!.PlanAsync(prepared.Request, context.CancellationToken);
+                if (BurnBytes(plan) != source.Bytes)
+                {
+                    throw new OpticalBurnException(OpticalBurnErrorCode.SourceFailed, "The project changed since the review.");
+                }
+
+                IDiscGenerationService generation = _generation;
+                OpticalBurnRequest generated = new(
+                    deviceId,
+                    mode,
+                    source.Bytes,
+                    (output, token) => generation.GenerateStreamAsync(plan, output, progress: null, token).GetAwaiter().GetResult(),
+                    speed,
+                    ExpectedMediaIdentity: identity);
+                result = await _burner.BurnAsync(generated, progress, context.CancellationToken);
             });
         _jobId = null;
         if (job.Succeeded && result is { } done)
@@ -473,6 +538,15 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
             Sources.Add(Describe(BurnSourceKind.Project, _text["burn.source.project"], output, workspace.Media.Family));
         }
 
+        if (_planner is not null)
+        {
+            // Sized by planning with the draft composition; the 8192 px source is composed in the job.
+            Sources.Add(new BurnSourceOption(
+                BurnSourceKind.Generated, _text["burn.source.generated"], GeneratedKey, GeneratedMode(workspace), 0, default,
+                $"rev-{_projects.ContentRevision}", _text["burn.problem.planning"]));
+            _ = PlanGeneratedAsync(workspace);
+        }
+
         if (workspace.Identity.CalibrationSessionPath is { Length: > 0 } sessionPath && CalibrationArtifact(sessionPath) is { } target)
         {
             Sources.Add(Describe(BurnSourceKind.CalibrationTarget, _text["burn.source.calibration"], target.Path, target.Family));
@@ -480,6 +554,76 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
 
         SelectedSource = Sources.FirstOrDefault(source => source.Path == keep) ?? Sources.FirstOrDefault();
     }
+
+    private static OpticalBurnMediaKind GeneratedMode(ProjectWorkspace workspace)
+        => workspace.Media switch
+        {
+            CdState when !string.IsNullOrWhiteSpace(workspace.Delivery.DataDirectory) => OpticalBurnMediaKind.CdData,
+            CdState => OpticalBurnMediaKind.CdAudio,
+            BluRayState => OpticalBurnMediaKind.BluRayData,
+            _ => OpticalBurnMediaKind.DvdData,
+        };
+
+    /// <summary>Bytes the generator will produce for a burn: the plan's size, without the WAVE header for CD audio.</summary>
+    private static long BurnBytes(GenerationPlan plan)
+        => plan.Request is GenerateCdRequest cd && cd.Format != CdArtifactFormat.Mode1Iso ? cd.Parameters.TotalBytes : plan.EstimatedBytes;
+
+    private async Task PlanGeneratedAsync(ProjectWorkspace workspace)
+    {
+        _planningGenerated?.Cancel();
+        CancellationTokenSource cancellation = new();
+        _planningGenerated = cancellation;
+        long revision = _projects.ContentRevision;
+        string? problem;
+        long bytes = 0;
+        string summary = string.Empty;
+        try
+        {
+            DiscImageStudio.App.Avalonia.Generation.ExportReview review = await _planner!.ReviewAsync(workspace, _projects.ProjectFilePath, cancellation.Token);
+            if (review.Plan is { } plan)
+            {
+                bytes = BurnBytes(plan);
+                summary = plan.Summary;
+                problem = review.PaintedLayers == 0 ? _text["burn.problem.nothingDrawn"] : null;
+            }
+            else
+            {
+                problem = review.PlanError is { } error ? ExportWorkspaceViewModel.ProblemText(_text, error) : _text["burn.problem.planFailed"];
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException or InvalidOperationException)
+        {
+            problem = string.Format(CultureInfo.CurrentUICulture, _text["export.problem.unexpected"], exception.Message);
+        }
+
+        if (cancellation.IsCancellationRequested || revision != _projects.ContentRevision)
+        {
+            return;
+        }
+
+        int index = Sources.ToList().FindIndex(option => option.Kind == BurnSourceKind.Generated);
+        if (index < 0)
+        {
+            return;
+        }
+
+        bool selected = SelectedSource?.Kind == BurnSourceKind.Generated;
+        BurnSourceOption updated = Sources[index] with { Bytes = bytes, Problem = problem, Title = _text["burn.source.generated"] };
+        _generatedSummary = summary;
+        Sources[index] = updated;
+        if (selected)
+        {
+            SelectedSource = updated;
+        }
+
+        Evaluate();
+    }
+
+    private string _generatedSummary = string.Empty;
 
     private BurnSourceOption Describe(BurnSourceKind kind, string title, string path, OpticalDiscFamily family)
     {
@@ -567,7 +711,12 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
         BurnSourceOption? source = SelectedSource;
         SourceText = source is null
             ? string.Empty
-            : string.Format(CultureInfo.CurrentUICulture, _text["burn.source.text"], source.Path, source.Bytes > 0 ? ByteSize.Format(source.Bytes) : "—", source.Mode is { } m ? ModeText(m) : "—");
+            : string.Format(
+                CultureInfo.CurrentUICulture,
+                _text["burn.source.text"],
+                source.Kind == BurnSourceKind.Generated ? _text["burn.source.generatedText"] : source.Path,
+                source.Bytes > 0 ? ByteSize.Format(source.Bytes) : "—",
+                source.Mode is { } m ? ModeText(m) : "—");
         if (!IsBackendAvailable)
         {
             Problems.Add(_text["burn.backend.unavailable"]);

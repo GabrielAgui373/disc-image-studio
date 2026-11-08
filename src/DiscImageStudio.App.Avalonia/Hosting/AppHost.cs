@@ -187,6 +187,10 @@ public sealed class AppHost : IDisposable
             clipboard);
         viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
         viewModel.BurnWorkspace.AttachJobs(jobs);
+        viewModel.BurnWorkspace.AttachGeneration(
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
+            services.Generation,
+            generation);
         viewModel.CalibrationWorkspace.AttachRecovery(
             DiscImageStudio.Application.Calibration.CalibrationRecoveryStore.Under(paths, new DiscImageStudio.Application.Ports.SystemClock()));
         PreferencesViewModel preferences = new(

@@ -123,6 +123,8 @@
                         <TextBlock Text="{Binding IrreversibleText}" TextWrapping="Wrap" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding BluRayWarningText}" TextWrapping="Wrap"
                                    Classes="settings-hint" IsVisible="{Binding ShowBluRayWarning}" />
+                        <TextBlock Text="{Binding GeneratedWarningText}" TextWrapping="Wrap"
+                                   Classes="settings-hint" IsVisible="{Binding ShowGeneratedWarning}" />
                         <CheckBox IsChecked="{Binding Acknowledged}">
                             <TextBlock Text="{Binding AcknowledgeLabel}" TextWrapping="Wrap" />
                         </CheckBox>
