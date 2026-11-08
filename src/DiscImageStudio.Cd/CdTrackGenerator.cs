@@ -344,6 +344,24 @@ public static class CdTrackGenerator
         ToneProfile tone,
         CancellationToken cancellationToken = default)
     {
+        byte[] pixels = RenderWarpPixels(imagePath, generated, actual, outputSize, samplesPerSector, tone, cancellationToken);
+        WritePng(Path.GetFullPath(outputPath), outputSize, pixels);
+    }
+
+    /// <summary>
+    /// The projection behind <see cref="PreviewWarp(string, string, CdDiscParameters, CdDiscParameters, int, int, ToneProfile, CancellationToken)"/>
+    /// as an opaque BGRA buffer of <paramref name="outputSize"/>², for hosts that display the
+    /// result without a PNG round trip.
+    /// </summary>
+    public static byte[] RenderWarpPixels(
+        string imagePath,
+        CdDiscParameters generated,
+        CdDiscParameters actual,
+        int outputSize,
+        int samplesPerSector,
+        ToneProfile tone,
+        CancellationToken cancellationToken = default)
+    {
         generated.Validate();
         actual.Validate();
         ValidatePreview(outputSize, samplesPerSector);
@@ -387,7 +405,7 @@ public static class CdTrackGenerator
             sampleNumber++;
         }
 
-        WritePng(Path.GetFullPath(outputPath), outputSize, preview.CreatePixels());
+        return preview.CreatePixels();
     }
 
     /// <summary>

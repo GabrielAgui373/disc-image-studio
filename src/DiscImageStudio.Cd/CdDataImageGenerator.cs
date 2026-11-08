@@ -204,6 +204,13 @@ public static class CdDataImageGenerator
     public static void PreviewWarp(string imagePath, string outputPath, CdDiscParameters generated,
         CdDiscParameters actual, int outputSize, int samplesPerSector, ToneProfile tone,
         CdDataLayoutPlan? plan = null, CancellationToken cancellationToken = default)
+        => DataPreview.Save(outputPath, outputSize,
+            RenderWarpPixels(imagePath, generated, actual, outputSize, samplesPerSector, tone, plan, cancellationToken));
+
+    /// <summary>The data-disc projection as an opaque BGRA buffer of <paramref name="outputSize"/>².</summary>
+    public static byte[] RenderWarpPixels(string imagePath, CdDiscParameters generated,
+        CdDiscParameters actual, int outputSize, int samplesPerSector, ToneProfile tone,
+        CdDataLayoutPlan? plan = null, CancellationToken cancellationToken = default)
     {
         ValidatePreview(actual, outputSize, samplesPerSector);
         generated.Validate();
@@ -224,7 +231,7 @@ public static class CdDataImageGenerator
                 preview.Splat(actual, physicalByte, CdToneMapping.Map(sampler.Sample(physicalByte), tone, physicalByte));
             }
         }
-        preview.Save(outputPath);
+        return preview.CreatePixels();
     }
 
     public static void PreviewTrack(string isoPath, string outputPath, CdDiscParameters actual,
@@ -276,7 +283,16 @@ public static class CdDataImageGenerator
             _sum[index] += CdToneMapping.DisplayGray(palette);
             _count[index]++;
         }
-        internal void Save(string path)
+        internal void Save(string path) => Save(path, size, CreatePixels());
+
+        internal static void Save(string path, int size, byte[] pixels)
+        {
+            string fullPath = Path.GetFullPath(path);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+            RasterCodec.SavePng(fullPath, size, size, pixels, grayscale: false);
+        }
+
+        internal byte[] CreatePixels()
         {
             byte[] pixels = new byte[checked(size * size * 4)];
             Array.Fill(pixels, (byte)255);
@@ -286,9 +302,7 @@ public static class CdDataImageGenerator
                 byte gray = (byte)((_sum[index] + _count[index] / 2) / _count[index]);
                 pixels[index * 4] = pixels[index * 4 + 1] = pixels[index * 4 + 2] = gray;
             }
-            string fullPath = Path.GetFullPath(path);
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-            RasterCodec.SavePng(fullPath, size, size, pixels, grayscale: false);
+            return pixels;
         }
     }
 
