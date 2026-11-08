@@ -56,6 +56,9 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
         _images = images ?? new CachingLayerImageSource();
     }
 
+    /// <summary>Decoded-layer cache shared with hosts that draw layers themselves (the design canvas).</summary>
+    public CachingLayerImageSource LayerImages => _images;
+
     /// <summary>
     /// Builds the scene: CD composes against the scheme's fixed image radius, DVD and BD against
     /// the generated outer radius, and layer sizes follow the content outer radius (WPF rules).

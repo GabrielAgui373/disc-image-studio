@@ -5,6 +5,7 @@ using DiscImageStudio.App.Avalonia.Diagnostics;
 using DiscImageStudio.App.Avalonia.Feedback;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
+using DiscImageStudio.App.Avalonia.ViewModels.Design;
 using DiscImageStudio.Application.Composition;
 using DiscImageStudio.Application.Editing;
 using DiscImageStudio.Application.Jobs;
@@ -67,6 +68,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
+        DesignCanvas = new DesignCanvasViewModel(
+            projects,
+            _editor,
+            new DiscImageStudio.App.Avalonia.Design.LayerBitmapCache(_compositions.LayerImages, dispatcher),
+            text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
@@ -260,9 +266,17 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             return;
         }
 
+        DesignCanvas.CommitPendingEdits();
         ApplicationResult<EditOutcome> result = step();
         if (result.Succeeded)
         {
+            // Reselect what the step touched so the user sees what changed.
+            DesignCanvas.Refresh();
+            if (result.Value.AffectedLayerIds.FirstOrDefault(id => DesignCanvas.Layers.Any(layer => layer.Id == id)) is { } layerId)
+            {
+                DesignCanvas.SelectedLayerId = layerId;
+            }
+
             ProjectActionError = null;
             ProjectActionStatus = string.Format(
                 System.Globalization.CultureInfo.CurrentUICulture,
@@ -289,6 +303,13 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void OnProjectWorkspaceChanged(ProjectWorkspaceChanged change)
     {
+        // The canvas follows every change, including drag previews; the rest only committed ones.
+        DesignCanvas.Refresh();
+        if (change.IsPreview)
+        {
+            return;
+        }
+
         RefreshProjectState();
         RefreshHistoryState();
         if (!change.IsPreview)
@@ -301,6 +322,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public RecentProjectsViewModel Recent { get; }
 
     public CompositionPreviewViewModel Preview { get; }
+
+    public DesignCanvasViewModel DesignCanvas { get; }
 
     public ProjectSettingsViewModel ProjectSettings { get; }
 
@@ -628,6 +651,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task SaveProjectAsync()
     {
+        DesignCanvas.CommitPendingEdits();
         if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
@@ -639,6 +663,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task SaveProjectAsAsync()
     {
+        DesignCanvas.CommitPendingEdits();
         if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
@@ -673,6 +698,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task OpenProjectSettingsAsync()
     {
+        DesignCanvas.CommitPendingEdits();
         if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
@@ -684,6 +710,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [RelayCommand]
     private async Task CloseProjectAsync()
     {
+        DesignCanvas.CommitPendingEdits();
         if (!HasOpenProject || IsProjectOperationInProgress || IsAnyDialogOpen)
         {
             return;
@@ -983,6 +1010,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void OnProjectOpened(ProjectOpened project)
     {
+        DesignCanvas.Reset();
         RefreshProjectState();
         RefreshHistoryState();
         _ = Recent.RefreshAsync();
@@ -1006,6 +1034,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void OnProjectClosed(ProjectClosed project)
     {
+        DesignCanvas.Reset();
         RefreshProjectState();
         RefreshHistoryState();
         Preview.Clear();

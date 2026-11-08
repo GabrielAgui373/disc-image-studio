@@ -792,6 +792,35 @@
     <Setter Property="Margin" Value="0,0,8,2" />
   </Style>
 
+  <!-- Design canvas card: a fixed-height frame so the canvas never collapses inside the page scroll. -->
+  <Style Selector="Border.design-canvas-card">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+
+  <Style Selector="Border.design-canvas-frame">
+    <Setter Property="Height" Value="560" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <Style Selector="Border.design-canvas-frame:focus-within">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.design-zoom-percent">
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
   <Style Selector="Border.home-continue">
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />

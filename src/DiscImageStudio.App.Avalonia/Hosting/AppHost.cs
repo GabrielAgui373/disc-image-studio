@@ -71,7 +71,10 @@ public sealed class AppHost : IDisposable
         PhysicalFileSystem fileSystem = new();
         JsonProjectDocumentStore projectDocuments = new();
         // CD composes against the scheme's fixed image radius; the CD module owns that value.
-        ProjectCompositionService compositions = new(DiscImageStudio.Cd.CdDiscParameters.StandardImageOuterRadiusMm);
+        // One decoded-layer cache serves composition (preview, thumbnail, generation) and the
+        // design canvas, so a layer image is decoded once per file version.
+        CachingLayerImageSource layerImages = new();
+        ProjectCompositionService compositions = new(DiscImageStudio.Cd.CdDiscParameters.StandardImageOuterRadiusMm, layerImages);
         ProjectLifecycleService projects = new(
             projectDocuments,
             fileSystem,

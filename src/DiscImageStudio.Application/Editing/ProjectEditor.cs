@@ -33,6 +33,9 @@ public sealed class ProjectEditor
     /// <summary>Raised after any change to what can be undone or redone.</summary>
     public event EventHandler? HistoryChanged;
 
+    /// <summary>True when a project is open and no drag is in progress, so a new edit can start.</summary>
+    public bool CanApply => Synchronize() && _activeDrag is null;
+
     public bool CanUndo => Synchronize() && _history.CanUndo && _activeDrag is null;
 
     public bool CanRedo => Synchronize() && _history.CanRedo && _activeDrag is null;

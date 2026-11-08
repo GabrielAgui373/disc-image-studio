@@ -18,6 +18,12 @@ public sealed class LayerImageLevel
 
     /// <summary>Premultiplied BGRA, row-major, no padding.</summary>
     internal byte[] Pixels { get; }
+
+    /// <summary>
+    /// Read-only view of the premultiplied BGRA pixels, for hosts that build a display bitmap
+    /// (the design canvas). The engine never exposes a mutable buffer.
+    /// </summary>
+    public ReadOnlySpan<byte> PremultipliedPixels => Pixels;
 }
 
 /// <summary>
