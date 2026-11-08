@@ -591,7 +591,8 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
         {
             foreach (OpticalModeCapability capability in device.Status.Modes)
             {
-                ModeRows.Add(new(ModeText(capability.Mode), capability.IsAvailable ? _text["burn.mode.available"] : ReasonText(capability.Reason)));
+                string state = capability.IsAvailable ? _text["burn.mode.available"] : ReasonText(capability.Reason);
+                ModeRows.Add(new(ModeText(capability.Mode), capability.Detail is { Length: > 0 } detail ? $"{state} · {detail}" : state));
             }
 
             if (source?.Mode is { } mode)

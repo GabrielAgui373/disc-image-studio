@@ -39,9 +39,22 @@ public interface IScsiTransport : IDisposable
     ScsiResult Read(byte[] cdb, int allocationLength, TimeSpan timeout);
 }
 
-/// <summary>Opens a drive for reading MMC state.</summary>
+/// <summary>A drive opened for writing (Task 13.5): read commands plus commands that send data.</summary>
+public interface IScsiWriteTransport : IScsiTransport
+{
+    ScsiResult Send(byte[] cdb, byte[] data, int length, TimeSpan timeout);
+}
+
+/// <summary>Opens a drive for reading MMC state, or exclusively for a burn.</summary>
 public interface IScsiTransportFactory
 {
+    /// <summary>
+    /// Opens <paramref name="devicePath"/> read-write, non-blocking and exclusive (no mount or
+    /// other burner can hold it meanwhile). Needs write access to the node (uaccess or the group).
+    /// </summary>
+    /// <exception cref="LinuxDeviceOpenException">The node cannot be opened; <see cref="LinuxDeviceOpenException.Errno"/> says why.</exception>
+    IScsiWriteTransport OpenForWriting(string devicePath);
+
     /// <summary>Opens <paramref name="devicePath"/> read-only and non-blocking (works without a disc).</summary>
     /// <exception cref="LinuxDeviceOpenException">The node cannot be opened; <see cref="LinuxDeviceOpenException.Errno"/> says why.</exception>
     IScsiTransport OpenForReading(string devicePath);
@@ -71,18 +84,41 @@ public sealed class SgIoTransportFactory : IScsiTransportFactory
 
         return new SgIoTransport(descriptor);
     }
+
+    public IScsiWriteTransport OpenForWriting(string devicePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(devicePath);
+        int descriptor = LinuxNative.Open(
+            devicePath,
+            LinuxNative.ReadWrite | LinuxNative.NonBlocking | LinuxNative.CloseOnExec | LinuxNative.Exclusive);
+        if (descriptor < 0)
+        {
+            throw new LinuxDeviceOpenException(devicePath, LinuxNative.LastError);
+        }
+
+        return new SgIoTransport(descriptor);
+    }
 }
 
-internal sealed class SgIoTransport(int descriptor) : IScsiTransport
+internal sealed class SgIoTransport(int descriptor) : IScsiWriteTransport
 {
     private const int SenseBytes = 32;
     private int _descriptor = descriptor;
 
     public ScsiResult Read(byte[] cdb, int allocationLength, TimeSpan timeout)
+        => Execute(cdb, new byte[allocationLength], allocationLength, toDevice: false, timeout);
+
+    public ScsiResult Send(byte[] cdb, byte[] data, int length, TimeSpan timeout)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(length, data.Length);
+        return Execute(cdb, data, length, toDevice: true, timeout);
+    }
+
+    private ScsiResult Execute(byte[] cdb, byte[] data, int allocationLength, bool toDevice, TimeSpan timeout)
     {
         ArgumentNullException.ThrowIfNull(cdb);
         ObjectDisposedException.ThrowIf(_descriptor < 0, this);
-        byte[] data = new byte[allocationLength];
         byte[] sense = new byte[SenseBytes];
         GCHandle cdbHandle = GCHandle.Alloc(cdb, GCHandleType.Pinned);
         GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -92,7 +128,8 @@ internal sealed class SgIoTransport(int descriptor) : IScsiTransport
             SgIoHeader header = new()
             {
                 interface_id = SgIoHeader.InterfaceId,
-                dxfer_direction = allocationLength > 0 ? SgIoHeader.TransferFromDevice : SgIoHeader.TransferNone,
+                dxfer_direction = allocationLength == 0 ? SgIoHeader.TransferNone
+                    : toDevice ? SgIoHeader.TransferToDevice : SgIoHeader.TransferFromDevice,
                 cmd_len = (byte)cdb.Length,
                 mx_sb_len = SenseBytes,
                 dxfer_len = (uint)allocationLength,
@@ -106,7 +143,7 @@ internal sealed class SgIoTransport(int descriptor) : IScsiTransport
                 throw new IOException($"SG_IO failed (errno {LinuxNative.LastError}).");
             }
 
-            int received = Math.Clamp(allocationLength - header.resid, 0, allocationLength);
+            int received = toDevice ? 0 : Math.Clamp(allocationLength - header.resid, 0, allocationLength);
             return new ScsiResult(header.status, header.host_status, header.driver_status, sense[..header.sb_len_wr], data[..received]);
         }
         finally

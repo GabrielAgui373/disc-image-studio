@@ -133,12 +133,28 @@ public sealed class AppHost : IDisposable
         // recorders are offered only when explicitly asked for, to exercise the Burn page.
         DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend noWriter = new(
             "Burning on Linux is enabled only after it is validated on real recorders.");
-        DiscImageStudio.Burning.IOpticalDeviceService burning =
-            Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1"
-                ? DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo()
-                : OperatingSystem.IsLinux()
-                    ? new DiscImageStudio.Burning.Linux.LinuxOpticalDeviceService()
-                    : noWriter;
+        DiscImageStudio.Burning.IOpticalDeviceService burning;
+        DiscImageStudio.Burning.IOpticalBurner? writer = null;
+        if (Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1")
+        {
+            burning = DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            // Modes are enabled by recorded physical tests (burn-validations.json) or, for the test
+            // campaign, by DISC_IMAGE_STUDIO_BURN_TEST_MODES; every burn is logged locally (Task 13.5).
+            DiscImageStudio.Burning.Linux.LinuxBurnValidation validation = DiscImageStudio.Burning.Linux.LinuxBurnValidation.Load(
+                Path.Combine(paths.ConfigDirectory, "burn-validations.json"),
+                Environment.GetEnvironmentVariable(DiscImageStudio.Burning.Linux.LinuxBurnValidation.TestModesVariable));
+            burning = new DiscImageStudio.Burning.Linux.LinuxOpticalDeviceService(validation: validation);
+            writer = new DiscImageStudio.Burning.Linux.LinuxOpticalBurner(
+                validation: validation,
+                log: new DiscImageStudio.Burning.Linux.BurnTestLog(Path.Combine(paths.StateDirectory, "burn-tests.jsonl")));
+        }
+        else
+        {
+            burning = noWriter;
+        }
 
         MainViewModel viewModel = new(
             paths,
@@ -163,7 +179,7 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
             new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation),
             burning,
-            burning as DiscImageStudio.Burning.IOpticalBurner ?? noWriter);
+            writer ?? burning as DiscImageStudio.Burning.IOpticalBurner ?? noWriter);
         viewModel.ExportWorkspace.AttachRunner(
             new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
             jobs,

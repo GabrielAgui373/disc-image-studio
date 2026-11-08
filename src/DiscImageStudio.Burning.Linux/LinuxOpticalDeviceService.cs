@@ -49,18 +49,18 @@ public sealed class LinuxOpticalDeviceService : IOpticalDeviceService
 {
     private readonly LinuxDeviceTree _tree;
     private readonly IScsiTransportFactory _transports;
-    private readonly OpticalWriteModes _validated;
+    private readonly LinuxBurnValidation _validation;
     private readonly Func<string, LinuxAccessDiagnosis> _diagnose;
 
     public LinuxOpticalDeviceService(
         LinuxDeviceTree? tree = null,
         IScsiTransportFactory? transports = null,
-        OpticalWriteModes validated = OpticalWriteModes.None,
+        LinuxBurnValidation? validation = null,
         Func<string, LinuxAccessDiagnosis>? diagnose = null)
     {
         _tree = tree ?? new LinuxDeviceTree();
         _transports = transports ?? new SgIoTransportFactory();
-        _validated = validated;
+        _validation = validation ?? new LinuxBurnValidation();
         _diagnose = diagnose ?? (path => Diagnose(path, _tree));
     }
 
@@ -134,8 +134,22 @@ public sealed class LinuxOpticalDeviceService : IOpticalDeviceService
             state,
             detail,
             media,
-            OpticalDeviceStatus.Evaluate(writeModes, state, media, _validated));
+            Modes(node, writeModes, state, media));
     }
+
+    /// <summary>
+    /// Capabilities with the validation records applied: a mode is available only with a passing
+    /// physical test for this recorder and disc type, or while the test campaign enables it (then it
+    /// says so).
+    /// </summary>
+    private IReadOnlyList<OpticalModeCapability> Modes(LinuxOpticalNode node, OpticalWriteModes writeModes, OpticalDeviceAccess state, OpticalMediaState? media)
+        => [.. OpticalDeviceStatus.Evaluate(writeModes, state, media, _validation.Validated(node, media)).Select(capability =>
+            capability.IsAvailable && _validation.IsTestOnly(node, media, capability.Mode)
+                ? capability with { Detail = "Enabled for a hardware test; not validated yet" }
+                : capability.Reason == OpticalBurnUnavailableReason.NotValidated
+                  && (OpticalDeviceStatus.Flag(capability.Mode) & LinuxBurnValidation.ImplementedModes) == 0
+                    ? capability with { Detail = "Not implemented on Linux yet" }
+                    : capability)];
 
     private static string DisplayName(LinuxOpticalNode node)
     {

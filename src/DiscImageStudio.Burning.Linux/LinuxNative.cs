@@ -14,6 +14,7 @@ internal static partial class LinuxNative
     internal const int ReadWrite = 2;
     internal const int NonBlocking = 0x800;
     internal const int CloseOnExec = 0x80000;
+    internal const int Exclusive = 0x80;
     internal const int ReadAccess = 4;
     internal const int WriteAccess = 2;
     internal const int ErrorNoEntry = 2;
