@@ -14,8 +14,8 @@
                 <Button Grid.Column="1" Classes="calibration-step" Classes.active="{Binding IsPhotoStep}"
                         Content="{Binding StepPhotoLabel}" Command="{Binding ShowPhotoStepCommand}"
                         ToolTip.Tip="{Binding NeedsSessionText}" />
-                <Button Grid.Column="2" Classes="calibration-step" IsEnabled="False"
-                        Content="{Binding StepCurveLabel}" />
+                <Button Grid.Column="2" Classes="calibration-step" Classes.active="{Binding IsCurveStep}"
+                        Content="{Binding StepCurveLabel}" Command="{Binding ShowCurveStepCommand}" />
                 <TextBlock Grid.Column="3" Text="{Binding StepLaterHint}" Classes="settings-hint"
                            VerticalAlignment="Center" TextWrapping="Wrap" />
             </Grid>
@@ -210,13 +210,17 @@
 
         <!-- Step 2: the photo and its edges. -->
         <Grid x:Name="PhotoPanes" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16"
-              IsVisible="{Binding IsPhotoStep}">
+              IsVisible="{Binding !IsTargetStep}">
             <Border x:Name="CanvasPane" Classes="design-panel" VerticalAlignment="Top">
                 <StackPanel Spacing="10">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                        <StackPanel Spacing="4">
+                        <StackPanel Spacing="4" IsVisible="{Binding IsPhotoStep}">
                             <TextBlock Text="{Binding PhotoTitle}" Classes="settings-section-title" />
                             <TextBlock Text="{Binding PhotoDescription}" Classes="settings-hint" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Spacing="4" IsVisible="{Binding IsCurveStep}">
+                            <TextBlock Text="{Binding CurveTitle}" Classes="settings-section-title" />
+                            <TextBlock Text="{Binding CurveDescription}" Classes="settings-hint" TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top">
                             <Button Classes="ghost" Content="−" Command="{Binding PhotoCanvas.ZoomOutCommand}" />
@@ -233,7 +237,7 @@
                 </StackPanel>
             </Border>
 
-            <Border x:Name="PhotoSide" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top">
+            <Border x:Name="PhotoSide" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top" IsVisible="{Binding IsPhotoStep}">
                 <StackPanel Spacing="16">
                     <Border Classes="export-confirm" IsVisible="{Binding HasRecoveryDraft}">
                         <StackPanel Spacing="8">
@@ -322,6 +326,139 @@
                         <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding SaveSessionLabel}"
                                 Command="{Binding SavePhotoCommand}" IsEnabled="{Binding !IsPhotoBusy}" />
                         <TextBlock Text="{Binding PhotoSaveText}" Classes="settings-hint" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Step 3: curve, candidates and the result (Tasks 12.4 and 12.5). -->
+            <Border x:Name="CurveSide" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top" IsVisible="{Binding IsCurveStep}">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding TraceCountText}" Classes="settings-field-label" />
+                        <UniformGrid Rows="1" ColumnSpacing="8">
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding RemovePointLabel}" Command="{Binding RemoveSelectedPointCommand}" />
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding ClearTraceLabel}" Command="{Binding ClearTraceCommand}" />
+                        </UniformGrid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding RangeLabel}" Classes="settings-field-label" />
+                        <ComboBox ItemsSource="{Binding SearchRanges}" SelectedItem="{Binding SelectedRange}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="calibration:CalibrationRangeOption">
+                                    <TextBlock Text="{Binding Label}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <CheckBox IsChecked="{Binding FitPitch}" IsVisible="{Binding IsDvdSession}">
+                            <TextBlock Text="{Binding FitPitchLabel}" TextWrapping="Wrap" />
+                        </CheckBox>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding IsFitting}">
+                        <TextBlock Text="{Binding FitProgressText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <ProgressBar IsIndeterminate="True" />
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Content="{Binding CancelPhotoWorkLabel}" Command="{Binding CancelFitCommand}" />
+                    </StackPanel>
+                    <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Command="{Binding SolveCommand}" IsVisible="{Binding !IsFitting}">
+                        <TextBlock Text="{Binding SolveLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                    </Button>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding HasFit}">
+                        <Border Classes="export-status" Classes.ready="{Binding IsFitAccepted}">
+                            <TextBlock Text="{Binding FitAssessment}" TextWrapping="Wrap" />
+                        </Border>
+                        <TextBlock Text="{Binding CandidatesLabel}" Classes="settings-field-label" />
+                        <ListBox ItemsSource="{Binding Candidates}" SelectedItem="{Binding SelectedCandidate}" MaxHeight="220">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="calibration:CalibrationCandidateItem">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Detail}" Classes="settings-hint" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Classes="calibration-badge" Classes.accepted="{Binding Accepted}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Badge}" FontSize="11" FontWeight="SemiBold" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <ItemsControl ItemsSource="{Binding CandidateRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="export:ExportSummaryRow">
+                                    <Border Classes="export-row">
+                                        <Grid ColumnDefinitions="96,*" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding Label}" Classes="settings-field-label" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border Classes="settings-asset-summary" IsVisible="{Binding HasFitWarnings}">
+                            <ItemsControl ItemsSource="{Binding FitWarnings}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" Classes="settings-hint" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </StackPanel>
+
+                    <Border Classes="export-confirm" IsVisible="{Binding HasFit}">
+                        <StackPanel Spacing="10">
+                            <CheckBox IsChecked="{Binding CurveConfirmed}">
+                                <CheckBox.IsEnabled>
+                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                        <Binding Path="IsPredictionReady" />
+                                        <Binding Path="IsFitAccepted" />
+                                    </MultiBinding>
+                                </CheckBox.IsEnabled>
+                                <TextBlock Text="{Binding ConfirmCurveLabel}" TextWrapping="Wrap" />
+                            </CheckBox>
+                            <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding ApplyCalibrationCommand}" IsEnabled="{Binding CanApply}">
+                                <TextBlock Text="{Binding ApplyLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                            </Button>
+                            <TextBlock Text="{Binding ApplyBlockedText}" Classes="settings-hint" TextWrapping="Wrap"
+                                       IsVisible="{Binding !CanApply}" />
+                            <TextBlock Text="{Binding ApplyStatus}" TextWrapping="Wrap"
+                                       IsVisible="{Binding ApplyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding MeasurementTitle}" Classes="settings-field-label" />
+                        <Border Classes="settings-asset-summary">
+                            <TextBlock Text="{Binding MeasurementText}" TextWrapping="Wrap" />
+                        </Border>
+                        <Button Classes="ghost" HorizontalAlignment="Left" Content="{Binding ClearMeasurementLabel}"
+                                Command="{Binding ClearMeasurementCommand}" IsVisible="{Binding HasMeasurement}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding HasFit}">
+                        <TextBlock Text="{Binding PresetLabel}" Classes="settings-field-label" />
+                        <TextBox Text="{Binding PresetName}" PlaceholderText="{Binding PresetWatermark}" MaxLength="80" />
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding SavePresetLabel}"
+                                Command="{Binding SavePresetCommand}" />
+                        <TextBlock Text="{Binding PresetStatus}" Classes="settings-hint" TextWrapping="Wrap"
+                                   IsVisible="{Binding PresetStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <CheckBox IsChecked="{Binding ReportIncludesPersonal}">
+                            <TextBlock Text="{Binding ReportPersonalLabel}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding ReportLabel}"
+                                Command="{Binding ExportReportCommand}" />
+                        <TextBlock Text="{Binding ReportStatus}" Classes="settings-hint" TextWrapping="Wrap"
+                                   IsVisible="{Binding ReportStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                     </StackPanel>
                 </StackPanel>
             </Border>

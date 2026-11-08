@@ -30,6 +30,11 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
                 SelectedEdge = null;
             }
 
+            if (SelectedTraceIndex >= Step.TracePoints.Count)
+            {
+                SelectedTraceIndex = -1;
+            }
+
             RefreshWorld();
             Invalidate();
         };
@@ -62,6 +67,26 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
 
     public int SelectedIndex { get; private set; } = -1;
 
+    /// <summary>Step 3: the rectified view where curve points are placed.</summary>
+    [ObservableProperty]
+    public partial bool IsTracing { get; set; }
+
+    /// <summary>Curve points can be added, moved and removed.</summary>
+    [ObservableProperty]
+    public partial bool CanTrace { get; set; }
+
+    /// <summary>Selected curve point (index in radial order), or −1.</summary>
+    public int SelectedTraceIndex { get; private set; } = -1;
+
+    /// <summary>The selected candidate's predicted curve, in disc millimetres.</summary>
+    public IReadOnlyList<CalibrationPoint>? Prediction { get; private set; }
+
+    /// <summary>Curve points visibly off the prediction (drawn as crosses, not only in another colour).</summary>
+    public IReadOnlySet<int> Outliers { get; private set; } = new HashSet<int>();
+
+    /// <summary>Raised when a click or drag is refused (off the disc), with the reason for the hint line.</summary>
+    public event EventHandler<string>? TraceRefused;
+
     [ObservableProperty]
     public partial string ZoomText { get; private set; } = "100%";
 
@@ -71,6 +96,10 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
     public string EmptyText => _text["calibration.photo.canvas.empty"];
 
     public string RectifiedCaption => _text["calibration.photo.canvas.rectified"];
+
+    public string TraceCaption => _text["calibration.curve.canvas.caption"];
+
+    public void ShowHint(string text) => HintText = text;
 
     public void SetPhotoBitmap(Bitmap? bitmap)
     {
@@ -93,6 +122,95 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
         RefreshWorld();
         RefreshHint();
         Invalidate();
+    }
+
+    partial void OnIsTracingChanged(bool value)
+    {
+        SelectedEdge = null;
+        SelectedIndex = -1;
+        SelectedTraceIndex = -1;
+        RefreshWorld();
+        RefreshHint();
+        Invalidate();
+    }
+
+    partial void OnCanTraceChanged(bool value)
+    {
+        RefreshHint();
+        Invalidate();
+    }
+
+    public void SetPrediction(IReadOnlyList<CalibrationPoint>? curve, IReadOnlyList<int>? outliers)
+    {
+        Prediction = curve;
+        Outliers = new HashSet<int>(outliers ?? []);
+        Invalidate();
+    }
+
+    public void SelectTrace(int index)
+    {
+        SelectedTraceIndex = index;
+        RefreshHint();
+        Invalidate();
+    }
+
+    public bool AddTrace(CalibrationPoint mm)
+    {
+        if (!CanTrace)
+        {
+            return false;
+        }
+
+        int index = Step.AddTracePoint(mm);
+        if (index < 0)
+        {
+            TraceRefused?.Invoke(this, Step.IsOnDisc(mm) ? _text["calibration.curve.hint.full"] : _text["calibration.curve.hint.offDisc"]);
+            return false;
+        }
+
+        SelectTrace(index);
+        return true;
+    }
+
+    public bool MoveTrace(int index, CalibrationPoint mm)
+    {
+        if (!CanTrace)
+        {
+            return false;
+        }
+
+        int moved = Step.MoveTracePoint(index, mm);
+        if (moved < 0)
+        {
+            TraceRefused?.Invoke(this, _text["calibration.curve.hint.offDisc"]);
+            return false;
+        }
+
+        SelectTrace(moved);
+        return true;
+    }
+
+    public bool RemoveSelectedTrace()
+    {
+        if (!CanTrace || SelectedTraceIndex < 0 || !Step.RemoveTracePoint(SelectedTraceIndex))
+        {
+            return false;
+        }
+
+        SelectTrace(-1);
+        return true;
+    }
+
+    /// <summary>Moves the selected curve point by millimetres (arrow keys).</summary>
+    public bool NudgeSelectedTrace(double dx, double dy)
+    {
+        if (SelectedTraceIndex < 0 || SelectedTraceIndex >= Step.TracePoints.Count)
+        {
+            return false;
+        }
+
+        CalibrationPoint current = Step.TracePoints[SelectedTraceIndex];
+        return MoveTrace(SelectedTraceIndex, new(current.X + dx, current.Y + dy));
     }
 
     partial void OnCanEditChanged(bool value)
@@ -162,7 +280,7 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
 
     private void RefreshWorld()
     {
-        if (ShowRectified && Step.Rectification is { } rectification)
+        if ((ShowRectified || IsTracing) && Step.Rectification is { } rectification)
         {
             Viewport.ShowDisc(rectification.CanvasRadiusMm);
         }
@@ -178,7 +296,13 @@ public sealed partial class CalibrationPhotoCanvasViewModel : ObservableObject
         => ZoomText = string.Format(CultureInfo.CurrentUICulture, "{0:0}%", Viewport.Zoom * 100);
 
     private void RefreshHint()
-        => HintText = ShowRectified
+        => HintText = IsTracing
+            ? !CanTrace
+                ? _text["calibration.curve.hint.locked"]
+                : SelectedTraceIndex >= 0
+                    ? string.Format(CultureInfo.CurrentUICulture, _text["calibration.curve.hint.selected"], SelectedTraceIndex + 1)
+                    : _text["calibration.curve.hint.add"]
+            : ShowRectified
             ? _text["calibration.photo.hint.rectified"]
             : !CanEdit
                 ? _text["calibration.photo.hint.locked"]

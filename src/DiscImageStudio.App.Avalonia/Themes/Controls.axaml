@@ -441,6 +441,17 @@
     <Setter Property="Opacity" Value="0.55" />
   </Style>
 
+  <Style Selector="Border.calibration-badge">
+    <Setter Property="Padding" Value="8,2" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="Background" Value="{DynamicResource DiscWarningBrush}" />
+    <Setter Property="TextElement.Foreground" Value="White" />
+  </Style>
+
+  <Style Selector="Border.calibration-badge.accepted">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
   <Style Selector="Border.calibration-canvas">
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
     <Setter Property="ClipToBounds" Value="True" />

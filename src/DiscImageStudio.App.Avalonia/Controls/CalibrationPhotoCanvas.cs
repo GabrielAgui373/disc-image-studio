@@ -38,6 +38,11 @@ public sealed class CalibrationPhotoCanvas : Control
     private CalibrationPoint _dragOriginal = new(0, 0);
     private CalibrationPoint _dragPosition = new(0, 0);
     private Point _pointer;
+    private int _traceDrag = -1;
+    private Point? _lastTraceClick;
+    private CalibrationPoint _traceOriginal = new(0, 0);
+    private CalibrationPoint _tracePosition = new(0, 0);
+    private CalibrationPoint _traceStartWorld = new(0, 0);
 
     static CalibrationPhotoCanvas()
     {
@@ -52,6 +57,8 @@ public sealed class CalibrationPhotoCanvas : Control
     }
 
     private bool Dragging => _dragEdge is not null;
+
+    private bool DraggingTrace => _traceDrag >= 0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -82,7 +89,7 @@ public sealed class CalibrationPhotoCanvas : Control
 
     private void OnInvalidateRequested(object? sender, EventArgs args)
     {
-        if (Dragging && ViewModel is { CanEdit: false })
+        if ((Dragging && ViewModel is { CanEdit: false }) || (DraggingTrace && ViewModel is { CanTrace: false }))
         {
             CancelDrag();
         }
@@ -102,6 +109,26 @@ public sealed class CalibrationPhotoCanvas : Control
         }
 
         CalibrationPhotoViewport viewport = model.Viewport;
+        if (model.IsTracing)
+        {
+            if (model.Step.Rectification is null || model.RectifiedBitmap is not { } view)
+            {
+                DrawCentred(context, model.EmptyText, bounds.Center, Brush("DiscTextMutedBrush", Colors.Gray));
+                return;
+            }
+
+            DrawBitmap(context, view, viewport);
+            DrawRectifiedGuides(context, viewport, model.Step.PhysicalOuterRadiusMm, faint: true);
+            DrawTrace(context, model);
+            DrawCaption(context, model.TraceCaption);
+            if (DraggingTrace)
+            {
+                DrawLoupe(context, viewport, view, _tracePosition, Brush("DiscAccentBrush", Colors.DeepSkyBlue));
+            }
+
+            return;
+        }
+
         if (model.ShowRectified && model.Step.Rectification is not null && model.RectifiedBitmap is { } rectified)
         {
             DrawBitmap(context, rectified, viewport);
@@ -120,7 +147,60 @@ public sealed class CalibrationPhotoCanvas : Control
         DrawEdges(context, model);
         if (Dragging)
         {
-            DrawLoupe(context, model, photo);
+            DrawLoupe(context, viewport, photo, _dragPosition, EdgeBrush(_dragEdge ?? CalibrationEdge.Outer));
+        }
+    }
+
+    /// <summary>
+    /// Curve points (cyan dots joined in radial order), the selected candidate's prediction
+    /// (orange) and the points off it, drawn as red crosses so they read without colour.
+    /// </summary>
+    private void DrawTrace(DrawingContext context, CalibrationPhotoCanvasViewModel model)
+    {
+        CalibrationPhotoViewport viewport = model.Viewport;
+        if (model.Prediction is { Count: > 1 } prediction)
+        {
+            context.DrawGeometry(null, new Pen(new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x1F)), 2), Path(viewport, prediction, closed: false));
+        }
+
+        IReadOnlyList<CalibrationPoint> points = model.Step.TracePoints;
+        if (DraggingTrace && _traceDrag < points.Count)
+        {
+            CalibrationPoint[] copy = [.. points];
+            copy[_traceDrag] = _tracePosition;
+            points = copy;
+        }
+
+        IBrush trace = new SolidColorBrush(Color.FromRgb(0x22, 0xD3, 0xEE));
+        IBrush outlier = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44));
+        context.DrawGeometry(null, new Pen(trace, 1.2, new DashStyle([2, 3], 0)), Path(viewport, points, closed: false));
+        for (int i = 0; i < points.Count; i++)
+        {
+            CalibrationPoint view = viewport.WorldToView(points[i]);
+            Point centre = new(view.X, view.Y);
+            bool selected = i == model.SelectedTraceIndex || i == _traceDrag;
+            if (model.Outliers.Contains(i))
+            {
+                double arm = selected ? 7 : 5;
+                Pen cross = new(outlier, 2.4);
+                context.DrawLine(new Pen(Brushes.Black, 4.2), new Point(centre.X - arm, centre.Y - arm), new Point(centre.X + arm, centre.Y + arm));
+                context.DrawLine(new Pen(Brushes.Black, 4.2), new Point(centre.X - arm, centre.Y + arm), new Point(centre.X + arm, centre.Y - arm));
+                context.DrawLine(cross, new Point(centre.X - arm, centre.Y - arm), new Point(centre.X + arm, centre.Y + arm));
+                context.DrawLine(cross, new Point(centre.X - arm, centre.Y + arm), new Point(centre.X + arm, centre.Y - arm));
+            }
+            else
+            {
+                double radius = selected ? 6 : 4;
+                context.DrawEllipse(trace, new Pen(Brushes.Black, 1.2), centre, radius, radius);
+            }
+
+            if (selected)
+            {
+                FormattedText label = Text($"#{i + 1}", 12, Brushes.White);
+                Rect box = new(centre.X + 9, centre.Y - label.Height - 8, label.Width + 8, label.Height + 4);
+                context.DrawRectangle(new SolidColorBrush(Colors.Black, 0.6), null, new RoundedRect(box, 3));
+                context.DrawText(label, new Point(box.Left + 4, box.Top + 2));
+            }
         }
     }
 
@@ -166,25 +246,28 @@ public sealed class CalibrationPhotoCanvas : Control
         }
     }
 
-    /// <summary>A magnified, pixel-exact view of the photo under the moving handle.</summary>
-    private void DrawLoupe(DrawingContext context, CalibrationPhotoCanvasViewModel model, Bitmap photo)
+    /// <summary>A magnified, pixel-exact view of the bitmap under the point being moved.</summary>
+    private void DrawLoupe(DrawingContext context, CalibrationPhotoViewport viewport, Bitmap bitmap, CalibrationPoint world, IBrush crossBrush)
     {
-        CalibrationPhotoViewport viewport = model.Viewport;
         // Opposite corner from the pointer, so the loupe never covers what it shows.
         bool left = _pointer.X > Bounds.Width / 2;
         Rect box = new(left ? 12 : Bounds.Width - LoupeSize - 12, 12, LoupeSize, LoupeSize);
-        double scale = Math.Max(viewport.Scale * LoupeZoom, 2);
-        double half = LoupeSize / 2 / scale;
-        Rect source = new(_dragPosition.X + 0.5 - half, _dragPosition.Y + 0.5 - half, 2 * half, 2 * half);
+        (double worldLeft, double worldTop, double worldWidth, double worldHeight) = viewport.World;
+        double perWorldX = bitmap.PixelSize.Width / worldWidth;
+        double perWorldY = bitmap.PixelSize.Height / worldHeight;
+        double halfWorld = LoupeSize / 2 / Math.Max(viewport.Scale * LoupeZoom, 2 * perWorldX);
+        double cx = (world.X - worldLeft) * perWorldX;
+        double cy = (world.Y - worldTop) * perWorldY;
+        Rect source = new(cx - (halfWorld * perWorldX), cy - (halfWorld * perWorldY), 2 * halfWorld * perWorldX, 2 * halfWorld * perWorldY);
         using (context.PushClip(new RoundedRect(box, 8)))
         {
             context.FillRectangle(new SolidColorBrush(Color.FromRgb(0x24, 0x26, 0x2b)), box);
             using (context.PushRenderOptions(new RenderOptions { BitmapInterpolationMode = BitmapInterpolationMode.None }))
             {
-                context.DrawImage(photo, source, box);
+                context.DrawImage(bitmap, source, box);
             }
 
-            Pen cross = new(EdgeBrush(_dragEdge ?? CalibrationEdge.Outer), 1);
+            Pen cross = new(crossBrush, 1);
             context.DrawLine(cross, new Point(box.Center.X, box.Top), new Point(box.Center.X, box.Center.Y - 6));
             context.DrawLine(cross, new Point(box.Center.X, box.Center.Y + 6), new Point(box.Center.X, box.Bottom));
             context.DrawLine(cross, new Point(box.Left, box.Center.Y), new Point(box.Center.X - 6, box.Center.Y));
@@ -194,10 +277,11 @@ public sealed class CalibrationPhotoCanvas : Control
         context.DrawRectangle(null, new Pen(Brushes.White, 1.5), new RoundedRect(box, 8));
     }
 
-    private void DrawRectifiedGuides(DrawingContext context, CalibrationPhotoViewport viewport, double outerRadiusMm)
+    private void DrawRectifiedGuides(DrawingContext context, CalibrationPhotoViewport viewport, double outerRadiusMm, bool faint = false)
     {
         CalibrationPoint centre = viewport.WorldToView(new(0, 0));
         Point origin = new(centre.X, centre.Y);
+        using DrawingContext.PushedState opacity = context.PushOpacity(faint ? 0.45 : 1);
         Pen guide = new(EdgeBrush(CalibrationEdge.Outer), 1.2, new DashStyle([5, 4], 0));
         context.DrawEllipse(null, guide, origin, outerRadiusMm * viewport.Scale, outerRadiusMm * viewport.Scale);
         Pen hole = new(EdgeBrush(CalibrationEdge.Hole), 1.2, new DashStyle([5, 4], 0));
@@ -284,6 +368,36 @@ public sealed class CalibrationPhotoCanvas : Control
         PointerPoint point = e.GetCurrentPoint(this);
         _pointer = point.Position;
         CalibrationPoint view = new(point.Position.X, point.Position.Y);
+        if (model.IsTracing && point.Properties.IsLeftButtonPressed && !_spaceHeld)
+        {
+            // In the curve step a click adds a point. The second click of a double click on the same
+            // spot must not add another one; quick clicks at different places are separate points
+            // (the platform counts them as a multi-click by time alone).
+            bool repeat = e.ClickCount >= 2 && _lastTraceClick is { } last
+                          && Math.Abs(last.X - point.Position.X) < 6 && Math.Abs(last.Y - point.Position.Y) < 6;
+            _lastTraceClick = point.Position;
+            if (!repeat && model.CanTrace)
+            {
+                int traceHit = model.Viewport.HitTest(model.Step.TracePoints, view, 10);
+                if (traceHit >= 0)
+                {
+                    _traceDrag = traceHit;
+                    _traceOriginal = model.Step.TracePoints[traceHit];
+                    _tracePosition = _traceOriginal;
+                    _traceStartWorld = model.Viewport.ViewToWorld(view);
+                    model.SelectTrace(traceHit);
+                    e.Pointer.Capture(this);
+                }
+                else
+                {
+                    model.AddTrace(model.Viewport.ViewToWorld(view));
+                }
+            }
+
+            e.Handled = true;
+            return;
+        }
+
         if (point.Properties.IsLeftButtonPressed && e.ClickCount == 2 && HitHandle(model, view) is null)
         {
             model.FitViewCommand.Execute(null);
@@ -338,6 +452,14 @@ public sealed class CalibrationPhotoCanvas : Control
             return;
         }
 
+        if (DraggingTrace)
+        {
+            CalibrationPoint world = model.Viewport.ViewToWorld(new(position.X, position.Y));
+            _tracePosition = new(_traceOriginal.X + world.X - _traceStartWorld.X, _traceOriginal.Y + world.Y - _traceStartWorld.Y);
+            InvalidateVisual();
+            return;
+        }
+
         if (Dragging)
         {
             CalibrationPoint world = model.Viewport.ViewToWorld(new(position.X, position.Y));
@@ -351,7 +473,9 @@ public sealed class CalibrationPhotoCanvas : Control
             return;
         }
 
-        bool overHandle = model.CanEdit && !model.ShowRectified && HitHandle(model, new(position.X, position.Y)) is not null;
+        bool overHandle = model.IsTracing
+            ? model.CanTrace && model.Viewport.HitTest(model.Step.TracePoints, new(position.X, position.Y), 10) >= 0
+            : model.CanEdit && !model.ShowRectified && HitHandle(model, new(position.X, position.Y)) is not null;
         Cursor = new Cursor(overHandle ? StandardCursorType.Cross : _spaceHeld ? StandardCursorType.Hand : StandardCursorType.Arrow);
     }
 
@@ -362,6 +486,18 @@ public sealed class CalibrationPhotoCanvas : Control
         {
             _panning = false;
             Cursor = new Cursor(StandardCursorType.Arrow);
+        }
+        else if (DraggingTrace && ViewModel is { } tracing)
+        {
+            int index = _traceDrag;
+            CalibrationPoint position = _tracePosition;
+            _traceDrag = -1;
+            if (position != _traceOriginal)
+            {
+                tracing.MoveTrace(index, position);
+            }
+
+            InvalidateVisual();
         }
         else if (Dragging && ViewModel is { } model)
         {
@@ -424,7 +560,22 @@ public sealed class CalibrationPhotoCanvas : Control
                 Cursor = new Cursor(StandardCursorType.Hand);
                 e.Handled = true;
                 break;
-            case Key.Escape when Dragging:
+            case Key.Delete or Key.Back when model.IsTracing:
+                e.Handled = model.RemoveSelectedTrace();
+                break;
+            case Key.Left when model.IsTracing:
+                e.Handled = model.NudgeSelectedTrace(-step * 0.02, 0);
+                break;
+            case Key.Right when model.IsTracing:
+                e.Handled = model.NudgeSelectedTrace(step * 0.02, 0);
+                break;
+            case Key.Up when model.IsTracing:
+                e.Handled = model.NudgeSelectedTrace(0, -step * 0.02);
+                break;
+            case Key.Down when model.IsTracing:
+                e.Handled = model.NudgeSelectedTrace(0, step * 0.02);
+                break;
+            case Key.Escape when Dragging || DraggingTrace:
                 CancelDrag();
                 e.Handled = true;
                 break;
@@ -492,10 +643,11 @@ public sealed class CalibrationPhotoCanvas : Control
 
     private void CancelDrag()
     {
-        if (Dragging)
+        if (Dragging || DraggingTrace)
         {
             _dragEdge = null;
             _dragIndex = -1;
+            _traceDrag = -1;
             InvalidateVisual();
         }
     }

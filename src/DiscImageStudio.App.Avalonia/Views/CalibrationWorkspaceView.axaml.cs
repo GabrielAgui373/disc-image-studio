@@ -19,7 +19,7 @@ public partial class CalibrationWorkspaceView : UserControl
     private void ApplyLayout(double width)
     {
         bool stacked = width < StackedBelowWidth;
-        foreach ((Grid panes, Control side) in new (Grid, Control)[] { (Panes, SidePane), (PhotoPanes, PhotoSide) })
+        foreach ((Grid panes, Control side) in new (Grid, Control)[] { (Panes, SidePane), (PhotoPanes, PhotoSide), (PhotoPanes, CurveSide) })
         {
             panes.ColumnDefinitions = stacked ? new ColumnDefinitions("*") : new ColumnDefinitions("*,340");
             Grid.SetColumn(side, stacked ? 0 : 1);

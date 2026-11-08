@@ -51,7 +51,7 @@ public sealed partial class CalibrationWorkspaceViewModel
     private CalibrationPhotoCanvasViewModel? _photoCanvas;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsTargetStep), nameof(IsPhotoStep))]
+    [NotifyPropertyChangedFor(nameof(IsTargetStep), nameof(IsPhotoStep), nameof(IsCurveStep))]
     public partial CalibrationStep CurrentStep { get; private set; } = CalibrationStep.Target;
 
     public bool IsTargetStep => CurrentStep == CalibrationStep.Target;
@@ -160,22 +160,30 @@ public sealed partial class CalibrationWorkspaceViewModel
         await EnsurePhotoLoadedAsync();
     }
 
-    partial void OnCurrentStepChanged(CalibrationStep value) => RefreshPhotoState();
+    partial void OnCurrentStepChanged(CalibrationStep value)
+    {
+        RefreshPhotoState();
+        RefreshCurveState();
+    }
 
     /// <summary>The linked session changed: drop the photo of another target, keep this one's.</summary>
     private void OnLinkedSessionChanged()
     {
         ShowPhotoStepCommand.NotifyCanExecuteChanged();
+        ShowCurveStepCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanUsePhotoStep));
+        OnPropertyChanged(nameof(CanUseCurveStep));
         if (_photoKey is not null && _photoKey != _linkedSession?.Target.Id)
         {
             ResetPhoto();
         }
 
-        if (!CanUsePhotoStep && IsPhotoStep)
+        if (!CanUsePhotoStep && (IsPhotoStep || IsCurveStep))
         {
             CurrentStep = CalibrationStep.Target;
         }
+
+        RefreshCurveState();
     }
 
     private void ResetPhoto()
@@ -186,6 +194,9 @@ public sealed partial class CalibrationWorkspaceViewModel
         _photoKey = null;
         _photoOwner = null;
         _photoOwnerPath = null;
+        _appliedUtc = null;
+        _savedPreset = null;
+        InvalidateFit();
         _photoUnsaved = false;
         _loadingPhoto = true;
         try
@@ -218,6 +229,8 @@ public sealed partial class CalibrationWorkspaceViewModel
         _photoKey = session.Target.Id;
         _photoOwner = session;
         _photoOwnerPath = path;
+        LoadFitSettings(session);
+        InvalidateFit();
         HasRecoveryDraft = false;
         if (_recovery?.List().FirstOrDefault(draft => draft.Key == session.Target.Id) is { } draft
             && draft.SavedUtc > File.GetLastWriteTimeUtc(path))
@@ -420,7 +433,7 @@ public sealed partial class CalibrationWorkspaceViewModel
             return;
         }
 
-        CalibrationSession updated = session with { Photo = _photo.ToSession() };
+        CalibrationSession updated = ComposeSession(session);
         try
         {
             await Task.Run(() => CalibrationSessionStore.Save(path, updated));
@@ -472,6 +485,7 @@ public sealed partial class CalibrationWorkspaceViewModel
         }
 
         RefreshPhotoState();
+        OnTraceMaybeChanged();
     }
 
     private async Task RestorePhotoAsync(CalibrationPhotoSession session)
@@ -540,7 +554,7 @@ public sealed partial class CalibrationWorkspaceViewModel
             return;
         }
 
-        CalibrationSession draft = session with { Photo = _photo.ToSession() };
+        CalibrationSession draft = ComposeSession(session);
         string? sessionPath = _photoOwnerPath;
         string? projectPath = _projects.ProjectFilePath;
         try
@@ -563,7 +577,7 @@ public sealed partial class CalibrationWorkspaceViewModel
 
         try
         {
-            recovery.Save(session with { Photo = _photo.ToSession() }, _photoOwnerPath, _projects.ProjectFilePath);
+            recovery.Save(ComposeSession(session), _photoOwnerPath, _projects.ProjectFilePath);
         }
         catch (Exception exception) when (exception is CalibrationException or IOException or UnauthorizedAccessException)
         {
