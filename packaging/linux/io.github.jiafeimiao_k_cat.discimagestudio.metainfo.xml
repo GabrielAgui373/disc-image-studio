@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.jiafeimiao_k_cat.discimagestudio</id>
+  <name>Disc Image Studio</name>
+  <summary>Design artwork that appears on the data side of optical discs</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>
+      Disc Image Studio turns an image into disc data that meets the physical-layer constraints
+      of CD, DVD and single-layer BD-R, so that after burning the pattern becomes visible on the disc.
+    </p>
+    <p>
+      Design the disc surface with layers, preview how the disc will read back, export the image
+      with integrity checks, calibrate the geometry of your drive and media from a photo, and burn.
+    </p>
+  </description>
+  <launchable type="desktop-id">disc-image-studio.desktop</launchable>
+  <url type="homepage">https://github.com/JiaFeiMiao-K-Cat/DiscImageStudio</url>
+  <url type="bugtracker">https://github.com/JiaFeiMiao-K-Cat/DiscImageStudio/issues</url>
+  <developer id="io.github.jiafeimiao_k_cat">
+    <name>Disc Image Studio contributors</name>
+  </developer>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <!-- Filled in by build-linux-gui.sh from Directory.Build.props. -->
+    <release version="@VERSION@" date="@DATE@" />
+  </releases>
+  <categories>
+    <category>Graphics</category>
+  </categories>
+  <provides>
+    <binary>disc-image-studio</binary>
+  </provides>
+</component>

@@ -126,6 +126,13 @@ jobs:
           path: artifacts/release/${{ needs.metadata.outputs.tag }}
           merge-multiple: true
 
+      - name: Collect tested Linux GUI archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: linux-gui-${{ needs.metadata.outputs.tag }}-*
+          path: artifacts/release/${{ needs.metadata.outputs.tag }}
+          merge-multiple: true
+
       - name: Prepare release notes
         run: |
           $metadata = ./packaging/Get-ReleaseMetadata.ps1 -Tag $env:RELEASE_TAG -RequireReleaseNotes
@@ -142,6 +149,16 @@ jobs:
             }
             $hashes += $line
           }
+          foreach ($rid in 'linux-x64','linux-arm64') {
+            $archive = "DiscImageStudio-Linux-$($metadata.Tag)-$rid.tar.gz"
+            $path = Join-Path $directory $archive
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            $line = "$hash  $archive"
+            if ((Get-Content -LiteralPath "$path.sha256" -Raw).Trim() -cne $line) {
+              throw "Downloaded Linux GUI checksum does not match for $archive."
+            }
+            $hashes += $line
+          }
           $checksum = $hashes -join "`n"
           [IO.File]::WriteAllText($manifest, "$checksum`n", [Text.UTF8Encoding]::new($false))
           $notes = @(
@@ -152,10 +169,12 @@ jobs:
             '下载下方 win-x64.exe 后直接运行，支持 Windows 10 2004+ / Windows 11 x64，已内置 .NET 运行时。'
             '此便携 EXE 未进行代码签名。即时流式刻录仍为实验性功能；硬件实测范围以仓库验证记录为准。'
             '**Linux 和 macOS 命令行版为实验性功能。** 按系统和处理器选择自包含的 tar.gz，解压后运行 `./disc-image-studio --help`。macOS 的 arm64 对应 Apple 芯片，x64 对应 Intel。'
+            '**Linux 图形界面为实验性功能。** 下载 DiscImageStudio-Linux 对应处理器的 tar.gz，解压后运行 `./disc-image-studio`，或运行 `./install.sh` 为当前用户安装到 ~/.local（加入应用菜单）。刻录在每种模式通过实机验证前保持关闭。'
             ''
             'Download the win-x64.exe below and run it directly on Windows 10 2004+ / Windows 11 x64. The .NET runtime is included.'
             'This portable EXE is unsigned. Live streaming burn remains experimental; see the repository validation records for tested hardware coverage.'
             '**The Linux and macOS CLIs are experimental.** Extract the self-contained tar.gz matching your OS and CPU, then run `./disc-image-studio --help` in that directory. On macOS, arm64 is Apple silicon and x64 is Intel.'
+            '**The Linux GUI is experimental.** Extract the DiscImageStudio-Linux tar.gz for your CPU and run `./disc-image-studio`, or run `./install.sh` to install it for your user under ~/.local (with a menu entry). Burning stays disabled for each mode until it is validated on real recorders.'
             ''
             '### SHA-256'
             ''

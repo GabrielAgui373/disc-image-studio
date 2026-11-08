@@ -9,7 +9,7 @@
     <AssemblyName>DiscImageStudio.App.Avalonia</AssemblyName>
     <RootNamespace>DiscImageStudio.App.Avalonia</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\DiscImageStudio.ico</ApplicationIcon>
     <Title>Disc Image Studio</Title>
     <Product>Disc Image Studio</Product>
     <Description>Create image-mapped CD, DVD and Blu-ray artifacts on Linux.</Description>

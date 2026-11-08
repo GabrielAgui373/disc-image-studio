@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Disc Image Studio
+GenericName=Disc art designer
+Comment=Design artwork that appears on the data side of CDs, DVDs and Blu-ray discs
+Exec=disc-image-studio
+Icon=disc-image-studio
+Terminal=false
+Categories=Graphics;
+Keywords=CD;DVD;Blu-ray;disc;burn;artwork;
+StartupWMClass=DiscImageStudio.App.Avalonia

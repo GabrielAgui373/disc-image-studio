@@ -10,7 +10,7 @@
         d:DesignHeight="620"
         x:Class="DiscImageStudio.App.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/DiscImageStudio.ico"
         Width="900"
         Height="620"
         MinWidth="620"
