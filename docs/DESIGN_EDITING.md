@@ -129,6 +129,24 @@ O canvas da página Design é a superfície de manipulação direta. Ele é divi
 
 Perder o ponteiro no meio de um arraste (outra janela, um diálogo) restaura o estado inicial. Depois de desfazer ou refazer, a camada afetada é selecionada de novo.
 
+## Painel lateral da Design (Tasks 09.3 e 09.4)
+
+Ao lado do canvas fica um painel com três abas. Abaixo de 860 DIP de largura de conteúdo, o painel passa para baixo do canvas. Toda alteração passa pelo `ProjectEditor`.
+
+**Layers** (`DesignWorkspaceViewModel`, `LayerListViewModel`, `LayerPropertiesViewModel`):
+
+- A lista mostra o topo primeiro, com miniatura (o bitmap de interação do canvas), marcador de imagem ausente e nome esmaecido quando a camada está oculta. As linhas são atualizadas no lugar enquanto a ordem não muda, então uma prévia de arraste no canvas nunca reconstrói a lista.
+- Selecionar na lista seleciona no canvas, e vice-versa.
+- **Import images** abre o seletor com várias imagens; todas entram num único passo e a última fica selecionada.
+- Reordenar: botões subir/descer ou arrastar a alça da linha (um passo "Reorder layer").
+- Mostrar/ocultar, duplicar e remover são um passo cada.
+- Propriedades da camada selecionada: nome (confirmado com Enter ou ao sair; Esc reverte), posição em mm, escala em %, rotação em graus e opacidade em %, todos como `NumericFieldViewModel` (ADR 3). "Reset placement" volta para o centro, sem rotação e escala 1.
+- Imagem da camada: path e ação **Relink**, que escolhe um novo arquivo e aplica `ProjectAssetService.Relink` como um passo desfazível ("Relink layer image").
+
+**Tone** (`ToneSettingsViewModel`): força do dither (0–100%), brilho (−64 a +64), níveis graváveis (dois; quatro só para CD, desabilitado nas demais famílias com explicação), linearização sRGB e "Reset to photo defaults". Uma sequência de mudanças de slider vira um único passo, confirmado 600 ms depois da última mudança ou antes de qualquer outro comando. Alternar níveis ou sRGB confirma na hora. O preview antes/depois fica para a etapa Preview (Task 10), porque o dither ainda vive no assembly `Imaging`, que é Windows-only.
+
+**Disc files** (`DiscFilesViewModel`): a pasta cujos arquivos são gravados no sistema de arquivos do disco (ISO 9660/Joliet ou UDF), apresentada como pasta, com textos explicando que esses arquivos não são desenhados na arte. Mostra quantidade e tamanho (contagem em segundo plano, limitada a 100.000 arquivos, sem seguir symlinks), avisa quando a pasta não existe mais e oferece escolher, abrir e remover. Escolher ou remover é um passo desfazível.
+
 ## Contexto de projeto na interface
 
 A navegação separa o que é do aplicativo do que é do projeto aberto:
