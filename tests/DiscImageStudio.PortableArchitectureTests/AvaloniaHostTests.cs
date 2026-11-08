@@ -313,7 +313,12 @@ public sealed class AvaloniaHostTests
             new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName)),
             new DiscImageStudio.Application.Composition.ProjectCompositionService(57.5),
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
-            new DiscImageStudio.Application.Preview.PreviewCoordinator([]));
+            new DiscImageStudio.Application.Preview.PreviewCoordinator([]),
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(
+                new DiscImageStudio.Application.Preview.PreviewSourceCache(
+                    new DiscImageStudio.Application.Composition.ProjectCompositionService(57.5),
+                    Path.Combine(paths.CacheDirectory, "preview")),
+                new DiscImageStudio.Generation.DiscGenerationService()));
 
     private static string CreateTempDirectory()
     {
