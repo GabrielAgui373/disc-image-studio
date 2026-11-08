@@ -1,0 +1,257 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls"
+             xmlns:design="using:DiscImageStudio.App.Avalonia.ViewModels.Design"
+             xmlns:views="using:DiscImageStudio.App.Avalonia.Views"
+             x:Class="DiscImageStudio.App.Avalonia.Views.DesignWorkspaceView"
+             x:DataType="design:DesignWorkspaceViewModel">
+    <!-- Two panes on wide windows (canvas | panel); the code-behind stacks them when narrow. -->
+    <Grid x:Name="Panes" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+        <views:DesignCanvasView x:Name="CanvasPane" DataContext="{Binding Canvas}" VerticalAlignment="Top" />
+
+        <Border x:Name="SidePane" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top">
+            <StackPanel Spacing="14">
+                <!-- Panel switcher: layers, tone and the files written to the disc. -->
+                <Border Classes="design-tabs">
+                    <UniformGrid Rows="1">
+                        <Button Classes="design-tab"
+                                Classes.active="{Binding IsLayersPanel}"
+                                Content="{Binding LayersTabLabel}"
+                                Command="{Binding ShowPanelCommand}"
+                                CommandParameter="{x:Static design:DesignPanel.Layers}" />
+                        <Button Classes="design-tab"
+                                Classes.active="{Binding IsTonePanel}"
+                                Content="{Binding ToneTabLabel}"
+                                Command="{Binding ShowPanelCommand}"
+                                CommandParameter="{x:Static design:DesignPanel.Tone}" />
+                        <Button Classes="design-tab"
+                                Classes.active="{Binding IsFilesPanel}"
+                                Content="{Binding FilesTabLabel}"
+                                Command="{Binding ShowPanelCommand}"
+                                CommandParameter="{x:Static design:DesignPanel.DiscFiles}" />
+                    </UniformGrid>
+                </Border>
+
+                <!-- Layers -->
+                <StackPanel Spacing="12" IsVisible="{Binding IsLayersPanel}">
+                    <Button Classes="primary" HorizontalAlignment="Stretch" Command="{Binding ImportCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Viewbox Width="14" Height="14">
+                                <Canvas Width="24" Height="24">
+                                    <Path Classes="button-icon" Data="M12,5 V19 M5,12 H19" />
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="{Binding ImportLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                        </StackPanel>
+                    </Button>
+
+                    <TextBlock Text="{Binding LayersEmpty}"
+                               Classes="settings-hint"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding !HasLayers}" />
+
+                    <ItemsControl x:Name="LayerList" ItemsSource="{Binding Layers.Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="design:LayerListItem">
+                                <Border Classes="layer-row" Classes.selected="{Binding IsSelected}" Classes.hidden="{Binding !Visible}">
+                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
+                                        <!-- Drag handle: reorders by dragging the row up or down. -->
+                                        <Border Classes="layer-grip" Tag="{Binding}" ToolTip.Tip="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).DragLabel}">
+                                            <Viewbox Width="10" Height="14">
+                                                <Canvas Width="10" Height="16">
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="1" Canvas.Top="2" />
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="6" Canvas.Top="2" />
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="1" Canvas.Top="7" />
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="6" Canvas.Top="7" />
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="1" Canvas.Top="12" />
+                                                    <Ellipse Classes="grip-dot" Canvas.Left="6" Canvas.Top="12" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Border>
+                                        <Border Grid.Column="1" Classes="layer-thumb">
+                                            <Grid>
+                                                <Image Source="{Binding Thumbnail}" Stretch="Uniform" IsVisible="{Binding HasThumbnail}" />
+                                                <TextBlock Text="!" Classes="layer-thumb-missing" IsVisible="{Binding IsMissing}" />
+                                            </Grid>
+                                        </Border>
+                                        <Button Grid.Column="2"
+                                                Classes="layer-select"
+                                                Command="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).SelectCommand}"
+                                                CommandParameter="{Binding}"
+                                                AutomationProperties.Name="{Binding Name}">
+                                            <StackPanel Spacing="1">
+                                                <TextBlock Text="{Binding Name}" Classes="layer-name" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MissingLabel}"
+                                                           Classes="layer-missing"
+                                                           IsVisible="{Binding IsMissing}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Grid.Column="3"
+                                                Classes="ghost compact-action history-action"
+                                                Command="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).ToggleVisibilityCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).ToggleVisibilityLabel}"
+                                                AutomationProperties.Name="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).ToggleVisibilityLabel}">
+                                            <Viewbox Width="15" Height="15">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Classes="history-icon" Data="M2,12 C5,7 8,5 12,5 C16,5 19,7 22,12 C19,17 16,19 12,19 C8,19 5,17 2,12 Z" />
+                                                    <Ellipse Classes="eye-pupil" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" IsVisible="{Binding Visible}" />
+                                                    <Path Classes="history-icon" Data="M4,20 L20,4" IsVisible="{Binding !Visible}" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                        <Button Grid.Column="4"
+                                                Classes="ghost compact-action history-action"
+                                                Command="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveUpCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveUpLabel}"
+                                                AutomationProperties.Name="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveUpLabel}">
+                                            <Viewbox Width="12" Height="12">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Classes="history-icon" Data="M6,15 L12,9 L18,15" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                        <Button Grid.Column="5"
+                                                Classes="ghost compact-action history-action"
+                                                Command="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveDownCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveDownLabel}"
+                                                AutomationProperties.Name="{Binding $parent[UserControl].((design:DesignWorkspaceViewModel)DataContext).MoveDownLabel}">
+                                            <Viewbox Width="12" Height="12">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Classes="history-icon" Data="M6,9 L12,15 L18,9" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Properties of the selected layer -->
+                    <StackPanel Spacing="12" IsVisible="{Binding Properties.HasSelection}">
+                        <Border Classes="design-divider" />
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                            <TextBlock Text="{Binding Properties.Title}" Classes="settings-section-title" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Classes="ghost compact-action" Content="{Binding DuplicateLabel}" Command="{Binding DuplicateCommand}" />
+                            <Button Grid.Column="2" Classes="ghost compact-action danger" Content="{Binding RemoveLabel}" Command="{Binding RemoveCommand}" />
+                        </Grid>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Properties.NameLabel}" Classes="settings-field-label" />
+                            <TextBox x:Name="LayerNameBox"
+                                     Text="{Binding Properties.NameText, Mode=TwoWay}"
+                                     AutomationProperties.Name="{Binding Properties.NameLabel}" />
+                        </StackPanel>
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                            <views:NumericFieldView DataContext="{Binding Properties.X}" />
+                            <views:NumericFieldView Grid.Column="1" DataContext="{Binding Properties.Y}" />
+                            <views:NumericFieldView Grid.Row="1" DataContext="{Binding Properties.Scale}" />
+                            <views:NumericFieldView Grid.Row="1" Grid.Column="1" DataContext="{Binding Properties.Rotation}" />
+                            <views:NumericFieldView Grid.Row="2" DataContext="{Binding Properties.Opacity}" />
+                            <Button Grid.Row="2" Grid.Column="1"
+                                    Classes="secondary"
+                                    VerticalAlignment="Bottom"
+                                    HorizontalAlignment="Stretch"
+                                    Content="{Binding Properties.ResetLabel}"
+                                    Command="{Binding Properties.ResetTransformCommand}" />
+                        </Grid>
+                        <Border Classes="layer-source" Classes.missing="{Binding Properties.IsMissing}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{Binding Properties.ImageLabel}" Classes="settings-field-label" />
+                                    <TextBlock Text="{Binding Properties.ImagePath}"
+                                               Classes="settings-path"
+                                               TextTrimming="LeadingCharacterEllipsis"
+                                               ToolTip.Tip="{Binding Properties.ImagePath}" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Classes="secondary compact-action"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding RelinkLabel}"
+                                        Command="{Binding RelinkCommand}" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Tone -->
+                <StackPanel Spacing="14" IsVisible="{Binding IsTonePanel}">
+                    <TextBlock Text="{Binding Tone.Description}" Classes="settings-hint" TextWrapping="Wrap" />
+                    <StackPanel Spacing="4">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Tone.DitherLabel}" Classes="settings-field-label" />
+                            <TextBlock Grid.Column="1" Text="{Binding Tone.DitherText}" Classes="tone-value" />
+                        </Grid>
+                        <Slider Minimum="0" Maximum="100" SmallChange="1" LargeChange="10"
+                                Value="{Binding Tone.DitherPercent, Mode=TwoWay}"
+                                AutomationProperties.Name="{Binding Tone.DitherLabel}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Tone.BrightnessLabel}" Classes="settings-field-label" />
+                            <TextBlock Grid.Column="1" Text="{Binding Tone.BrightnessText}" Classes="tone-value" />
+                        </Grid>
+                        <Slider Minimum="-64" Maximum="64" SmallChange="1" LargeChange="8"
+                                Value="{Binding Tone.Brightness, Mode=TwoWay}"
+                                AutomationProperties.Name="{Binding Tone.BrightnessLabel}" />
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{Binding Tone.LevelsLabel}" Classes="settings-field-label" />
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton GroupName="ToneLevels" Content="{Binding Tone.TwoLevelsLabel}" IsChecked="{Binding !Tone.IsFourLevels, Mode=OneWay}" />
+                            <RadioButton GroupName="ToneLevels"
+                                         Content="{Binding Tone.FourLevelsLabel}"
+                                         IsChecked="{Binding Tone.IsFourLevels, Mode=TwoWay}"
+                                         IsEnabled="{Binding Tone.CanUseFourLevels}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding Tone.LevelsHint}" Classes="settings-hint" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <CheckBox Content="{Binding Tone.SrgbLabel}" IsChecked="{Binding Tone.IsSrgbLinearized, Mode=TwoWay}" />
+                    <Button Classes="secondary" HorizontalAlignment="Left" Content="{Binding Tone.ResetLabel}" Command="{Binding Tone.ResetCommand}" />
+                    <TextBlock Text="{Binding Tone.PreviewNote}" Classes="settings-hint" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!-- Files written to the disc: deliberately styled apart from the image layers. -->
+                <StackPanel Spacing="12" IsVisible="{Binding IsFilesPanel}">
+                    <TextBlock Text="{Binding DiscFiles.Description}" Classes="settings-hint" TextWrapping="Wrap" />
+                    <Border Classes="disc-files-card" Classes.missing="{Binding DiscFiles.IsMissing}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Classes="home-folder-icon">
+                                <Canvas Width="38" Height="32">
+                                    <Path Data="M3,9 H16 L20,13 H35 V28 H3 Z" Classes="home-folder-shape" />
+                                    <Path Data="M3,9 V6 H15 L19,10" Classes="home-folder-tab" />
+                                </Canvas>
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding DiscFiles.FolderPath}"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="LeadingCharacterEllipsis"
+                                           ToolTip.Tip="{Binding DiscFiles.FolderPath}"
+                                           IsVisible="{Binding DiscFiles.HasFolder}" />
+                                <TextBlock Text="{Binding DiscFiles.Summary}" Classes="settings-hint" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <WrapPanel Classes="action-row">
+                        <Button Classes="primary" Content="{Binding DiscFiles.ChooseLabel}" Command="{Binding DiscFiles.ChooseCommand}" />
+                        <Button Classes="secondary" Content="{Binding DiscFiles.OpenLabel}" Command="{Binding DiscFiles.OpenCommand}" IsVisible="{Binding DiscFiles.CanOpen}" />
+                        <Button Classes="ghost" Content="{Binding DiscFiles.ClearLabel}" Command="{Binding DiscFiles.ClearCommand}" IsVisible="{Binding DiscFiles.HasFolder}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding DiscFiles.DistinctionNote}" Classes="settings-hint" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding Status}"
+                           Classes="numeric-field-error"
+                           TextWrapping="Wrap"
+                           IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

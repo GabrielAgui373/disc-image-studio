@@ -435,8 +435,8 @@
                         <TextBlock Text="{Binding SettingsPreferencesNote}" Classes="project-action-status" />
                     </StackPanel>
 
-                    <views:DesignCanvasView DataContext="{Binding DesignCanvas}"
-                                            IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsDesignPage}" />
+                    <views:DesignWorkspaceView DataContext="{Binding DesignWorkspace}"
+                                               IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsDesignPage}" />
 
                     <views:CompositionPreviewView DataContext="{Binding Preview}"
                                                   IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsDesignPage}" />

@@ -14,6 +14,7 @@ public static class HistoryLabels
     public const string LayerVisibility = "layer.visibility";
     public const string TransformLayer = "layer.transform";
     public const string LayerOpacity = "layer.opacity";
+    public const string RelinkLayer = "layer.relink";
     public const string Tone = "tone.set";
     public const string DataFolder = "data.set";
     public const string ProjectSettings = "project.settings";

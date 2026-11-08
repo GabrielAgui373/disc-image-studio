@@ -792,6 +792,216 @@
     <Setter Property="Margin" Value="0,0,8,2" />
   </Style>
 
+  <!-- Design page side panel: tabs, layer rows, property fields, tone and disc files. -->
+  <Style Selector="Border.design-panel">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="14" />
+  </Style>
+
+  <Style Selector="Border.design-tabs">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="3" />
+  </Style>
+
+  <Style Selector="Button.design-tab">
+    <Setter Property="Height" Value="30" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.design-tab /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Button.design-tab:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Button.design-tab.active">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Border.layer-row">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="4,4,6,4" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Border.layer-row:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+  </Style>
+
+  <Style Selector="Border.layer-row.selected">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.layer-row.hidden TextBlock.layer-name">
+    <Setter Property="Opacity" Value="0.55" />
+  </Style>
+
+  <Style Selector="Border.layer-row.dragging">
+    <Setter Property="Opacity" Value="0.55" />
+  </Style>
+
+  <Style Selector="Border.layer-row.drop-target">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0,2,0,0" />
+  </Style>
+
+  <Style Selector="Border.layer-grip">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Cursor" Value="SizeNorthSouth" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="Ellipse.grip-dot">
+    <Setter Property="Width" Value="3" />
+    <Setter Property="Height" Value="3" />
+    <Setter Property="Fill" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="Border.layer-thumb">
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.layer-thumb-missing">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <Style Selector="Button.layer-select">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.layer-select /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.layer-name">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.layer-missing">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <Style Selector="Ellipse.eye-pupil">
+    <Setter Property="Fill" Value="{DynamicResource DiscTextBrush}" />
+  </Style>
+
+  <Style Selector="Path.button-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscOnAccentBrush}" />
+    <Setter Property="StrokeThickness" Value="2.4" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+  </Style>
+
+  <Style Selector="Border.design-divider">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource DiscBorderBrush}" />
+  </Style>
+
+  <Style Selector="Button.danger:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource DiscDangerBrush}" />
+  </Style>
+
+  <Style Selector="TextBox.numeric-field">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="TextBox.numeric-field.invalid">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscDangerBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.numeric-field-unit">
+    <Setter Property="Margin" Value="0,0,10,0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.numeric-field-error">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscDangerBrush}" />
+  </Style>
+
+  <Style Selector="Border.layer-source">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="10,8" />
+  </Style>
+
+  <Style Selector="Border.layer-source.missing">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.tone-value">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <!-- Disc files look like a folder/document, never like an image layer. -->
+  <Style Selector="Border.disc-files-card">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12" />
+  </Style>
+
+  <Style Selector="Border.disc-files-card.missing">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <Style Selector="WrapPanel.action-row > Button">
+    <Setter Property="Margin" Value="0,0,8,8" />
+  </Style>
+
   <!-- Design canvas card: a fixed-height frame so the canvas never collapses inside the page scroll. -->
   <Style Selector="Border.design-canvas-card">
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
