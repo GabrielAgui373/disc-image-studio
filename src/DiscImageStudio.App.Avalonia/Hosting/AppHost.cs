@@ -189,6 +189,19 @@ public sealed class AppHost : IDisposable
         viewModel.BurnWorkspace.AttachJobs(jobs);
         viewModel.CalibrationWorkspace.AttachRecovery(
             DiscImageStudio.Application.Calibration.CalibrationRecoveryStore.Under(paths, new DiscImageStudio.Application.Ports.SystemClock()));
+        PreferencesViewModel preferences = new(
+            settings,
+            settingsStore,
+            paths,
+            cache,
+            jobs,
+            previewSources,
+            filePicker,
+            text,
+            theme => app.RequestedThemeVariant = theme);
+        // The lifetime saves the settings again on exit; it must save the latest ones.
+        preferences.Changed += applicationLifetime.UpdateSettings;
+        viewModel.AttachPreferences(preferences);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

@@ -412,6 +412,47 @@
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding IsSettingsPage}" Spacing="{DynamicResource DiscSpace5}">
+                        <controls:SectionCard DataContext="{Binding Preferences}"
+                                              Title="{Binding Title}"
+                                              Description="{Binding Description}"
+                                              x:DataType="vm:PreferencesViewModel">
+                            <StackPanel Spacing="16">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding ThemeLabel}" Classes="settings-field-label" />
+                                    <Border Classes="design-tabs" MaxWidth="420" HorizontalAlignment="Left">
+                                        <UniformGrid Rows="1">
+                                            <Button Classes="design-tab" Classes.active="{Binding IsSystemTheme}"
+                                                    Content="{Binding SystemLabel}" Command="{Binding UseSystemThemeCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsLightTheme}"
+                                                    Content="{Binding LightLabel}" Command="{Binding UseLightThemeCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsDarkTheme}"
+                                                    Content="{Binding DarkLabel}" Command="{Binding UseDarkThemeCommand}" />
+                                        </UniformGrid>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding ProjectsLabel}" Classes="settings-field-label" />
+                                    <TextBlock Text="{Binding ProjectsDirectory}" Classes="settings-path" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="secondary" Content="{Binding ChooseLabel}" Command="{Binding ChooseProjectsDirectoryCommand}" />
+                                        <Button Classes="ghost" Content="{Binding ResetLabel}" Command="{Binding ResetProjectsDirectoryCommand}"
+                                                IsVisible="{Binding IsCustomProjectsDirectory}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding CacheLabel}" Classes="settings-field-label" />
+                                    <TextBlock Text="{Binding CacheText}" Classes="settings-hint" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="secondary" Content="{Binding ClearCacheLabel}" Command="{Binding ClearCacheCommand}"
+                                                IsEnabled="{Binding !IsWorking}" />
+                                        <Button Classes="ghost" Content="{Binding RefreshCacheLabel}" Command="{Binding RefreshCacheCommand}"
+                                                IsEnabled="{Binding !IsWorking}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock Text="{Binding StatusText}" Classes="settings-hint" TextWrapping="Wrap"
+                                           IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            </StackPanel>
+                        </controls:SectionCard>
                         <controls:SectionCard Title="{Binding PlatformDetailsTitle}"
                                               Description="{Binding PlatformDetailsDescription}">
                             <StackPanel Spacing="{DynamicResource DiscSpace3}">
@@ -451,7 +492,6 @@
                                            IsVisible="{Binding ActionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             </StackPanel>
                         </controls:SectionCard>
-                        <TextBlock Text="{Binding SettingsPreferencesNote}" Classes="project-action-status" />
                     </StackPanel>
 
                     <views:DesignWorkspaceView DataContext="{Binding DesignWorkspace}"

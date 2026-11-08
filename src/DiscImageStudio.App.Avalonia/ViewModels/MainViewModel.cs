@@ -35,7 +35,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly ProjectLifecycleService _projects;
     private readonly JobCoordinator _jobs;
     private readonly IUiDispatcher _dispatcher;
-    private readonly UserSettings _settings;
+    private UserSettings _settings;
     private readonly ProjectAssetService _assets;
     private readonly ProjectCompositionService _compositions;
     private readonly ProjectEditor _editor;
@@ -379,6 +379,26 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     /// <summary>The Export page: the plan of what will be generated and its destination.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel ExportWorkspace { get; }
+
+    /// <summary>Theme, default project folder and cache on the Settings page; attached by the host.</summary>
+    [ObservableProperty]
+    public partial PreferencesViewModel? Preferences { get; private set; }
+
+    public void AttachPreferences(PreferencesViewModel preferences)
+    {
+        Preferences = preferences ?? throw new ArgumentNullException(nameof(preferences));
+        preferences.Changed += settings =>
+        {
+            bool followDefault = !IsNewProjectDialogOpen;
+            _settings = settings;
+            if (followDefault)
+            {
+                NewProjectDirectory = string.IsNullOrWhiteSpace(settings.DefaultProjectDirectory)
+                    ? _paths.ProjectsDirectory
+                    : settings.DefaultProjectDirectory;
+            }
+        };
+    }
 
     /// <summary>The Burn page: recorders, capability gating and the confirmed burn (Task 13.2).</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Burn.BurnWorkspaceViewModel BurnWorkspace { get; }
@@ -1015,6 +1035,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         (CurrentPageTitle, CurrentPageDescription, CurrentPageBadge) = GetPagePresentation(current);
         IsHomePage = current == WorkspacePage.Home;
         IsSettingsPage = current == WorkspacePage.Settings;
+        if (IsSettingsPage && Preferences is { } preferences)
+        {
+            _ = preferences.RefreshCacheAsync();
+        }
         IsProjectPage = hasOpenProject && RequiresProject(current);
         IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
         IsPreviewPage = IsProjectPage && current == WorkspacePage.Preview;
