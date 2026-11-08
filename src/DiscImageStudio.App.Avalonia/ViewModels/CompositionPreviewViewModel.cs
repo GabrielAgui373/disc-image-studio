@@ -26,6 +26,9 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
     private readonly ProjectLifecycleService _projects;
     private readonly ITextCatalog _text;
     private long _generation;
+    private readonly DiscImageStudio.App.Avalonia.Design.Debouncer _refresh;
+    private bool _isActive;
+    private bool _stale;
 
     public CompositionPreviewViewModel(
         ProjectCompositionService compositions,
@@ -41,6 +44,40 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
         NoLayersTitle = text["design.preview.noLayers.title"];
         NoLayersDescription = text["design.preview.noLayers.description"];
         Issues.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasIssues));
+        _refresh = new DiscImageStudio.App.Avalonia.Design.Debouncer(RefreshDelay, () => _ = RefreshAsync());
+    }
+
+    /// <summary>Quiet period after the last committed change before recomposing at 2048 px.</summary>
+    public static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(250);
+
+    /// <summary>
+    /// Asks for a recomposition after the quiet period. While the Design page is hidden the
+    /// preview is only marked stale, so editing elsewhere never pays for 2048 px compositions.
+    /// </summary>
+    public void RequestRefresh()
+    {
+        if (!_isActive)
+        {
+            _stale = true;
+            return;
+        }
+
+        _refresh.Schedule();
+    }
+
+    /// <summary>Called when the Design page is shown or hidden; showing it refreshes a stale preview.</summary>
+    public void SetActive(bool active)
+    {
+        _isActive = active;
+        if (active && _stale)
+        {
+            _stale = false;
+            _refresh.Schedule();
+        }
+        else if (!active)
+        {
+            _refresh.Cancel();
+        }
     }
 
     public string Title { get; }
@@ -148,6 +185,8 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
 
     public void Clear()
     {
+        _refresh.Cancel();
+        _stale = false;
         ++_generation;
         Image = null;
         Issues.Clear();

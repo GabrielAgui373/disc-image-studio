@@ -23,7 +23,22 @@ public partial class DesignWorkspaceView : UserControl
     public DesignWorkspaceView()
     {
         InitializeComponent();
-        SizeChanged += (_, args) => ApplyLayout(args.NewSize.Width);
+        SizeChanged += (_, args) =>
+        {
+            ApplyLayout(args.NewSize.Width);
+            if (TopLevel.GetTopLevel(this) is { } top)
+            {
+                FitCanvasHeight(top.ClientSize.Height);
+            }
+        };
+        AttachedToVisualTree += (_, _) =>
+        {
+            if (TopLevel.GetTopLevel(this) is { } top)
+            {
+                top.SizeChanged += (_, _) => FitCanvasHeight(top.ClientSize.Height);
+                FitCanvasHeight(top.ClientSize.Height);
+            }
+        };
         LayerNameBox.GotFocus += (_, _) => SetEditingName(true);
         LayerNameBox.LostFocus += (_, _) =>
         {
@@ -44,6 +59,21 @@ public partial class DesignWorkspaceView : UserControl
         Panes.ColumnDefinitions = stacked ? new ColumnDefinitions("*") : new ColumnDefinitions("*,340");
         Grid.SetColumn(SidePane, stacked ? 0 : 1);
         Grid.SetRow(SidePane, stacked ? 1 : 0);
+    }
+
+    /// <summary>
+    /// Keeps the canvas as tall as the window allows (minus the shell and project bar), between
+    /// 360 and 640 DIP, so the whole disc stays visible without scrolling on common sizes.
+    /// </summary>
+    private void FitCanvasHeight(double windowHeight)
+    {
+        Border? frame = CanvasPane.GetVisualDescendants()
+            .OfType<Border>()
+            .FirstOrDefault(border => border.Classes.Contains("design-canvas-frame"));
+        if (frame is not null)
+        {
+            frame.Height = Math.Clamp(windowHeight - 330, 360, 640);
+        }
     }
 
     private void SetEditingName(bool editing)
@@ -134,20 +164,31 @@ public partial class DesignWorkspaceView : UserControl
         }
     }
 
-    /// <summary>The list row under a point in list coordinates, clamped to the list.</summary>
+    /// <summary>
+    /// The item index under a point in list coordinates. With virtualization only realized rows
+    /// exist, so the index comes from the row's item, clamped to the first or last realized row.
+    /// </summary>
     private int TargetIndex(Point inList)
     {
-        Border[] rows = Rows().ToArray();
-        for (int index = 0; index < rows.Length; index++)
+        if (ViewModel is not { } model)
         {
-            Point? top = rows[index].TranslatePoint(default, LayerList);
-            if (top is { } origin && inList.Y < origin.Y + rows[index].Bounds.Height)
+            return 0;
+        }
+
+        Border[] rows = Rows()
+            .Where(row => row.DataContext is LayerListItem)
+            .OrderBy(row => row.TranslatePoint(default, LayerList)?.Y ?? double.MaxValue)
+            .ToArray();
+        foreach (Border row in rows)
+        {
+            Point? top = row.TranslatePoint(default, LayerList);
+            if (top is { } origin && inList.Y < origin.Y + row.Bounds.Height)
             {
-                return index;
+                return model.Layers.Items.IndexOf((LayerListItem)row.DataContext!);
             }
         }
 
-        return Math.Max(0, rows.Length - 1);
+        return rows.Length == 0 ? 0 : model.Layers.Items.IndexOf((LayerListItem)rows[^1].DataContext!);
     }
 
     private IEnumerable<Border> Rows()

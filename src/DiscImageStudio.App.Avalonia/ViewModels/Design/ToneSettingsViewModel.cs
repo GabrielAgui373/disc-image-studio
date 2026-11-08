@@ -1,5 +1,5 @@
 using System.Globalization;
-using Avalonia.Threading;
+using DiscImageStudio.App.Avalonia.Design;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.App.Avalonia.Localization;
@@ -21,7 +21,7 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
     private readonly ProjectLifecycleService _projects;
     private readonly ProjectEditor _editor;
     private readonly ITextCatalog _text;
-    private readonly DispatcherTimer _commitTimer;
+    private readonly Debouncer _commit;
     private ProjectEditor.DragEdit? _adjustment;
     private bool _syncing;
 
@@ -30,8 +30,7 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
         _projects = projects ?? throw new ArgumentNullException(nameof(projects));
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _text = text ?? throw new ArgumentNullException(nameof(text));
-        _commitTimer = new DispatcherTimer { Interval = CommitDelay };
-        _commitTimer.Tick += (_, _) => CommitPendingEdits();
+        _commit = new Debouncer(CommitDelay, CommitPendingEdits);
         Title = text["design.tone.title"];
         Description = text["design.tone.description"];
         DitherLabel = text["design.tone.dither"];
@@ -131,7 +130,7 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
     /// <summary>Commits a pending slider adjustment; call before undo, save or other commands.</summary>
     public void CommitPendingEdits()
     {
-        _commitTimer.Stop();
+        _commit.Cancel();
         ProjectEditor.DragEdit? adjustment = _adjustment;
         _adjustment = null;
         adjustment?.Commit();
@@ -157,8 +156,7 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
 
         ToneProfile tone = Current();
         _adjustment.Update(workspace => DesignEdits.SetTone(workspace, tone));
-        _commitTimer.Stop();
-        _commitTimer.Start();
+        _commit.Schedule();
     }
 
     private void Switch()

@@ -50,10 +50,12 @@
                                TextWrapping="Wrap"
                                IsVisible="{Binding !HasLayers}" />
 
+                    <!-- Scrolls and virtualizes rows, so projects with many layers stay responsive. -->
+                    <ScrollViewer Classes="layer-list-scroll" VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="LayerList" ItemsSource="{Binding Layers.Items}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Spacing="4" />
+                                <VirtualizingStackPanel />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
@@ -134,6 +136,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    </ScrollViewer>
 
                     <!-- Properties of the selected layer -->
                     <StackPanel Spacing="12" IsVisible="{Binding Properties.HasSelection}">

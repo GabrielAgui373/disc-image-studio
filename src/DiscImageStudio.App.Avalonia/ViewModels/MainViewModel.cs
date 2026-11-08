@@ -322,7 +322,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         if (!change.IsPreview)
         {
             // A committed change may have touched layers or geometry; recompose the preview.
-            _ = Preview.RefreshAsync();
+            Preview.RequestRefresh();
         }
     }
 
@@ -938,6 +938,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsSettingsPage = current == WorkspacePage.Settings;
         IsProjectPage = hasOpenProject && RequiresProject(current);
         IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
+        Preview?.SetActive(IsDesignPage);
         IsPlaceholderPage = IsProjectPage && current != WorkspacePage.Design;
     }
 
@@ -1023,7 +1024,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshProjectState();
         RefreshHistoryState();
         _ = Recent.RefreshAsync();
-        _ = Preview.RefreshAsync();
+        Preview.RequestRefresh();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],

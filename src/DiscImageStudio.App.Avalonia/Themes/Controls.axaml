@@ -840,7 +840,12 @@
     <Setter Property="Foreground" Value="{DynamicResource DiscTextBrush}" />
   </Style>
 
+  <Style Selector="ScrollViewer.layer-list-scroll">
+    <Setter Property="MaxHeight" Value="380" />
+  </Style>
+
   <Style Selector="Border.layer-row">
+    <Setter Property="Margin" Value="0,0,0,4" />
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="1" />

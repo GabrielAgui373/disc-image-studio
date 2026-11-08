@@ -1,7 +1,6 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.App.Avalonia.Design;
@@ -47,7 +46,8 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     private readonly ProjectEditor _editor;
     private readonly LayerBitmapCache _bitmaps;
     private readonly ITextCatalog _text;
-    private readonly DispatcherTimer _nudgeTimer;
+    private readonly Debouncer _nudgeCommit;
+    private bool _nudging;
     private ProjectEditor.DragEdit? _drag;
     private string? _dragLayerId;
     private Vector _nudgeOffset;
@@ -63,8 +63,7 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
         _bitmaps = bitmaps ?? throw new ArgumentNullException(nameof(bitmaps));
         _text = text ?? throw new ArgumentNullException(nameof(text));
         _bitmaps.Changed += (_, _) => Refresh();
-        _nudgeTimer = new DispatcherTimer { Interval = NudgeCommitDelay };
-        _nudgeTimer.Tick += (_, _) => CommitPendingEdits();
+        _nudgeCommit = new Debouncer(NudgeCommitDelay, CommitPendingEdits);
         CanvasTitle = text["design.canvas.title"];
         EmptyHint = text["design.canvas.empty"];
         MissingLabel = text["design.canvas.missing"];
@@ -166,8 +165,9 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     /// <summary>Forgets bitmaps and view state when the project closes or another one opens.</summary>
     public void Reset()
     {
+        _nudgeCommit.Cancel();
+        _nudging = false;
         CancelDrag();
-        _nudgeTimer.Stop();
         _bitmaps.Clear();
         SelectedLayerId = null;
         Viewport.Fit();
@@ -297,6 +297,8 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     /// <summary>Restores the state from before the drag (Escape or lost pointer capture).</summary>
     public void CancelDrag()
     {
+        _nudging = false;
+        _nudgeCommit.Cancel();
         ProjectEditor.DragEdit? drag = _drag;
         _drag = null;
         _dragLayerId = null;
@@ -324,8 +326,9 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
             _drag = _editor.BeginDrag(HistoryLabels.TransformLayer, [layer.Id]);
             _dragLayerId = layer.Id;
             _nudgeOffset = default;
+            _nudging = true;
         }
-        else if (_dragLayerId != layer.Id || !_nudgeTimer.IsEnabled)
+        else if (_dragLayerId != layer.Id || !_nudging)
         {
             return; // a pointer drag is in progress
         }
@@ -340,19 +343,21 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
         };
         string id = layer.Id;
         _drag.Update(workspace => DesignEdits.SetTransform(workspace, id, moved));
-        _nudgeTimer.Stop();
-        _nudgeTimer.Start();
+        _nudgeCommit.Schedule();
     }
 
     /// <summary>Commits a pending nudge group; call before undo, save or any other command.</summary>
     public void CommitPendingEdits()
     {
-        if (!_nudgeTimer.IsEnabled)
+        // The group is tracked by its own flag: the debouncer has already cleared its pending
+        // state when it calls this method.
+        if (!_nudging)
         {
             return;
         }
 
-        _nudgeTimer.Stop();
+        _nudging = false;
+        _nudgeCommit.Cancel();
         CommitDrag();
     }
 
