@@ -16,6 +16,8 @@ public static partial class RasterCodec
         return frame;
     }
 
+    private static (int Width, int Height) HeaderSize(BitmapFrame frame) => (frame.PixelWidth, frame.PixelHeight);
+
     private static BgraRaster Decode(Stream stream, long maxPixels)
     {
         BitmapFrame frame = ReadHeader(stream, maxPixels);
