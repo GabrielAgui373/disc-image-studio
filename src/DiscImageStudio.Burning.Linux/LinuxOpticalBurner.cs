@@ -11,7 +11,10 @@ namespace DiscImageStudio.Burning.Linux;
 /// from the next writable address through a bounded host buffer, synchronizes the cache, closes
 /// the track and the session and unlocks. Cancellation and failures stop writing, flush what was
 /// sent and unlock; a cleanup that fails is reported as such. Every attempt is appended to the
-/// local burn log. CD modes are not implemented here (the ADR compares SG_IO with cdrdao/cdrskin
+/// local burn log. CD audio and CD data are written session-at-once from a cue sheet: the drive
+/// generates lead-in, the two-second pregap and lead-out, the host sends the track from LBA 0
+/// (2352-byte CD-DA sectors, or 2048-byte Mode 1 sectors the drive encodes); this replaces the
+/// cdrdao/cdrskin comparison the ADR left open, and is the first thing the physical matrix checks
 /// on hardware first). Nothing here formats, erases or blanks a disc.
 /// <para>Not validated on hardware: modes stay disabled by <see cref="LinuxBurnValidation"/> until
 /// a physical test is recorded or the test campaign enables them explicitly.</para>
@@ -20,6 +23,9 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
 {
     private const int SectorBytes = 2048;
     private const int BlocksPerWrite = 32;
+
+    /// <summary>27 CD-DA sectors are 63,504 bytes, inside a 64 KiB transfer.</summary>
+    private const int CdAudioBlocksPerWrite = 27;
     private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan FlushTimeout = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan BusyRetryLimit = TimeSpan.FromMinutes(2);
@@ -51,17 +57,12 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         => Task.Run<IReadOnlyList<OpticalWriteSpeed>>(
             () =>
             {
-                if (mediaKind is OpticalBurnMediaKind.CdAudio or OpticalBurnMediaKind.CdData)
-                {
-                    return [];
-                }
-
                 LinuxOpticalNode node = Node(deviceId);
                 try
                 {
                     using IScsiTransport transport = _transports.OpenForReading(node.DevicePath);
                     ScsiResult reply = transport.Read(GetPerformanceWriteSpeeds(32), 8 + (32 * 16), CommandTimeout);
-                    return reply.Succeeded ? ParseWriteSpeeds(reply.Data) : [];
+                    return reply.Succeeded ? ParseWriteSpeeds(reply.Data, OpticalBurnMedia.GetSectorBytes(mediaKind)) : [];
                 }
                 catch (Exception exception) when (exception is IOException)
                 {
@@ -99,11 +100,6 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         {
             progress?.Report(new OpticalBurnProgress(OpticalBurnStages.Prepare, "Opening the drive", 0, total));
             node = Node(request.DeviceId);
-            if (request.MediaKind is OpticalBurnMediaKind.CdAudio or OpticalBurnMediaKind.CdData)
-            {
-                throw new OpticalBurnException(OpticalBurnErrorCode.Unsupported, "CD modes are not implemented on Linux yet.");
-            }
-
             using IScsiWriteTransport transport = Open(node.DevicePath);
             progress?.Report(new OpticalBurnProgress(OpticalBurnStages.Media, "Checking the disc again", 0, total));
             (OpticalWriteModes writeModes, media) = MmcState.Read(transport);
@@ -196,25 +192,34 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         CancellationToken cancellationToken)
     {
         long total = request.ContentLength;
-        uint sectors = checked((uint)(total / SectorBytes));
+        bool cd = OpticalBurnMedia.UsesCdDao(request.MediaKind);
+        int sectorBytes = OpticalBurnMedia.GetSectorBytes(request.MediaKind);
+        uint sectors = checked((uint)(total / sectorBytes));
         MmcDiscInformation disc = MmcState.ParseDiscInformation(Require(transport.Read(MmcState.ReadDiscInformation(34), 34, CommandTimeout), "READ DISC INFORMATION").Data);
         int track = Math.Max(1, disc.LastTrackInLastSession);
         MmcTrackInformation info = MmcState.ParseTrackInformation(Require(transport.Read(MmcState.ReadTrackInformation(track, 48), 48, CommandTimeout), "READ TRACK INFORMATION").Data);
-        uint address = info.NextWritableValid ? info.NextWritable : info.TrackStart;
+        // Session-at-once CDs start the track at LBA 0; the drive writes the pregap before it.
+        uint address = cd ? 0 : info.NextWritableValid ? info.NextWritable : info.TrackStart;
 
         Run(transport, PreventRemoval(true), "PREVENT MEDIUM REMOVAL");
         bool started = false;
         Exception? failure = null;
         using CancellationTokenSource producerCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         OpticalBurnBufferOptions buffer = request.EffectiveBufferOptions;
-        int chunkBytes = BlocksPerWrite * SectorBytes;
+        int chunkBytes = (request.MediaKind == OpticalBurnMediaKind.CdAudio ? CdAudioBlocksPerWrite : BlocksPerWrite) * sectorBytes;
         using BlockingCollection<byte[]> queue = new(Math.Max(2, buffer.CapacityBytes / chunkBytes));
         Exception? producerFailure = null;
         Task producer = Task.CompletedTask;
         long written = 0;
         try
         {
-            if (media.Profile is OpticalMediaProfile.DvdMinusR or OpticalMediaProfile.DvdMinusRw or OpticalMediaProfile.DvdMinusRDualLayer)
+            if (cd)
+            {
+                SelectCdSessionAtOnce(transport, request.MediaKind);
+                byte[] cue = CueSheet(request.MediaKind, sectors);
+                RunBusyRetry(transport, SendCueSheet(cue.Length), cue, cue.Length, "SEND CUE SHEET");
+            }
+            else if (media.Profile is OpticalMediaProfile.DvdMinusR or OpticalMediaProfile.DvdMinusRw or OpticalMediaProfile.DvdMinusRDualLayer)
             {
                 // DVD-R: disc-at-once with a reserved track, as growisofs does; buffer-underrun protection on.
                 SelectDiscAtOnce(transport);
@@ -224,7 +229,7 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
             if (request.WriteSpeed is { } speed)
             {
                 // A speed the drive refuses is not an error; it keeps its own choice.
-                _ = transport.Read(SetSpeed((int)Math.Min(ushort.MaxValue, speed.SectorsPerSecond * (long)SectorBytes / 1000)), 0, CommandTimeout);
+                _ = transport.Read(SetSpeed((int)Math.Min(ushort.MaxValue, speed.SectorsPerSecond * (long)sectorBytes / 1000)), 0, CommandTimeout);
             }
 
             producer = Task.Run(() =>
@@ -267,12 +272,12 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
                     throw new OpticalBurnException(OpticalBurnErrorCode.SourceFailed, "The image stopped arriving.");
                 }
 
-                if (chunk.Length % SectorBytes != 0 || written + chunk.Length > total)
+                if (chunk.Length % sectorBytes != 0 || written + chunk.Length > total)
                 {
                     throw new OpticalBurnException(OpticalBurnErrorCode.SourceFailed, "The image does not match its announced size.");
                 }
 
-                int blocks = chunk.Length / SectorBytes;
+                int blocks = chunk.Length / sectorBytes;
                 started = true;
                 RunBusyRetry(transport, Write10(address, blocks), chunk, chunk.Length, "WRITE(10)");
                 address += (uint)blocks;
@@ -298,7 +303,12 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
 
             progress?.Report(new OpticalBurnProgress(OpticalBurnStages.Finalize, "Closing the disc", written, total));
             Flush(transport);
-            Close(transport, track, media);
+            if (!cd)
+            {
+                // A session-at-once CD is closed by the drive when the last sector arrives.
+                Close(transport, track, media);
+            }
+
             return written;
         }
         catch (Exception exception)
@@ -432,6 +442,56 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         RunBusyRetry(transport, ModeSelect(parameters.Length), parameters, parameters.Length, "MODE SELECT (write parameters)");
     }
 
+    /// <summary>Write parameters for a CD session-at-once: write type 2, buffer-underrun protection, CD-DA or CD-ROM session.</summary>
+    private static void SelectCdSessionAtOnce(IScsiWriteTransport transport, OpticalBurnMediaKind mode)
+    {
+        byte[] reply = Require(transport.Read(ModeSenseWriteParameters(64), 64, CommandTimeout), "MODE SENSE (write parameters)").Data;
+        int page = reply.Length >= 8 ? 8 + BinaryPrimitives.ReadUInt16BigEndian(reply.AsSpan(6)) : int.MaxValue;
+        if (reply.Length < page + 9 || (reply[page] & 0x3f) != 0x05)
+        {
+            throw new OpticalBurnException(OpticalBurnErrorCode.WriteFailed, "The drive returned no write parameters page.");
+        }
+
+        int pageLength = Math.Min(reply[page + 1] + 2, reply.Length - page);
+        byte[] parameters = new byte[8 + pageLength];
+        reply.AsSpan(page, pageLength).CopyTo(parameters.AsSpan(8));
+        bool audio = mode == OpticalBurnMediaKind.CdAudio;
+        parameters[8] &= 0x3f;
+        parameters[8 + 2] = (byte)((parameters[8 + 2] & 0xb0) | 0x40 | 0x02);              // BUFE on, session-at-once.
+        parameters[8 + 3] = (byte)((parameters[8 + 3] & 0x30) | (audio ? 0x00 : 0x04));    // Multi-session off; audio or data track.
+        parameters[8 + 4] = (byte)(audio ? 0x00 : 0x08);                                    // Raw 2352 audio, or Mode 1 2048.
+        parameters[8 + 8] = 0x00;                                                           // Session format: CD-DA or CD-ROM.
+        RunBusyRetry(transport, ModeSelect(parameters.Length), parameters, parameters.Length, "MODE SELECT (write parameters)");
+    }
+
+    /// <summary>
+    /// The cue sheet of one track (MMC SEND CUE SHEET): lead-in, pregap (index 0) and track
+    /// (index 1 at 00:02:00) as the drive's own or the host's data, then lead-out. Audio uses
+    /// data form 00h for the host's 2352-byte samples and 01h where the drive writes silence;
+    /// data uses 10h for the host's 2048-byte Mode 1 sectors and 14h where the drive generates them.
+    /// </summary>
+    public static byte[] CueSheet(OpticalBurnMediaKind mode, uint sectors)
+    {
+        bool audio = mode == OpticalBurnMediaKind.CdAudio;
+        byte control = audio ? (byte)0x01 : (byte)0x41;   // CTL (data track bit) and ADR 1.
+        byte drive = audio ? (byte)0x01 : (byte)0x14;
+        byte host = audio ? (byte)0x00 : (byte)0x10;
+        (byte m, byte s, byte f) = Msf(150 + sectors);
+        return
+        [
+            control, 0x00, 0x00, drive, 0, 0, 0, 0,
+            control, 0x01, 0x00, drive, 0, 0, 0, 0,
+            control, 0x01, 0x01, host, 0, 0, 2, 0,
+            control, 0xaa, 0x01, drive, 0, m, s, f,
+        ];
+    }
+
+    private static (byte Minute, byte Second, byte Frame) Msf(uint frames)
+        => ((byte)(frames / (60 * 75)), (byte)(frames / 75 % 60), (byte)(frames % 75));
+
+    public static byte[] SendCueSheet(int length)
+        => [0x5d, 0, 0, 0, 0, 0, (byte)(length >> 16), (byte)(length >> 8), (byte)length, 0];
+
     private static void WaitUntilReady(IScsiWriteTransport transport)
     {
         Stopwatch waited = Stopwatch.StartNew();
@@ -544,7 +604,7 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         => [0xac, 0, 0, 0, 0, 0, 0, 0, (byte)(descriptors >> 8), (byte)descriptors, 0x03, 0];
 
     /// <summary>Write speeds (kB/s, 1000 bytes) of a GET PERFORMANCE type 03h reply, as sectors per second.</summary>
-    public static IReadOnlyList<OpticalWriteSpeed> ParseWriteSpeeds(ReadOnlySpan<byte> reply)
+    public static IReadOnlyList<OpticalWriteSpeed> ParseWriteSpeeds(ReadOnlySpan<byte> reply, int sectorBytes = SectorBytes)
     {
         if (reply.Length < 8)
         {
@@ -556,7 +616,7 @@ public sealed class LinuxOpticalBurner : IOpticalBurner
         for (int offset = 8; offset + 16 <= length; offset += 16)
         {
             uint kilobytes = BinaryPrimitives.ReadUInt32BigEndian(reply[(offset + 12)..]);
-            int sectors = (int)Math.Min(int.MaxValue, kilobytes * 1000L / SectorBytes);
+            int sectors = (int)Math.Min(int.MaxValue, kilobytes * 1000L / sectorBytes);
             if (sectors > 0)
             {
                 speeds.Add(sectors);

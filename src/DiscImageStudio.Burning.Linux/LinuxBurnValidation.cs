@@ -40,8 +40,8 @@ public sealed class LinuxBurnValidation
 {
     public const string TestModesVariable = "DISC_IMAGE_STUDIO_BURN_TEST_MODES";
 
-    /// <summary>Modes the Linux writer implements; CD modes wait for the physical comparison of the ADR.</summary>
-    public const OpticalWriteModes ImplementedModes = OpticalWriteModes.DvdData | OpticalWriteModes.BluRayData;
+    /// <summary>Modes the Linux writer implements (all four, each still gated by a recorded test).</summary>
+    public const OpticalWriteModes ImplementedModes = OpticalWriteModes.All;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
