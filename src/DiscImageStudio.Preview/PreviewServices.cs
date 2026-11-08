@@ -12,4 +12,16 @@ public static class PreviewServices
         new DvdProjectionPreviewService(sources),
         new BluRayProjectionPreviewService(sources),
     ];
+
+    /// <summary>The three artifact read-backs.</summary>
+    public static IReadOnlyList<IPreviewService> CreateArtifact() =>
+    [
+        new CdArtifactPreviewService(),
+        new DvdArtifactPreviewService(),
+        new BluRayArtifactPreviewService(),
+    ];
+
+    /// <summary>Every preview service: projection and read-back for the three families.</summary>
+    public static IReadOnlyList<IPreviewService> CreateAll(PreviewSourceCache sources)
+        => [.. CreateProjection(sources), .. CreateArtifact()];
 }

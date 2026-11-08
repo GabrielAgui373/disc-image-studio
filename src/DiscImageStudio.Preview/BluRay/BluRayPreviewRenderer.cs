@@ -1,19 +1,27 @@
+using System.Numerics;
 using DiscImageStudio.BluRay;
+using DiscImageStudio.BluRay.Encoding;
 
 namespace DiscImageStudio.Preview.BluRay;
 
 /// <summary>
-/// Fast nominal BD payload projection, ported from the WPF host's <c>BluRayPreviewRenderer</c>
-/// without its bitmap dependency. Black denotes AA (3T bias), white 44 (6T bias) and gray payload
+/// Fast nominal BD payload projection and read-back, ported from the WPF host's
+/// <c>BluRayPreviewRenderer</c> without its bitmap dependency. Black denotes AA (3T bias), white 44 (6T bias) and gray payload
 /// outside the drawing range. It is neither an optical reflectance prediction nor an ECC/17PP
 /// channel simulation. The tone profile is already applied to the raster by the loader; the only
 /// remaining step is the 128 threshold and the optional 3T/6T swap.
 /// </summary>
-public static class BluRayProjectionRenderer
+public static class BluRayPreviewRenderer
 {
     public const int MinimumSize = 64;
     public const int MaximumSize = 8192;
     private const byte UnknownLevel = 128;
+
+    // Keep the offset/pixel sort buffer at 4 MiB even at 8192 px. The output keeps the
+    // requested resolution; only the read scheduling is batched.
+    private const int MaxReadSamplesPerBatch = 262_144;
+    private static readonly Lazy<PayloadCell[]> PayloadCells = new(CreatePayloadCells);
+    private static readonly Lazy<byte[][]> ScramblerBasis = new(CreateScramblerBasis);
 
     /// <summary>
     /// Samples <paramref name="source"/> where <paramref name="generated"/> puts each sector and
@@ -71,6 +79,117 @@ public static class BluRayProjectionRenderer
     }
 
     /// <summary>
+    /// Samples the ISO's host bytes after reapplying the BD scrambler and places them at the
+    /// nominal post-LDC/BIS byte positions of <paramref name="actual"/>: AA reads black (3T), 44
+    /// white (6T), anything else gray. Reads only selected sectors in bounded batches sorted by
+    /// file offset instead of scanning the whole ISO.
+    /// </summary>
+    public static byte[] RenderReadback(
+        string isoPath,
+        BluRayDiscParameters actual,
+        int outputSize,
+        uint drawingStartSector = 0,
+        uint? drawingEndSectorExclusive = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(isoPath);
+        Validate(actual, outputSize);
+        uint drawingEnd = drawingEndSectorExclusive ?? actual.TotalSectors;
+        if (drawingStartSector >= drawingEnd || drawingEnd > actual.TotalSectors)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(drawingEndSectorExclusive),
+                "The drawing range must lie inside the disc.");
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        using FileStream source = new(
+            Path.GetFullPath(isoPath),
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 1,
+            FileOptions.RandomAccess);
+        if (source.Length != actual.ContentLength)
+        {
+            throw new ArgumentException(
+                $"The BD ISO holds {source.Length:N0} bytes but {actual.TotalSectors:N0} sectors need {actual.ContentLength:N0}.",
+                nameof(isoPath));
+        }
+
+        PixelProjection projection = new(actual, outputSize);
+        byte[] pixels = new byte[checked(outputSize * outputSize * 4)];
+        List<ReadSample> samples = new(Math.Min(outputSize * outputSize, MaxReadSamplesPerBatch));
+        PayloadCell[] cells = PayloadCells.Value;
+        byte[] sectorBuffer = new byte[BluRayDiscParameters.BytesPerSector];
+        long loadedSector = -1;
+        byte[][] basis = ScramblerBasis.Value;
+        for (int y = 0; y < outputSize; y++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            for (int x = 0; x < outputSize; x++)
+            {
+                if (!projection.TryGetSector(x, y, out double sector))
+                {
+                    continue;
+                }
+
+                if (sector < drawingStartSector || sector >= drawingEnd)
+                {
+                    SetPixel(pixels, (y * outputSize) + x, UnknownLevel);
+                    continue;
+                }
+
+                double clusterPosition = sector / BluRayDiscParameters.SectorsPerCluster;
+                uint cluster = (uint)clusterPosition;
+                double channel = (clusterPosition - cluster) * BluRayDiscParameters.ChannelBitsPerRecordingUnit;
+
+                // EDC, parity, BIS, sync and run-in/out have no host payload byte. Select the
+                // nearest payload midpoint, as the projection uses the nearest spiral turn.
+                PayloadCell cell = FindNearestCell(cells, channel);
+                long offset = ((long)cluster * BluRayDiscParameters.PayloadBytesPerCluster) + cell.PayloadOffset;
+                samples.Add(new ReadSample(offset, (y * outputSize) + x));
+                if (samples.Count == MaxReadSamplesPerBatch)
+                {
+                    ReadBatch();
+                }
+            }
+        }
+
+        ReadBatch();
+        return pixels;
+
+        void ReadBatch()
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            samples.Sort(static (a, b) => a.Offset.CompareTo(b.Offset));
+            foreach (ReadSample sample in samples)
+            {
+                long sector = sample.Offset / BluRayDiscParameters.BytesPerSector;
+                if (sector != loadedSector)
+                {
+                    source.Position = sector * BluRayDiscParameters.BytesPerSector;
+                    source.ReadExactly(sectorBuffer);
+                    loadedSector = sector;
+                }
+
+                int byteOffset = (int)(sample.Offset % BluRayDiscParameters.BytesPerSector);
+                uint psn = BluRayDiscParameters.FirstLayer0PhysicalSector + (uint)sector;
+                byte value = (byte)(sectorBuffer[byteOffset] ^ ScramblerByte(basis, psn, byteOffset));
+                byte level = value switch
+                {
+                    BluRayRunLengthMapping.ThreeTByte => 0,
+                    BluRayRunLengthMapping.SixTByte => 255,
+                    _ => UnknownLevel,
+                };
+                SetPixel(pixels, sample.Pixel, level);
+            }
+
+            samples.Clear();
+        }
+    }
+
+    /// <summary>
     /// Centre of the output raster in pixels and its scale: pixel (x, y) covers the disc point
     /// <c>((x - centre) * mmPerPixel, (y - centre) * mmPerPixel)</c>, matching
     /// <see cref="PixelProjection"/>.
@@ -94,6 +213,85 @@ public static class BluRayProjectionRenderer
         pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = level;
         pixels[offset + 3] = 255;
     }
+
+    private static PayloadCell[] CreatePayloadCells()
+    {
+        BluRayDiscParameters disc = new();
+        BluRayImagePayloadMapping mapping = new(disc, static (_, _) => 0, new BluRayRunLengthMapping());
+        PayloadCell[] cells = new PayloadCell[BluRayDiscParameters.PayloadBytesPerCluster];
+        for (uint sector = 0; sector < BluRayDiscParameters.SectorsPerCluster; sector++)
+        {
+            for (int offset = 0; offset < BluRayDiscParameters.BytesPerSector; offset++)
+            {
+                int index = ((int)sector * BluRayDiscParameters.BytesPerSector) + offset;
+                cells[index] = new PayloadCell(mapping.GetPosition(sector, offset).NominalChannelBitPosition, index);
+            }
+        }
+
+        Array.Sort(cells, static (a, b) => a.ChannelPosition.CompareTo(b.ChannelPosition));
+        return cells;
+    }
+
+    private static PayloadCell FindNearestCell(PayloadCell[] cells, double channel)
+    {
+        int low = 0;
+        int high = cells.Length - 1;
+        while (low < high)
+        {
+            int mid = low + ((high - low) / 2);
+            if (cells[mid].ChannelPosition < channel)
+            {
+                low = mid + 1;
+            }
+            else
+            {
+                high = mid;
+            }
+        }
+
+        if (low > 0 && channel - cells[low - 1].ChannelPosition < cells[low].ChannelPosition - channel)
+        {
+            low--;
+        }
+
+        return cells[low];
+    }
+
+    // The additive LFSR is linear. Sixteen 2048-byte basis sequences avoid building an entire
+    // scrambler mask for every sparsely sampled recording unit.
+    private static byte[][] CreateScramblerBasis()
+    {
+        byte[][] basis = new byte[16][];
+        basis[15] = BluRayScrambler.CreateMask(0, BluRayDiscParameters.BytesPerSector);
+        for (int bit = 0; bit < 15; bit++)
+        {
+            basis[bit] = BluRayScrambler.CreateMask(1u << (bit + 5), BluRayDiscParameters.BytesPerSector);
+            for (int index = 0; index < basis[bit].Length; index++)
+            {
+                basis[bit][index] ^= basis[15][index];
+            }
+        }
+
+        return basis;
+    }
+
+    private static byte ScramblerByte(byte[][] basis, uint physicalSector, int offset)
+    {
+        byte value = basis[15][offset];
+        uint seed = (physicalSector >> 5) & 0x7fff;
+        while (seed != 0)
+        {
+            int bit = BitOperations.TrailingZeroCount(seed);
+            value ^= basis[bit][offset];
+            seed &= seed - 1;
+        }
+
+        return value;
+    }
+
+    private readonly record struct PayloadCell(double ChannelPosition, int PayloadOffset);
+
+    private readonly record struct ReadSample(long Offset, int Pixel);
 
     /// <summary>Maps an output pixel onto the nearest turn of the actual clockwise
     /// spiral, preserving absolute sector position between generated/measured discs.</summary>

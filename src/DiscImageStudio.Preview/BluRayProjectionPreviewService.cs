@@ -33,7 +33,7 @@ public sealed class BluRayProjectionPreviewService(PreviewSourceCache sources) :
 
         BluRayGray8Raster source = BluRayImageLoader.Load(sourcePath, workspace.Tone.Profile, cancellationToken);
         int size = request.OutputSize;
-        byte[] pixels = BluRayProjectionRenderer.RenderCalibration(
+        byte[] pixels = BluRayPreviewRenderer.RenderCalibration(
             source,
             generated,
             actual,
@@ -54,7 +54,7 @@ public sealed class BluRayProjectionPreviewService(PreviewSourceCache sources) :
                 geometry.AtSector(plan.DrawingEndSectorExclusive).RadiusMm);
         }
 
-        (double center, double mmPerPixel) = BluRayProjectionRenderer.Frame(actual, size);
+        (double center, double mmPerPixel) = BluRayPreviewRenderer.Frame(actual, size);
         return new ProjectionOutput(
             pixels,
             new PreviewFrame(center, mmPerPixel),

@@ -43,8 +43,11 @@ public enum PreviewWarningCode
     /// <summary>The sidecar does not describe this artifact (sector count or size differs).</summary>
     SidecarMismatch,
 
-    /// <summary>The artifact was written before the project's last change.</summary>
-    ArtifactOlderThanProject,
+    /// <summary>
+    /// The sidecar records other parameters than the project has now (geometry, tone, interleave,
+    /// polarity or file placement): the artifact shows an earlier version of the design.
+    /// </summary>
+    ArtifactDiffersFromProject,
 }
 
 /// <summary>Stable codes for conditions that prevent a preview. Hosts localize them.</summary>

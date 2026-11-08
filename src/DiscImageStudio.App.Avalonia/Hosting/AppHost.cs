@@ -123,7 +123,7 @@ public sealed class AppHost : IDisposable
                 Path.Combine(paths.CacheDirectory, "generation")),
             previewSources,
             new DiscImageStudio.Application.Preview.PreviewCoordinator(
-                DiscImageStudio.Preview.PreviewServices.CreateProjection(previewSources)));
+                DiscImageStudio.Preview.PreviewServices.CreateAll(previewSources)));
 
         MainViewModel viewModel = new(
             paths,

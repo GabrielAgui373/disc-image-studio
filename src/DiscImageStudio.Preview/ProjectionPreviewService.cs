@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using DiscImageStudio.Application.Preview;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
@@ -29,7 +28,14 @@ public abstract class ProjectionPreviewService : IPreviewService
     public async Task<PreviewResult> RenderAsync(PreviewRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        Validate(request);
+        PreviewSupport.Validate(request, Family, PreviewMode.Projection);
+        if (SourceSize(request) is < PreviewDefaults.MinimumSourceSize or > PreviewDefaults.MaximumSize)
+        {
+            throw new PreviewFailedException(
+                PreviewFailureCode.InvalidParameters,
+                $"Source size must be {PreviewDefaults.MinimumSourceSize}..{PreviewDefaults.MaximumSize} pixels.");
+        }
+
         Stopwatch stopwatch = Stopwatch.StartNew();
         using PreviewSourceLease source = await _sources
             .AcquireAsync(request.Workspace, request.ProjectFilePath, SourceSize(request), cancellationToken)
@@ -84,7 +90,7 @@ public abstract class ProjectionPreviewService : IPreviewService
             new("read.innerRadiusMm", Invariant(request.ReadGeometry.InnerRadiusMm)),
             new("read.outerRadiusMm", Invariant(request.ReadGeometry.OuterRadiusMm)),
             new("read.sectors", Invariant(request.ReadGeometry.Sectors)),
-            .. ToneParameters(request.Workspace.Tone.Profile),
+            .. PreviewSupport.ToneParameters(request.Workspace.Tone.Profile),
             .. output.Parameters,
         ];
         List<PreviewRingOverlay> overlays =
@@ -115,7 +121,7 @@ public abstract class ProjectionPreviewService : IPreviewService
 
     private static int SourceSize(PreviewRequest request) => request.SourceSize ?? ProjectCompositionSize;
 
-    protected static string Invariant(IFormattable value) => value.ToString(null, CultureInfo.InvariantCulture);
+    protected static string Invariant(IFormattable value) => PreviewSupport.Invariant(value);
 
     /// <summary>The data folder generation would lay out, or <see langword="null"/> for a pure image disc.</summary>
     protected static string? DataDirectory(ProjectWorkspace workspace)
@@ -136,53 +142,6 @@ public abstract class ProjectionPreviewService : IPreviewService
         {
             throw new PreviewFailedException(PreviewFailureCode.DataLayoutFailed, exception.Message, exception);
         }
-    }
-
-    private void Validate(PreviewRequest request)
-    {
-        if (request.Family != Family)
-        {
-            throw new PreviewFailedException(
-                PreviewFailureCode.Unsupported,
-                $"This service renders {Family}, not {request.Family}.");
-        }
-
-        if (request.ReadGeometry.Family != Family)
-        {
-            throw new PreviewFailedException(
-                PreviewFailureCode.InvalidParameters,
-                "The measured geometry belongs to another disc family.");
-        }
-
-        if (request.OutputSize is < PreviewDefaults.MinimumSize or > PreviewDefaults.MaximumSize)
-        {
-            throw new PreviewFailedException(
-                PreviewFailureCode.InvalidParameters,
-                $"Preview size must be {PreviewDefaults.MinimumSize}..{PreviewDefaults.MaximumSize} pixels.");
-        }
-
-        if (SourceSize(request) is < PreviewDefaults.MinimumSourceSize or > PreviewDefaults.MaximumSize)
-        {
-            throw new PreviewFailedException(
-                PreviewFailureCode.InvalidParameters,
-                $"Source size must be {PreviewDefaults.MinimumSourceSize}..{PreviewDefaults.MaximumSize} pixels.");
-        }
-
-        int samples = request.EffectiveSamplesPerSector;
-        if (samples < 1 || samples > PreviewDefaults.MaximumSamplesPerSector(Family))
-        {
-            throw new PreviewFailedException(
-                PreviewFailureCode.InvalidParameters,
-                $"Samples per sector must be 1..{PreviewDefaults.MaximumSamplesPerSector(Family)}.");
-        }
-    }
-
-    private static IEnumerable<PreviewParameter> ToneParameters(ToneProfile tone)
-    {
-        yield return new PreviewParameter("tone.ditherStrength", Invariant(tone.DitherStrength));
-        yield return new PreviewParameter("tone.levels", Invariant(tone.Levels));
-        yield return new PreviewParameter("tone.brightness", Invariant(tone.Brightness));
-        yield return new PreviewParameter("tone.srgbLinearization", tone.SrgbLinearization ? "true" : "false");
     }
 }
 
