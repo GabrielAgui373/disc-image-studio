@@ -41,7 +41,12 @@ public sealed partial class DiscGenerationService
         {
             problems.Add(exception.Error);
             target = string.IsNullOrWhiteSpace(outputPath) ? string.Empty : Path.GetFullPath(outputPath);
-            return new OutputPreflight(target, false, [], RequiredBytes(plan), null, problems);
+
+            // The space on the chosen disk is still worth showing while the name gets fixed.
+            string? folder = target.Length == 0 ? null : NearestExistingDirectory(Path.GetDirectoryName(target));
+            long? free = folder is null ? null : AvailableBytes(folder);
+            AddSpaceProblem(problems, RequiredBytes(plan), free);
+            return new OutputPreflight(target, false, [], RequiredBytes(plan), free, problems);
         }
 
         bool exists = File.Exists(target);
@@ -69,14 +74,7 @@ public sealed partial class DiscGenerationService
 
         long required = RequiredBytes(plan);
         long? available = existing is null ? null : AvailableBytes(existing);
-        if (available is { } free && free < required)
-        {
-            problems.Add(Error(
-                "generation.output.insufficient_space",
-                nameof(outputPath),
-                ("requiredBytes", required),
-                ("availableBytes", free)));
-        }
+        AddSpaceProblem(problems, required, available);
 
         return new OutputPreflight(target, exists, companions, required, available, problems);
     }
@@ -286,6 +284,18 @@ public sealed partial class DiscGenerationService
     {
         using FileStream stream = new(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         stream.Flush(flushToDisk: true);
+    }
+
+    private static void AddSpaceProblem(List<GenerationValidationError> problems, long required, long? available)
+    {
+        if (available is { } free && free < required)
+        {
+            problems.Add(Error(
+                "generation.output.insufficient_space",
+                "outputPath",
+                ("requiredBytes", required),
+                ("availableBytes", free)));
+        }
     }
 
     private static long RequiredBytes(GenerationPlan plan) => checked(plan.EstimatedBytes + CompanionMarginBytes);
