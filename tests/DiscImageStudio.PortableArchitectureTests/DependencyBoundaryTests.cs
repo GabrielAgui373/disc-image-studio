@@ -119,6 +119,7 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj",
             "src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj",
             "src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj",
+            "src/DiscImageStudio.Preview/DiscImageStudio.Preview.csproj",
             "src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj",
             "src/DvdImageSolver/DvdImageSolver.csproj",
             "tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj",
