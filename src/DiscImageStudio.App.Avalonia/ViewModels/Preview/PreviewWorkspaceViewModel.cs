@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using DiscImageStudio.App.Avalonia.Design;
 using DiscImageStudio.App.Avalonia.Localization;
 using DiscImageStudio.App.Avalonia.Platform;
+using DiscImageStudio.Application.Ports;
 using DiscImageStudio.Application.Preview;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
@@ -38,6 +39,8 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     private readonly PreviewCoordinator _previews;
     private readonly ProjectLifecycleService _projects;
     private readonly ITextCatalog _text;
+    private readonly IFilePickerService _filePicker;
+    private readonly IClipboardService _clipboard;
     private readonly Debouncer _refresh;
     private PreviewResult? _result;
     private long _generation;
@@ -47,8 +50,15 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     private OpticalDiscFamily? _family;
     private bool _syncing;
 
-    public PreviewWorkspaceViewModel(PreviewCoordinator previews, ProjectLifecycleService projects, ITextCatalog text)
+    public PreviewWorkspaceViewModel(
+        PreviewCoordinator previews,
+        ProjectLifecycleService projects,
+        ITextCatalog text,
+        IFilePickerService filePicker,
+        IClipboardService clipboard)
     {
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
         _previews = previews ?? throw new ArgumentNullException(nameof(previews));
         _projects = projects ?? throw new ArgumentNullException(nameof(projects));
         _text = text ?? throw new ArgumentNullException(nameof(text));
@@ -66,6 +76,8 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
         ParametersTitle = text["preview.parameters.title"];
         RefreshLabel = text["preview.refresh"];
         RenderingLabel = text["preview.rendering"];
+        ExportLabel = text["preview.export"];
+        CopyDiagnosticsLabel = text["preview.copyDiagnostics"];
         ViewTitle = text["preview.view.title"];
         DataMapLabel = text["preview.view.dataMap"];
         AppearanceLabel = text["preview.view.appearance"];
@@ -100,6 +112,24 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     public string RefreshLabel { get; }
 
     public string RenderingLabel { get; }
+
+    public string ExportLabel { get; }
+
+    public string CopyDiagnosticsLabel { get; }
+
+    /// <summary>Outcome of the last export or copy, shown under the actions.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActionStatus))]
+    public partial string ActionStatus { get; private set; } = string.Empty;
+
+    public bool HasActionStatus => ActionStatus.Length > 0;
+
+    /// <summary>Shown when the estimated peak memory is large for this computer.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCostWarning))]
+    public partial string CostWarning { get; private set; } = string.Empty;
+
+    public bool HasCostWarning => CostWarning.Length > 0;
 
     public string ViewTitle { get; }
 
@@ -270,7 +300,11 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     private void ShowAppearanceView() => ShowAppearance = true;
 
     // The view and the media only recolour the last result; they never recompute it.
-    partial void OnShowAppearanceChanged(bool value) => _ = PresentAsync();
+    partial void OnShowAppearanceChanged(bool value)
+    {
+        UpdateCostEstimate();
+        _ = PresentAsync();
+    }
 
     partial void OnSelectedMediaChanged(MediaAppearanceOption? value) => _ = PresentAsync();
 
@@ -383,11 +417,88 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
             workspace.Media.Sectors,
             PreviewDefaults.SamplesPerSector(family),
             UseDraftSource ? DraftSourceSize : PreviewDefaults.MaximumSize);
+        // Showing the result adds the overlay copy and the bitmap, one BGRA buffer each; the
+        // appearance view adds its recoloured buffer and two 16-bit level planes.
+        long displayBytes = (long)size.Size * size.Size * (ShowAppearance ? 16 : 8);
+        long peak = estimate.PeakBytes + displayBytes;
         CostEstimate = string.Format(
             CultureInfo.CurrentUICulture,
             _text["preview.cost"],
             Math.Max(0.1, estimate.Duration.TotalSeconds),
-            Math.Ceiling(estimate.PeakBytes / (1024.0 * 1024.0)));
+            Math.Ceiling(peak / (1024.0 * 1024.0)));
+
+        // Above most of the memory the system can still hand out, the preview competes with the
+        // rest of the desktop and may be killed by the kernel's out-of-memory handling.
+        long available = SystemMemory.AvailableBytes();
+        CostWarning = available > 0 && peak > available * 0.8 ? _text["preview.costWarning"] : string.Empty;
+    }
+
+    private bool CanExport() => _result is not null && !IsRendering;
+
+    /// <summary>Saves exactly the pixels on screen (view, media and overlays included) as a PNG.</summary>
+    [RelayCommand(CanExecute = nameof(CanExport))]
+    private async Task ExportPngAsync()
+    {
+        if (_result is not { } result)
+        {
+            return;
+        }
+
+        string? appearance = ShowAppearance ? SelectedMedia?.Media.Id : null;
+        string projectName = _projects.Current?.Identity.Name ?? string.Empty;
+        string? path = await _filePicker.SaveFileAsync(new SaveFilePickerRequest(
+            _text["preview.export.pickerTitle"],
+            SuggestedFileName: PreviewExport.SuggestedFileName(projectName, result, appearance),
+            SuggestedDirectory: _projects.ProjectFilePath is { } project ? Path.GetDirectoryName(project) : null,
+            DefaultExtension: ".png",
+            FileTypes: [new FilePickerType("PNG", ["*.png"], ["image/png"])]));
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        byte[]? pixels = DisplayedPixels();
+        if (pixels is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await Task.Run(() => PreviewExport.SavePng(path, result.Size, pixels));
+            ActionStatus = string.Format(CultureInfo.CurrentUICulture, _text["preview.export.done"], path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            ActionStatus = string.Format(CultureInfo.CurrentUICulture, _text["preview.export.failed"], exception.Message);
+        }
+    }
+
+    /// <summary>Copies the parameters, confidence and warnings behind the picture as text.</summary>
+    [RelayCommand(CanExecute = nameof(CanExport))]
+    private async Task CopyDiagnosticsAsync()
+    {
+        if (_result is not { } result)
+        {
+            return;
+        }
+
+        string text = PreviewExport.Diagnostics(
+            _projects.Current?.Identity.Name ?? string.Empty,
+            result with { Warnings = [.. result.Warnings.Select(NamedLayers)] },
+            ShowAppearance ? SelectedMedia?.Media.Id : null,
+            ShowFileSystem,
+            ShowUsefulRing);
+        await _clipboard.SetTextAsync(text);
+        ActionStatus = _text["preview.copyDiagnostics.done"];
+    }
+
+    partial void OnIsRenderingChanged(bool value) => NotifyActionsChanged();
+
+    private void NotifyActionsChanged()
+    {
+        ExportPngCommand.NotifyCanExecuteChanged();
+        CopyDiagnosticsCommand.NotifyCanExecuteChanged();
     }
 
     private async Task RefreshAsync()
@@ -496,6 +607,9 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
         Warnings.Clear();
         Parameters.Clear();
     }
+
+    private PreviewWarning NamedLayers(PreviewWarning warning)
+        => warning.Code == PreviewWarningCode.LayersNotPainted ? warning with { Detail = LayerNames(warning.Detail) } : warning;
 
     private string? LayerNames(string? ids)
     {

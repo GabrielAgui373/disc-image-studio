@@ -73,7 +73,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel(
             previews ?? throw new ArgumentNullException(nameof(previews)),
             projects,
-            text);
+            text,
+            filePicker,
+            clipboard);
         DesignWorkspace = new DesignWorkspaceViewModel(
             new DesignCanvasViewModel(
                 projects,

@@ -457,6 +457,11 @@
     <Setter Property="CornerRadius" Value="6" />
   </Style>
 
+  <Style Selector="TextBlock.preview-cost-warning">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
   <Style Selector="TextBlock.preview-parameter-value">
     <Setter Property="FontSize" Value="12" />
     <Setter Property="FontFamily" Value="monospace" />

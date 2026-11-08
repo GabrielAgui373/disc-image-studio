@@ -110,6 +110,8 @@
                                TextWrapping="Wrap"
                                IsVisible="{Binding IsProjectionMode}" />
                     <TextBlock Text="{Binding CostEstimate}" Classes="settings-hint" />
+                    <TextBlock Text="{Binding CostWarning}" Classes="preview-cost-warning" TextWrapping="Wrap"
+                               IsVisible="{Binding HasCostWarning}" />
                 </StackPanel>
 
                 <StackPanel Spacing="6">
@@ -128,7 +130,20 @@
                     </CheckBox>
                 </StackPanel>
 
-                <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding RefreshLabel}" Command="{Binding RefreshCommand}" />
+                <StackPanel Spacing="8">
+                    <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding RefreshLabel}" Command="{Binding RefreshCommand}" />
+                    <UniformGrid Rows="1" ColumnSpacing="8">
+                        <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Command="{Binding ExportPngCommand}">
+                            <TextBlock Text="{Binding ExportLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                        </Button>
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Content="{Binding CopyDiagnosticsLabel}"
+                                Command="{Binding CopyDiagnosticsCommand}" />
+                    </UniformGrid>
+                    <TextBlock Text="{Binding ActionStatus}" Classes="settings-hint" TextWrapping="Wrap"
+                               IsVisible="{Binding HasActionStatus}" />
+                </StackPanel>
 
                 <StackPanel Spacing="6" IsVisible="{Binding HasWarnings}">
                     <TextBlock Text="{Binding WarningsTitle}" Classes="settings-field-label" />
