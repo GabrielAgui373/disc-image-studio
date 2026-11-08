@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
+using Avalonia.Threading;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using DiscImageStudio.App.Avalonia.Design;
@@ -285,7 +287,7 @@ public sealed class DiscDesignCanvas : Control
             return;
         }
 
-        Focus();
+        Focus(NavigationMethod.Pointer);
 
         PointerPoint point = e.GetCurrentPoint(this);
         Point screen = point.Position;
@@ -527,6 +529,38 @@ public sealed class DiscDesignCanvas : Control
     {
         base.OnLostFocus(e);
         _spaceHeld = false;
+    }
+
+    /// <summary>
+    /// A click focuses the canvas (Avalonia focuses focusable elements on press), and every
+    /// scrolling ancestor then scrolls the whole canvas into view, moving it under the pointer in
+    /// the middle of a gesture: a rotation would turn around a point that just moved. GotFocus
+    /// reaches the canvas before it bubbles to those ScrollViewers, so pointer focus records their
+    /// offsets here and puts them back; keyboard focus still scrolls as usual.
+    /// </summary>
+    protected override void OnGotFocus(FocusChangedEventArgs e)
+    {
+        base.OnGotFocus(e);
+        if (e.NavigationMethod != NavigationMethod.Pointer)
+        {
+            return;
+        }
+
+        (ScrollViewer Viewer, Vector Offset)[] scrollers = [.. this.GetVisualAncestors()
+            .OfType<ScrollViewer>()
+            .Select(viewer => (viewer, viewer.Offset))];
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                foreach ((ScrollViewer viewer, Vector offset) in scrollers)
+                {
+                    if (viewer.Offset != offset)
+                    {
+                        viewer.Offset = offset;
+                    }
+                }
+            },
+            DispatcherPriority.Send);
     }
 
     // ---- Gesture helpers ----
