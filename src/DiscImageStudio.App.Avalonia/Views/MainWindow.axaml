@@ -354,7 +354,7 @@
                                 </StackPanel>
 
                                 <Border Grid.Column="1" Classes="home-disc-illustration">
-                                    <controls:DiscArt Classes="hero" Variant="{Binding SelectedHomeTemplate.Id, FallbackValue=cd}" />
+                                    <controls:DiscArt Classes="hero" Variant="{Binding SelectedHomeTemplate.Id, FallbackValue=dvd}" />
                                 </Border>
                             </Grid>
                         </Border>

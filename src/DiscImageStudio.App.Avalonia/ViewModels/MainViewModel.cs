@@ -185,7 +185,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             ? paths.ProjectsDirectory
             : _settings.DefaultProjectDirectory;
         NewProjectVolumeLabel = text["newProject.defaultVolumeLabel"];
-        SelectHomeTemplate(HomeTemplates[0]);
+        SelectHomeTemplate(DefaultHomeTemplate);
 
         HomeNavigation = CreateNavigationItem(WorkspacePage.Home, "navigation.home", "Alt+H");
         DesignNavigation = CreateNavigationItem(WorkspacePage.Design, "navigation.design", "Alt+D");
@@ -403,6 +403,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public WorkspaceNavigationItem SettingsNavigation { get; }
     public IReadOnlyList<WorkspaceNavigationItem> NavigationItems { get; }
     public IReadOnlyList<HomeTemplateOption> HomeTemplates { get; }
+
+    /// <summary>DVD is the family a new project starts from and the one the Home hero shows.</summary>
+    private HomeTemplateOption DefaultHomeTemplate
+        => HomeTemplates.First(template => template.Family == OpticalDiscFamily.Dvd);
     public IReadOnlyList<NewProjectPresetOption> ProjectPresets { get; }
     public ObservableCollection<NewProjectPresetOption> NewProjectPresets { get; } = [];
     public ObservableCollection<JobDockItem> Jobs { get; } = [];
@@ -622,7 +626,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         }
 
         _userPresets = _presetCatalog.LoadUserPresets();
-        SelectHomeTemplate(SelectedHomeTemplate ?? HomeTemplates[0]);
+        SelectHomeTemplate(SelectedHomeTemplate ?? DefaultHomeTemplate);
         NewProjectError = null;
         IsNewProjectDialogOpen = true;
         UpdateNewProjectFilePathPreview();
@@ -1236,7 +1240,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void RefreshProjectPresets()
     {
-        OpticalDiscFamily family = SelectedHomeTemplate?.Family ?? OpticalDiscFamily.CompactDisc;
+        OpticalDiscFamily family = SelectedHomeTemplate?.Family ?? OpticalDiscFamily.Dvd;
         string? selectedId = SelectedProjectPreset?.Id;
         NewProjectPresets.Clear();
         foreach (NewProjectPresetOption preset in ProjectPresets.Where(preset => preset.Family == family))
