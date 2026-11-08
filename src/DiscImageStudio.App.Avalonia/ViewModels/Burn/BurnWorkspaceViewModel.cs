@@ -230,6 +230,65 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
     /// <summary>The key of the generated source; it has no file.</summary>
     private const string GeneratedKey = "generate://project";
 
+    /// <summary>Called by the shell when the backend can record physical test results (Task 06).</summary>
+    public void AttachValidation(IOpticalValidationRecorder recorder)
+        => _validation = recorder ?? throw new ArgumentNullException(nameof(recorder));
+
+    private IOpticalValidationRecorder? _validation;
+    private OpticalValidationResult? _pendingValidation;
+
+    /// <summary>The last burn used a mode enabled only for testing: ask for the verdict.</summary>
+    [ObservableProperty]
+    public partial bool IsRecordingValidation { get; private set; }
+
+    [ObservableProperty]
+    public partial string ValidationBrand { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ValidationNotes { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ValidationStatus { get; private set; } = string.Empty;
+
+    public string ValidationTitle => _text["burn.validation.title"];
+
+    public string ValidationText => _text["burn.validation.text"];
+
+    public string ValidationBrandLabel => _text["burn.validation.brand"];
+
+    public string ValidationNotesLabel => _text["burn.validation.notes"];
+
+    public string ValidationPassedLabel => _text["burn.validation.passed"];
+
+    public string ValidationFailedLabel => _text["burn.validation.failed"];
+
+    [RelayCommand]
+    private void RecordPassed() => RecordValidation(passed: true);
+
+    [RelayCommand]
+    private void RecordFailed() => RecordValidation(passed: false);
+
+    private void RecordValidation(bool passed)
+    {
+        if (_validation is null || _pendingValidation is not { } pending)
+        {
+            return;
+        }
+
+        try
+        {
+            _validation.Record(pending with { Passed = passed, MediaBrand = ValidationBrand, Notes = ValidationNotes });
+            ValidationStatus = _text[passed ? "burn.validation.recordedPassed" : "burn.validation.recordedFailed"];
+            IsRecordingValidation = false;
+            _pendingValidation = null;
+            _ = RefreshAsync();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            ValidationStatus = string.Format(CultureInfo.CurrentUICulture, _text["export.failure.io"], exception.Message);
+        }
+    }
+
     public void AttachJobs(JobCoordinator jobs)
     {
         _jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
@@ -363,6 +422,11 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
                 source.Sha256 is { Length: >= 16 } hash ? hash[..16] : _text["burn.value.noManifest"])));
         ShowBluRayWarning = mode == OpticalBurnMediaKind.BluRayData;
         ShowGeneratedWarning = source.Kind == BurnSourceKind.Generated;
+        _pendingValidation = _validation?.IsTestOnly(device.Status, mode) == true
+            ? new OpticalValidationResult(device.Status, mode, media.Profile, null, SelectedSpeed?.Label, false, null)
+            : null;
+        IsRecordingValidation = false;
+        ValidationStatus = string.Empty;
         Acknowledged = false;
         _confirmedFingerprint = Fingerprint();
         Notice = string.Empty;
@@ -455,6 +519,8 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
                 result = await _burner.BurnAsync(generated, progress, context.CancellationToken);
             });
         _jobId = null;
+        // A test burn that ran (to the end or into an error) asks for the user's verdict.
+        IsRecordingValidation = _pendingValidation is not null && job.Error?.Code != ApplicationErrorCode.JobCanceled;
         if (job.Succeeded && result is { } done)
         {
             OutcomeTitle = _text["burn.result.succeededTitle"];

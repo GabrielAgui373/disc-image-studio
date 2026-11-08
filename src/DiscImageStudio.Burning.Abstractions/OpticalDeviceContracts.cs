@@ -282,3 +282,22 @@ public static class OpticalBurnStages
         _ => OpticalBurnStage.Unknown,
     };
 }
+
+/// <summary>The user's verdict on a burn made while a mode was enabled only for testing.</summary>
+public sealed record OpticalValidationResult(
+    OpticalDeviceStatus Device,
+    OpticalBurnMediaKind Mode,
+    OpticalMediaProfile Media,
+    string? MediaBrand,
+    string? Speed,
+    bool Passed,
+    string? Notes);
+
+/// <summary>Records physical test results; a passing one enables the mode for that recorder and disc type.</summary>
+public interface IOpticalValidationRecorder
+{
+    /// <summary>True when <paramref name="mode"/> is enabled on this recorder and disc only for testing.</summary>
+    bool IsTestOnly(OpticalDeviceStatus device, OpticalBurnMediaKind mode);
+
+    void Record(OpticalValidationResult result);
+}

@@ -154,6 +154,28 @@
                         <Button Classes="ghost" HorizontalAlignment="Right" Content="{Binding DoneLabel}" Command="{Binding DoneCommand}" />
                     </StackPanel>
                 </Border>
+
+                <!-- A mode enabled only for testing: record what the disc showed (Task 06). -->
+                <Border Classes="export-confirm" IsVisible="{Binding IsRecordingValidation}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding ValidationTitle}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ValidationText}" Classes="settings-hint" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding ValidationBrandLabel}" Classes="settings-field-label" />
+                        <TextBox Text="{Binding ValidationBrand}" />
+                        <TextBlock Text="{Binding ValidationNotesLabel}" Classes="settings-field-label" />
+                        <TextBox Text="{Binding ValidationNotes}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" />
+                        <UniformGrid Rows="1" ColumnSpacing="8">
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding ValidationFailedLabel}" Command="{Binding RecordFailedCommand}" />
+                            <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding RecordPassedCommand}">
+                                <TextBlock Text="{Binding ValidationPassedLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                            </Button>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+                <TextBlock Text="{Binding ValidationStatus}" Classes="settings-hint" TextWrapping="Wrap"
+                           IsVisible="{Binding ValidationStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
             </StackPanel>
         </Border>
     </Grid>

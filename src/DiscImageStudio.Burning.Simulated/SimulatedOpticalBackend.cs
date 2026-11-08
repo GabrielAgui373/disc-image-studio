@@ -63,7 +63,7 @@ public sealed class SimulatedRecorder(string id, string name, OpticalWriteModes 
 /// Burn page and its rules can be exercised before a real Linux backend exists. Bytes are hashed,
 /// never written anywhere. It is only offered when explicitly enabled.
 /// </summary>
-public sealed class SimulatedOpticalBackend : IOpticalDeviceService, IOpticalBurner
+public sealed class SimulatedOpticalBackend : IOpticalDeviceService, IOpticalBurner, IOpticalValidationRecorder
 {
     /// <summary>Waiting this long for data while the producer is still running counts as an underrun.</summary>
     public static readonly TimeSpan UnderrunTimeout = TimeSpan.FromSeconds(2);
@@ -84,6 +84,19 @@ public sealed class SimulatedOpticalBackend : IOpticalDeviceService, IOpticalBur
     public OpticalBackendAvailability Availability => OpticalBackendAvailability.Available;
 
     public IReadOnlyList<SimulatedRecorder> Recorders => _recorders;
+
+    /// <summary>Modes reported as enabled only for a hardware test until a passing result is recorded.</summary>
+    public OpticalWriteModes TestOnlyModes { get; set; }
+
+    /// <summary>Results recorded through the page.</summary>
+    public List<OpticalValidationResult> ValidationResults { get; } = [];
+
+    public bool IsTestOnly(OpticalDeviceStatus device, OpticalBurnMediaKind mode)
+        => (TestOnlyModes & OpticalDeviceStatus.Flag(mode)) != 0
+           && !ValidationResults.Any(result => result.Passed && result.Device.Device.Id == device.Device.Id
+                                               && result.Mode == mode && result.Media == device.Media?.Profile);
+
+    public void Record(OpticalValidationResult result) => ValidationResults.Add(result ?? throw new ArgumentNullException(nameof(result)));
 
     /// <summary>Three recorders: a BD writer with a blank BD-R, a DVD writer with a blank DVD-R and a CD writer without a disc.</summary>
     public static SimulatedOpticalBackend CreateDemo()
@@ -133,7 +146,7 @@ public sealed class SimulatedOpticalBackend : IOpticalDeviceService, IOpticalBur
     private OpticalDeviceStatus Describe(SimulatedRecorder recorder)
     {
         OpticalMediaState? media = recorder.Access == OpticalDeviceAccess.Ready ? recorder.Media : null;
-        return new OpticalDeviceStatus(
+        OpticalDeviceStatus status = new(
             new OpticalBurnDevice(recorder.Id, recorder.Name, []),
             recorder.Vendor,
             recorder.Model,
@@ -144,6 +157,12 @@ public sealed class SimulatedOpticalBackend : IOpticalDeviceService, IOpticalBur
             recorder.AccessDetail,
             media,
             OpticalDeviceStatus.Evaluate(recorder.WriteModes, recorder.Access, media, _validated));
+        return status with
+        {
+            Modes = [.. status.Modes.Select(capability => capability.IsAvailable && IsTestOnly(status, capability.Mode)
+                ? capability with { Detail = "Enabled for a hardware test; not validated yet" }
+                : capability)],
+        };
     }
 
     // ---- IOpticalBurner ----

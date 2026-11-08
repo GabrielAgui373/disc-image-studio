@@ -135,9 +135,14 @@ public sealed class AppHost : IDisposable
             "Burning on Linux is enabled only after it is validated on real recorders.");
         DiscImageStudio.Burning.IOpticalDeviceService burning;
         DiscImageStudio.Burning.IOpticalBurner? writer = null;
+        DiscImageStudio.Burning.IOpticalValidationRecorder? validationRecorder = null;
         if (Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1")
         {
-            burning = DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo();
+            DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend simulated = DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo();
+            simulated.TestOnlyModes = DiscImageStudio.Burning.Linux.LinuxBurnValidation.ParseModes(
+                Environment.GetEnvironmentVariable(DiscImageStudio.Burning.Linux.LinuxBurnValidation.TestModesVariable));
+            burning = simulated;
+            validationRecorder = simulated;
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -147,6 +152,7 @@ public sealed class AppHost : IDisposable
                 Path.Combine(paths.ConfigDirectory, "burn-validations.json"),
                 Environment.GetEnvironmentVariable(DiscImageStudio.Burning.Linux.LinuxBurnValidation.TestModesVariable));
             burning = new DiscImageStudio.Burning.Linux.LinuxOpticalDeviceService(validation: validation);
+            validationRecorder = validation;
             writer = new DiscImageStudio.Burning.Linux.LinuxOpticalBurner(
                 validation: validation,
                 log: new DiscImageStudio.Burning.Linux.BurnTestLog(Path.Combine(paths.StateDirectory, "burn-tests.jsonl")));
@@ -187,6 +193,10 @@ public sealed class AppHost : IDisposable
             clipboard);
         viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
         viewModel.BurnWorkspace.AttachJobs(jobs);
+        if (validationRecorder is not null)
+        {
+            viewModel.BurnWorkspace.AttachValidation(validationRecorder);
+        }
         viewModel.BurnWorkspace.AttachGeneration(
             new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
             services.Generation,

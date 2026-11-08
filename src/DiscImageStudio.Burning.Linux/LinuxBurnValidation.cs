@@ -36,7 +36,7 @@ public sealed record BurnValidationDocument(
 /// <c>DISC_IMAGE_STUDIO_BURN_TEST_MODES</c> (for example <c>DvdData,BluRayData</c>) enables modes
 /// that are not validated yet, and the page says so for each of them.
 /// </summary>
-public sealed class LinuxBurnValidation
+public sealed class LinuxBurnValidation : IOpticalValidationRecorder
 {
     public const string TestModesVariable = "DISC_IMAGE_STUDIO_BURN_TEST_MODES";
 
@@ -49,18 +49,32 @@ public sealed class LinuxBurnValidation
         Converters = { new JsonStringEnumConverter() },
     };
 
-    private readonly IReadOnlyList<BurnValidationRecord> _records;
+    private readonly List<BurnValidationRecord> _records;
+    private readonly Lock _gate = new();
 
-    public LinuxBurnValidation(IEnumerable<BurnValidationRecord>? records = null, OpticalWriteModes testModes = OpticalWriteModes.None)
+    public LinuxBurnValidation(IEnumerable<BurnValidationRecord>? records = null, OpticalWriteModes testModes = OpticalWriteModes.None, string? path = null)
     {
         _records = [.. records ?? []];
         TestModes = testModes & ImplementedModes;
+        Path = path;
     }
+
+    /// <summary>The records file; results recorded from the app are saved here.</summary>
+    public string? Path { get; }
 
     /// <summary>Modes enabled for a hardware test without a passing record.</summary>
     public OpticalWriteModes TestModes { get; }
 
-    public IReadOnlyList<BurnValidationRecord> Records => _records;
+    public IReadOnlyList<BurnValidationRecord> Records
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return [.. _records];
+            }
+        }
+    }
 
     /// <summary>Reads the records file (missing means no record) and the test variable.</summary>
     public static LinuxBurnValidation Load(string? path, string? testModes = null)
@@ -82,7 +96,7 @@ public sealed class LinuxBurnValidation
             }
         }
 
-        return new LinuxBurnValidation(records, ParseModes(testModes));
+        return new LinuxBurnValidation(records, ParseModes(testModes), path);
     }
 
     public static OpticalWriteModes ParseModes(string? text)
@@ -104,7 +118,7 @@ public sealed class LinuxBurnValidation
     {
         ArgumentNullException.ThrowIfNull(node);
         OpticalWriteModes modes = OpticalWriteModes.None;
-        foreach (BurnValidationRecord record in _records)
+        foreach (BurnValidationRecord record in Records)
         {
             if (record.Passed
                 && Same(record.Vendor, node.Vendor) && Same(record.Model, node.Model) && Same(record.Firmware, node.Revision)
@@ -120,8 +134,45 @@ public sealed class LinuxBurnValidation
     public bool IsTestOnly(LinuxOpticalNode node, OpticalMediaState? media, OpticalBurnMediaKind mode)
     {
         OpticalWriteModes flag = OpticalDeviceStatus.Flag(mode);
-        return (TestModes & flag) != 0 && (new LinuxBurnValidation(_records).Validated(node, media) & flag) == 0;
+        return (TestModes & flag) != 0 && (new LinuxBurnValidation(Records).Validated(node, media) & flag) == 0;
     }
+
+    public bool IsTestOnly(OpticalDeviceStatus device, OpticalBurnMediaKind mode)
+    {
+        ArgumentNullException.ThrowIfNull(device);
+        return IsTestOnly(Node(device), device.Media, mode);
+    }
+
+    /// <summary>Adds a physical test result and saves the file; a passing one enables the mode at once.</summary>
+    public void Record(OpticalValidationResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        BurnValidationRecord record = new(
+            result.Device.Vendor ?? string.Empty,
+            result.Device.Model ?? string.Empty,
+            result.Device.Firmware ?? string.Empty,
+            result.Mode,
+            result.Media,
+            string.IsNullOrWhiteSpace(result.MediaBrand) ? null : result.MediaBrand.Trim(),
+            result.Speed,
+            result.Passed ? "pass" : "fail",
+            DateTimeOffset.UtcNow,
+            string.IsNullOrWhiteSpace(result.Notes) ? null : result.Notes.Trim());
+        lock (_gate)
+        {
+            _records.Add(record);
+            if (Path is { } path)
+            {
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path))!);
+                string temporary = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path))!, $".dis-{Guid.NewGuid():N}.tmp");
+                File.WriteAllText(temporary, JsonSerializer.Serialize(new BurnValidationDocument(BurnValidationDocument.FormatName, [.. _records]), JsonOptions));
+                File.Move(temporary, path, overwrite: true);
+            }
+        }
+    }
+
+    private static LinuxOpticalNode Node(OpticalDeviceStatus device)
+        => new(device.Device.Id, device.Device.VolumePaths.FirstOrDefault() ?? string.Empty, device.Vendor, device.Model, device.Firmware, -1, -1, new Dictionary<string, string>());
 
     /// <summary>An empty records file, to fill in after a test.</summary>
     public static string Template()
