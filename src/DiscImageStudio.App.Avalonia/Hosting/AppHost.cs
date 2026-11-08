@@ -94,6 +94,12 @@ public sealed class AppHost : IDisposable
             logger);
         AboutInfo about = AboutInfo.Create(paths);
 
+        // Projection sources are the 8192 px composite generation reads, cached per design
+        // content in the XDG cache folder and shared by every preview of that content.
+        DiscImageStudio.Application.Preview.PreviewSourceCache previewSources = new(
+            compositions,
+            Path.Combine(paths.CacheDirectory, "preview"));
+
         HostServices services = new(
             paths,
             filePicker,
@@ -114,7 +120,10 @@ public sealed class AppHost : IDisposable
             // Generation sources are disposable composites; they live in the XDG cache folder.
             new DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer(
                 compositions,
-                Path.Combine(paths.CacheDirectory, "generation")));
+                Path.Combine(paths.CacheDirectory, "generation")),
+            previewSources,
+            new DiscImageStudio.Application.Preview.PreviewCoordinator(
+                DiscImageStudio.Preview.PreviewServices.CreateProjection(previewSources)));
 
         MainViewModel viewModel = new(
             paths,
@@ -151,6 +160,8 @@ public sealed class AppHost : IDisposable
         _desktop.ShutdownRequested -= OnShutdownRequested;
         _exceptionMonitor.Dispose();
         _applicationLifetime.Dispose();
+        Services.Previews.CancelAll();
+        Services.PreviewSources.Dispose();
     }
 
     private async void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs args)
@@ -198,4 +209,6 @@ public sealed record HostServices(
     UserSettings Settings,
     ITextCatalog Text,
     AboutInfo About,
-    DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer Generation);
+    DiscImageStudio.App.Avalonia.Generation.ProjectGenerationPreparer Generation,
+    DiscImageStudio.Application.Preview.PreviewSourceCache PreviewSources,
+    DiscImageStudio.Application.Preview.PreviewCoordinator Previews);
