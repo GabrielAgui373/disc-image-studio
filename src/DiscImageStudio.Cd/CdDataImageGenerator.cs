@@ -236,6 +236,16 @@ public static class CdDataImageGenerator
 
     public static void PreviewTrack(string isoPath, string outputPath, CdDiscParameters actual,
         int outputSize, int byteStep, CancellationToken cancellationToken = default)
+        => DataPreview.Save(outputPath, outputSize,
+            RenderTrackPixels(isoPath, actual, outputSize, byteStep, cancellationToken));
+
+    /// <summary>
+    /// The read-back behind <see cref="PreviewTrack"/> as an opaque BGRA buffer of
+    /// <paramref name="outputSize"/>². The drawing range comes from the ISO's sidecar when it
+    /// describes this sector count, otherwise the whole ISO is read.
+    /// </summary>
+    public static byte[] RenderTrackPixels(string isoPath, CdDiscParameters actual,
+        int outputSize, int byteStep, CancellationToken cancellationToken = default)
     {
         ValidatePreview(actual, outputSize, byteStep);
         using FileStream input = new(isoPath, FileMode.Open, FileAccess.Read, FileShare.Read,
@@ -260,7 +270,7 @@ public static class CdDataImageGenerator
                 preview.Splat(actual, physicalByte, (byte)(sector[offset] ^ ScrambleMask[offset + PayloadOffset - 12]));
             }
         }
-        preview.Save(outputPath);
+        return preview.CreatePixels();
     }
 
     private static void ValidatePreview(CdDiscParameters parameters, int size, int interval)

@@ -52,7 +52,7 @@ public sealed record IsoReadbackSummary(
     public double PitchCubicMicrometres => TrackPitchMicrometres * PitchCubic;
 }
 
-internal static class IsoReadbackRenderer
+public static class IsoReadbackRenderer
 {
     /// <summary>Half of the 16-bit payload code word the generator targets.</summary>
     private const int CodeWordCenterOffset = 8;
@@ -61,6 +61,23 @@ internal static class IsoReadbackRenderer
         string isoPath,
         string outputPath,
         IsoReadbackOptions options)
+    {
+        string outputFullPath = Path.GetFullPath(outputPath);
+        byte[] pixels = RenderPixels(isoPath, options, out IsoReadbackSummary summary);
+        WritePng(outputFullPath, options.PreviewSize, pixels);
+        return summary with { OutputImage = outputFullPath };
+    }
+
+    /// <summary>
+    /// The read-back behind <see cref="Render"/> as an opaque BGRA buffer of
+    /// <see cref="IsoReadbackOptions.PreviewSize"/>²; the summary's
+    /// <see cref="IsoReadbackSummary.OutputImage"/> is empty because nothing is written.
+    /// </summary>
+    public static byte[] RenderPixels(
+        string isoPath,
+        IsoReadbackOptions options,
+        out IsoReadbackSummary summary,
+        CancellationToken cancellationToken = default)
     {
         Validate(options);
         string isoFullPath = Path.GetFullPath(isoPath);
@@ -105,7 +122,8 @@ internal static class IsoReadbackRenderer
         }
 
         int totalBlocks = checked((int)(options.FillSectors / DvdEccBlockEncoder.SectorCount));
-        Parallel.For(0, workerCount, worker =>
+        ParallelOptions parallel = new() { CancellationToken = cancellationToken };
+        Parallel.For(0, workerCount, parallel, worker =>
         {
             byte[] block = new byte[DvdEccBlockEncoder.PayloadBytesPerBlock];
             using FileStream iso = new(
@@ -117,6 +135,7 @@ internal static class IsoReadbackRenderer
                 FileOptions.SequentialScan);
             for (int blockIndex = worker; blockIndex < totalBlocks; blockIndex += workerCount)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 uint blockStartLba = options.StartLba
                     + checked((uint)blockIndex * DvdEccBlockEncoder.SectorCount);
                 iso.Seek(
@@ -189,10 +208,10 @@ internal static class IsoReadbackRenderer
             pixels[offset + 2] = level;
         }
 
-        WritePng(Path.GetFullPath(outputPath), size, pixels);
-        return new IsoReadbackSummary(
+        cancellationToken.ThrowIfCancellationRequested();
+        summary = new IsoReadbackSummary(
             isoFullPath,
-            Path.GetFullPath(outputPath),
+            string.Empty,
             size,
             options.TotalSectors,
             options.StartLba,
@@ -211,6 +230,7 @@ internal static class IsoReadbackRenderer
             options.PitchLinear,
             options.PitchQuadratic,
             options.PitchCubic);
+        return pixels;
     }
 
     private static void WritePng(string outputPath, int size, byte[] pixels)

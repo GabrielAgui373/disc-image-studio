@@ -424,6 +424,19 @@ public static class CdTrackGenerator
         bool deinterleave,
         CancellationToken cancellationToken = default)
     {
+        byte[] pixels = RenderTrackPixels(trackPath, actual, outputSize, byteStep, deinterleave, cancellationToken);
+        WritePng(Path.GetFullPath(outputPath), outputSize, pixels);
+    }
+
+    /// <summary>The read-back behind <see cref="PreviewTrack"/> as an opaque BGRA buffer of <paramref name="outputSize"/>².</summary>
+    public static byte[] RenderTrackPixels(
+        string trackPath,
+        CdDiscParameters actual,
+        int outputSize,
+        int byteStep,
+        bool deinterleave,
+        CancellationToken cancellationToken = default)
+    {
         actual.Validate();
         if (outputSize is < 64 or > 8192)
         {
@@ -485,7 +498,7 @@ public static class CdTrackGenerator
                 cancellationToken);
         }
 
-        WritePng(Path.GetFullPath(outputPath), outputSize, preview.CreatePixels());
+        return preview.CreatePixels();
     }
 
     /// <summary>Renders the file's bytes in file order; correct for a track without interleave.</summary>
