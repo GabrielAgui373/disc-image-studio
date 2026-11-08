@@ -28,7 +28,8 @@ public static class PreviewExport
         string target = Path.GetFullPath(path);
         string directory = Path.GetDirectoryName(target)!;
         Directory.CreateDirectory(directory);
-        string partial = Path.Combine(directory, $".{Path.GetFileName(target)}.{Guid.NewGuid():N}.partial");
+        // Never derived from the file name, so a name near the 255-byte limit still works.
+        string partial = Path.Combine(directory, $".dis-{Guid.NewGuid():N}.partial");
         try
         {
             byte[] png = RasterCodec.EncodePng(size, size, pixels, grayscale: false);

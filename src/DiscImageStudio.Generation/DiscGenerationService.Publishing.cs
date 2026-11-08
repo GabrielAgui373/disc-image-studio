@@ -23,6 +23,9 @@ public sealed partial class DiscGenerationService
     /// <summary>Room reserved for sidecars, cue sheet and manifest next to the artifact.</summary>
     private const long CompanionMarginBytes = 256 * 1024;
 
+    /// <summary>File-name component limit of ext4, XFS and Btrfs.</summary>
+    private const int MaximumFileNameBytes = 255;
+
     /// <summary>
     /// Checks a destination before a long generation: extension and source rules, existing
     /// files, permission to write and free space. Fast and side-effect free apart from a probe
@@ -54,6 +57,19 @@ public sealed partial class DiscGenerationService
         if (exists && replacePolicy == ArtifactReplacePolicy.Fail)
         {
             problems.Add(Error("generation.output.exists", nameof(outputPath), ("path", target)));
+        }
+
+        // Companions append suffixes (".json", ".manifest.json") to the artifact name; each name
+        // must still fit the 255-byte component limit of common Linux filesystems.
+        int longest = new[] { target }.Concat(CompanionPaths(plan, target))
+            .Max(path => System.Text.Encoding.UTF8.GetByteCount(Path.GetFileName(path)));
+        if (longest > MaximumFileNameBytes)
+        {
+            problems.Add(Error(
+                "generation.output.name_too_long",
+                nameof(outputPath),
+                ("maximumBytes", MaximumFileNameBytes),
+                ("longestBytes", longest)));
         }
 
         if (Directory.Exists(target))
@@ -112,7 +128,9 @@ public sealed partial class DiscGenerationService
         string name = Path.GetFileName(target);
         Directory.CreateDirectory(directory);
         string token = Guid.NewGuid().ToString("N");
-        string staging = Path.Combine(directory, $".{name}.{token}.staging");
+        // Temporary names never embed the file name: a valid 250-byte name plus a suffix would
+        // exceed the 255-byte component limit of Linux filesystems.
+        string staging = Path.Combine(directory, $".dis-{token}.staging");
         Directory.CreateDirectory(staging);
         try
         {
@@ -213,9 +231,10 @@ public sealed partial class DiscGenerationService
         List<string> placed = [];
         try
         {
-            foreach (string path in existing)
+            for (int index = 0; index < existing.Length; index++)
             {
-                string backup = Path.Combine(directory, $".{Path.GetFileName(path)}.{token}.backup");
+                string path = existing[index];
+                string backup = Path.Combine(directory, $".dis-{token}-{index}.backup");
                 File.Move(path, backup);
                 backups.Add((backup, path));
             }

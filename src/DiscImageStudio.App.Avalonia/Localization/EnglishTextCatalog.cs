@@ -299,6 +299,7 @@ public sealed class EnglishTextCatalog : ITextCatalog
         ["export.problem.generation.output.extension"] = "The file name has the wrong extension for this format.",
         ["export.problem.generation.output.overwrites_source"] = "The destination would overwrite the design's source image.",
         ["export.problem.generation.output.inside_source_directory"] = "The destination is inside the data folder written to the disc. Choose a folder outside it.",
+        ["export.problem.generation.output.name_too_long"] = "The file name is too long once the sidecars add their suffixes. Choose a shorter name.",
         ["export.problem.generation.output.is_directory"] = "The destination is a folder. Choose a file name.",
         ["export.problem.generation.output.directory_unreachable"] = "The destination folder cannot be reached.",
         ["export.problem.generation.output.not_writable"] = "This folder cannot be written. Choose another folder or check its permissions.",
