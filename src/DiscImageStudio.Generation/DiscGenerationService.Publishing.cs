@@ -171,6 +171,17 @@ public sealed partial class DiscGenerationService
                 companions.Add((stagedManifest, Describe(stagedManifest, manifestPath, "manifest")));
             }
 
+            if (options.BeforeCommit is { } check)
+            {
+                Report(progress, plan, "generation.validate");
+                check(
+                    new StagedArtifactSet(
+                        plan,
+                        new StagedFile(stagedArtifact, artifact),
+                        [.. companions.Select(item => new StagedFile(item.Staged, item.Final))]),
+                    cancellationToken);
+            }
+
             // 3–5. Swap in: nothing can be canceled from here on; the swap is a few renames.
             cancellationToken.ThrowIfCancellationRequested();
             Report(progress, plan, "generation.publish");

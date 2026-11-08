@@ -19,9 +19,25 @@ public enum ArtifactReplacePolicy
 }
 
 /// <param name="WriteManifest">Also publish <c>&lt;artifact&gt;.manifest.json</c> with sizes and SHA-256 hashes.</param>
+/// <param name="BeforeCommit">
+/// Runs once everything is staged and before anything reaches the final paths; throwing aborts
+/// the publication and leaves the destination untouched. Used for validation and for checking
+/// that the sources did not change while the artifact was written.
+/// </param>
 public sealed record ArtifactPublishOptions(
     ArtifactReplacePolicy ReplacePolicy = ArtifactReplacePolicy.Fail,
-    bool WriteManifest = true);
+    bool WriteManifest = true,
+    Action<StagedArtifactSet, CancellationToken>? BeforeCommit = null);
+
+/// <summary>A staged file and what it becomes once published.</summary>
+public sealed record StagedFile(string StagedPath, PublishedFile Final);
+
+/// <summary>
+/// The complete set as staged beside the destination, before the swap: the artifact (with its
+/// size and hash from the write) and every companion under its final file name, so engine
+/// readers find the sidecars next to the staged artifact.
+/// </summary>
+public sealed record StagedArtifactSet(GenerationPlan Plan, StagedFile Artifact, IReadOnlyList<StagedFile> Companions);
 
 /// <summary>A file of a published set, with the size and hash it was published with.</summary>
 public sealed record PublishedFile(string Path, string Kind, long Bytes, string Sha256);
