@@ -61,6 +61,7 @@ Os contratos, ownership e regras de threading da camada portátil estão em [APP
 O pipeline compartilhado de geração está em [GENERATION_PIPELINE.md](GENERATION_PIPELINE.md).
 A decisão e o contrato da composição de imagem portátil estão em [IMAGE_COMPOSITION.md](IMAGE_COMPOSITION.md).
 O modelo de edição, o histórico (undo/redo) e a opacidade no schema 3 estão em [DESIGN_EDITING.md](DESIGN_EDITING.md).
+Os contratos de prévia e readback, os serviços por mídia e suas decisões estão em [PREVIEW_AND_READBACK.md](PREVIEW_AND_READBACK.md).
 
 ## Executar o host Avalonia
 
