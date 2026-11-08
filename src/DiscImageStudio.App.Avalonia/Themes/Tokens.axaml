@@ -18,6 +18,14 @@
       <Color x:Key="DiscDangerColor">#C72D4E</Color>
       <Color x:Key="DiscOverlayColor">#990B0D12</Color>
       <Color x:Key="DiscOnAccentColor">#FFFFFF</Color>
+      <!-- Fluent derives sliders, radio buttons, check boxes and focus accents from these. -->
+      <Color x:Key="SystemAccentColor">#1E63D5</Color>
+      <Color x:Key="SystemAccentColorDark1">#174FAE</Color>
+      <Color x:Key="SystemAccentColorDark2">#123F8C</Color>
+      <Color x:Key="SystemAccentColorDark3">#0D2F69</Color>
+      <Color x:Key="SystemAccentColorLight1">#4A82E0</Color>
+      <Color x:Key="SystemAccentColorLight2">#78A2EA</Color>
+      <Color x:Key="SystemAccentColorLight3">#A6C2F2</Color>
       <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
       <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
       <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
@@ -77,6 +85,13 @@
       <Color x:Key="DiscDangerColor">#FF7893</Color>
       <Color x:Key="DiscOverlayColor">#AA05070D</Color>
       <Color x:Key="DiscOnAccentColor">#0B1426</Color>
+      <Color x:Key="SystemAccentColor">#6BA5FF</Color>
+      <Color x:Key="SystemAccentColorDark1">#4A88E8</Color>
+      <Color x:Key="SystemAccentColorDark2">#2F6CCB</Color>
+      <Color x:Key="SystemAccentColorDark3">#1E52A6</Color>
+      <Color x:Key="SystemAccentColorLight1">#6BA5FF</Color>
+      <Color x:Key="SystemAccentColorLight2">#8DBAFF</Color>
+      <Color x:Key="SystemAccentColorLight3">#AFCFFF</Color>
       <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
       <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
       <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
