@@ -128,9 +128,26 @@ public static class ArtifactValidator
                 BluRayIsoMetadata.TryLoad(path) is { } iso
                 && iso.TotalSectors == bluRay.Request.Parameters.TotalSectors
                 && iso.DrawingStartSector == plan.DrawingRange.StartSector,
+            CalibrationTargetPlanDetails calibration => CalibrationSnapshotMatches(calibration, path),
             _ => true,
         };
         return new ArtifactCheck("sidecar", matches);
+    }
+
+    /// <summary>The published snapshot reads back as the session the target was drawn from.</summary>
+    private static bool CalibrationSnapshotMatches(CalibrationTargetPlanDetails details, string path)
+    {
+        try
+        {
+            DiscImageStudio.Core.Calibration.CalibrationSession snapshot = DiscImageStudio.Core.Calibration.CalibrationSessionJson.Load(
+                Path.ChangeExtension(path, DiscGenerationService.CalibrationSidecarSuffix));
+            return snapshot.Target.Id == details.Request.Session.Target.Id
+                   && snapshot.Target.Parameters == details.Request.Session.Target.Parameters;
+        }
+        catch (Exception exception) when (exception is IOException or ArgumentException or System.Text.Json.JsonException)
+        {
+            return false;
+        }
     }
 
     private static ArtifactCheck HashCheck(string path, string expected, CancellationToken cancellationToken, string code = "hash.artifact")

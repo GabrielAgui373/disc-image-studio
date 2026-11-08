@@ -57,7 +57,12 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
     private GenerationPlan Plan(GenerateDiscRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ValidateSource(request.SourceImagePath);
+        // A calibration target is drawn from its session's pattern; there is no source image.
+        if (request is not GenerateCalibrationTargetRequest)
+        {
+            ValidateSource(request.SourceImagePath);
+        }
+
         try
         {
             request.Tone.Validate("tone");
@@ -67,6 +72,7 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
                 GenerateCdRequest cd => PlanCd(cd),
                 GenerateDvdRequest dvd => PlanDvd(dvd),
                 GenerateBluRayRequest bluRay => PlanBluRay(bluRay),
+                GenerateCalibrationTargetRequest calibration => PlanCalibrationTarget(calibration),
                 _ => throw Validation(
                     "generation.request.unsupported",
                     nameof(request),
@@ -245,6 +251,9 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
             case BluRayGenerationPlanDetails bluRay:
                 GenerateBluRay(plan, bluRay, output, progress, cancellationToken);
                 break;
+            case CalibrationTargetPlanDetails calibration:
+                GenerateCalibrationTarget(plan, calibration, output, progress, cancellationToken);
+                break;
             default:
                 throw Validation("generation.plan.unsupported", nameof(plan));
         }
@@ -412,6 +421,9 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
                         _utcNow())
                     .Save(locationPath);
                 break;
+            case CalibrationTargetPlanDetails calibration:
+                WriteCalibrationSidecars(calibration, contentPath, locationPath);
+                break;
         }
     }
 
@@ -486,8 +498,8 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
         }
 
         string target = Path.GetFullPath(outputPath);
-        string source = Path.GetFullPath(plan.Request.SourceImagePath);
-        if (target.Equals(source, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(plan.Request.SourceImagePath)
+            && target.Equals(Path.GetFullPath(plan.Request.SourceImagePath), StringComparison.OrdinalIgnoreCase))
         {
             throw Validation("generation.output.overwrites_source", nameof(outputPath));
         }
@@ -496,6 +508,8 @@ public sealed partial class DiscGenerationService : IDiscGenerationService
         {
             CdGenerationPlanDetails { Request.Format: CdArtifactFormat.WaveAudio } => ".wav",
             CdGenerationPlanDetails { Request.Format: CdArtifactFormat.RawAudio } => ".raw",
+            CalibrationTargetPlanDetails { Request.Family: OpticalDiscFamily.CompactDisc, Request.CdFormat: CdArtifactFormat.WaveAudio } => ".wav",
+            CalibrationTargetPlanDetails { Request.Family: OpticalDiscFamily.CompactDisc } => ".raw",
             _ => ".iso",
         };
         if (!Path.GetExtension(target).Equals(expectedExtension, StringComparison.OrdinalIgnoreCase))

@@ -294,14 +294,17 @@ public sealed partial class DiscGenerationService
         yield return ArtifactManifest.PathFor(target);
     }
 
-    // The metadata sidecar is appended to the artifact name; the cue sheet replaces its extension.
+    // The metadata sidecar is appended to the artifact name; the cue sheet and a calibration
+    // session snapshot replace its extension (disc.iso -> disc.calibration.json, as the WPF wizard).
     private static string CompanionPath(string target, GenerationSidecar sidecar)
-        => sidecar.Kind == "cue" ? Path.ChangeExtension(target, sidecar.Suffix) : target + sidecar.Suffix;
+        => sidecar.Kind is "cue" or CalibrationSidecarKind ? Path.ChangeExtension(target, sidecar.Suffix) : target + sidecar.Suffix;
 
     private static string CompanionKind(string target, string path)
-        => path.EndsWith(".cue", StringComparison.OrdinalIgnoreCase) && Path.ChangeExtension(target, ".cue") == path
+        => path == Path.ChangeExtension(target, ".cue")
             ? "cue"
-            : "metadata";
+            : path == Path.ChangeExtension(target, CalibrationSidecarSuffix)
+                ? CalibrationSidecarKind
+                : "metadata";
 
     private static PublishedFile Describe(string stagedPath, string finalPath, string kind)
     {
