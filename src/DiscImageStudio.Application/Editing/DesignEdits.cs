@@ -127,6 +127,22 @@ public static class DesignEdits
         };
     }
 
+    /// <summary>Sets the file generation writes, which Preview also reads back.</summary>
+    public static ProjectWorkspace SetOutputPath(ProjectWorkspace workspace, string outputPath)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
+        DeliveryState delivery = workspace.Delivery;
+        return workspace with
+        {
+            Delivery = new DeliveryState(
+                outputPath.Trim(),
+                delivery.DataDirectory,
+                delivery.VolumeLabel,
+                delivery.FilesAtOuterRing),
+        };
+    }
+
     public static int IndexOf(IReadOnlyList<DesignLayerState> layers, string layerId)
     {
         for (int index = 0; index < layers.Count; index++)

@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:export="using:DiscImageStudio.App.Avalonia.ViewModels.Export"
+             x:Class="DiscImageStudio.App.Avalonia.Views.ExportWorkspaceView"
+             x:DataType="export:ExportWorkspaceViewModel">
+    <!-- Two panes on wide windows (plan | destination); the code-behind stacks them when narrow. -->
+    <Grid x:Name="Panes" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+        <Border x:Name="PlanPane" Classes="design-panel" VerticalAlignment="Top">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding PlanTitle}" Classes="settings-section-title" />
+                        <TextBlock Text="{Binding PlanDescription}" Classes="settings-hint" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top"
+                                IsVisible="{Binding IsPlanning}">
+                        <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding PlanningLabel}" Classes="settings-hint" />
+                    </StackPanel>
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Summary}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="export:ExportSummaryRow">
+                            <Border Classes="export-row">
+                                <Grid ColumnDefinitions="120,*" ColumnSpacing="12">
+                                    <TextBlock Text="{Binding Label}" Classes="settings-field-label" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <StackPanel Spacing="6" IsVisible="{Binding HasNotes}">
+                    <TextBlock Text="{Binding NotesTitle}" Classes="settings-field-label" />
+                    <Border Classes="settings-asset-summary">
+                        <ItemsControl ItemsSource="{Binding Notes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border x:Name="SidePane" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top">
+            <StackPanel Spacing="16">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding DestinationTitle}" Classes="settings-field-label" />
+                    <Border Classes="export-destination">
+                        <TextBlock Text="{Binding TargetPath}" TextWrapping="Wrap" Classes="settings-path" />
+                    </Border>
+                    <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding BrowseLabel}"
+                            Command="{Binding BrowseCommand}" />
+                    <TextBlock Text="{Binding SpaceText}" Classes="settings-hint" TextWrapping="Wrap"
+                               Classes.export-space-short="{Binding IsSpaceShort}" />
+                </StackPanel>
+
+                <StackPanel Spacing="8" IsVisible="{Binding IsCdAudio}">
+                    <TextBlock Text="{Binding FormatLabel}" Classes="settings-field-label" />
+                    <Border Classes="design-tabs">
+                        <UniformGrid Rows="1">
+                            <Button Classes="design-tab" Classes.active="{Binding IsWaveFormat}"
+                                    Content="{Binding WaveLabel}" Command="{Binding UseWaveCommand}" />
+                            <Button Classes="design-tab" Classes.active="{Binding IsRawFormat}"
+                                    Content="{Binding RawLabel}" Command="{Binding UseRawCommand}" />
+                        </UniformGrid>
+                    </Border>
+                    <TextBlock Text="{Binding FormatHint}" Classes="settings-hint" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding HasProblems}">
+                    <TextBlock Text="{Binding ProblemsTitle}" Classes="settings-field-label" />
+                    <Border Classes="settings-asset-summary missing">
+                        <ItemsControl ItemsSource="{Binding Problems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <Button Classes="secondary" HorizontalAlignment="Left" Content="{Binding ExtensionFixLabel}"
+                            Command="{Binding FixExtensionCommand}" IsVisible="{Binding HasExtensionFix}" />
+                </StackPanel>
+
+                <Border Classes="export-status" Classes.ready="{Binding IsReady}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding GenerateHint}" Classes="settings-hint" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -64,12 +64,19 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         UserPresetCatalog presets,
         ProjectCompositionService compositions,
         ProjectEditor editor,
-        DiscImageStudio.Application.Preview.PreviewCoordinator previews)
+        DiscImageStudio.Application.Preview.PreviewCoordinator previews,
+        DiscImageStudio.App.Avalonia.Generation.ExportPlanner exportPlanner)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
         Preview.Composed += composed => DesignWorkspace?.Tone.SetSource(composed);
+        ExportWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel(
+            exportPlanner ?? throw new ArgumentNullException(nameof(exportPlanner)),
+            projects,
+            editor,
+            filePicker,
+            text);
         PreviewWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel(
             previews ?? throw new ArgumentNullException(nameof(previews)),
             projects,
@@ -332,12 +339,16 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             // A committed change may have touched layers or geometry; recompose the preview.
             Preview.RequestRefresh();
             PreviewWorkspace.RequestRefresh();
+            ExportWorkspace.RequestRefresh();
         }
     }
 
     public RecentProjectsViewModel Recent { get; }
 
     public CompositionPreviewViewModel Preview { get; }
+
+    /// <summary>The Export page: the plan of what will be generated and its destination.</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel ExportWorkspace { get; }
 
     /// <summary>The Preview page: projection of the design or read-back of the generated file.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel PreviewWorkspace { get; }
@@ -480,6 +491,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsPreviewPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsExportPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -959,8 +973,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
         IsPreviewPage = IsProjectPage && current == WorkspacePage.Preview;
         Preview?.SetActive(IsDesignPage);
+        IsExportPage = IsProjectPage && current == WorkspacePage.Export;
         PreviewWorkspace?.SetActive(IsPreviewPage);
-        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview);
+        ExportWorkspace?.SetActive(IsExportPage);
+        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export);
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -1048,6 +1064,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         Preview.RequestRefresh();
         PreviewWorkspace.Clear();
         PreviewWorkspace.RequestRefresh();
+        ExportWorkspace.Clear();
+        ExportWorkspace.RequestRefresh();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -1072,6 +1090,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshHistoryState();
         Preview.Clear();
         PreviewWorkspace.Clear();
+        ExportWorkspace.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
@@ -1426,6 +1445,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Design => (
                 _text["design.page.title"],
                 _text["design.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Export => (
+                _text["export.page.title"],
+                _text["export.page.description"],
                 ProjectFamilyBadge),
             WorkspacePage.Preview => (
                 _text["preview.page.title"],

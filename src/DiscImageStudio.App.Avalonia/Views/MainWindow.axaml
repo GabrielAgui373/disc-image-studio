@@ -444,6 +444,9 @@
                     <views:PreviewWorkspaceView DataContext="{Binding PreviewWorkspace}"
                                                 IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsPreviewPage}" />
 
+                    <views:ExportWorkspaceView DataContext="{Binding ExportWorkspace}"
+                                               IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsExportPage}" />
+
                     <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
                                          Title="{Binding CurrentPageTitle}"
                                          Description="{Binding CurrentPageDescription}" />

@@ -409,6 +409,31 @@
     <Setter Property="Background" Value="White" />
   </Style>
 
+  <!-- Export page -->
+  <Style Selector="Border.export-row">
+    <Setter Property="Padding" Value="0,7" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+
+  <Style Selector="Border.export-destination">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="10,8" />
+  </Style>
+
+  <Style Selector="Border.export-status">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscWarningBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+
+  <Style Selector="Border.export-status.ready">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscSuccessBrush}" />
+  </Style>
+
   <Style Selector="Border.preview-stage">
     <Setter Property="Width" Value="620" />
     <Setter Property="Height" Value="620" />
@@ -528,6 +553,11 @@
   <Style Selector="TextBlock.settings-hint, TextBlock.settings-path">
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+  </Style>
+
+  <!-- After settings-hint on purpose: in Avalonia the later style wins. -->
+  <Style Selector="TextBlock.settings-hint.export-space-short">
+    <Setter Property="Foreground" Value="{DynamicResource DiscDangerBrush}" />
   </Style>
 
   <Style Selector="Border.settings-readonly-chip">

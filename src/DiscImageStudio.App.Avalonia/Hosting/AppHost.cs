@@ -144,7 +144,10 @@ public sealed class AppHost : IDisposable
             new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger),
             compositions,
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
-            services.Previews);
+            services.Previews,
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(
+                services.PreviewSources,
+                new DiscImageStudio.Generation.DiscGenerationService()));
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {
