@@ -3,6 +3,8 @@
     <Project Path="src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
     <Project Path="src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
     <Project Path="src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+    <Project Path="src/DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj" />
+    <Project Path="src/DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj" />
     <Project Path="src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
     <Project Path="src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj" />
     <Project Path="src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />

@@ -66,7 +66,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ProjectEditor editor,
         DiscImageStudio.Application.Preview.PreviewCoordinator previews,
         DiscImageStudio.App.Avalonia.Generation.ExportPlanner exportPlanner,
-        DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner? calibrationRunner = null)
+        DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner? calibrationRunner = null,
+        DiscImageStudio.Burning.IOpticalDeviceService? burnDevices = null,
+        DiscImageStudio.Burning.IOpticalBurner? burner = null)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
@@ -105,6 +107,14 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
+        // Without a backend the Burn page explains why and offers export instead.
+        DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend unavailable = new("No burning backend on this platform yet.");
+        BurnWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Burn.BurnWorkspaceViewModel(
+            burnDevices ?? unavailable,
+            burner ?? unavailable,
+            projects,
+            text);
+        BurnWorkspace.GoToExportRequested += () => NavigateTo(WorkspacePage.Export);
         CalibrationWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel(
             calibrationRunner ?? new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(
                 new DiscImageStudio.Generation.DiscGenerationService()),
@@ -359,6 +369,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             PreviewWorkspace.RequestRefresh();
             ExportWorkspace.RequestRefresh();
             CalibrationWorkspace.RequestRefresh();
+            BurnWorkspace.RequestRefresh();
         }
     }
 
@@ -368,6 +379,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     /// <summary>The Export page: the plan of what will be generated and its destination.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel ExportWorkspace { get; }
+
+    /// <summary>The Burn page: recorders, capability gating and the confirmed burn (Task 13.2).</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Burn.BurnWorkspaceViewModel BurnWorkspace { get; }
 
     /// <summary>The Calibration page: target generation (Task 12.2), photo and curve later.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel CalibrationWorkspace { get; }
@@ -520,6 +534,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsCalibrationPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsBurnPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -1006,8 +1023,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewWorkspace?.SetActive(IsPreviewPage);
         ExportWorkspace?.SetActive(IsExportPage);
         IsCalibrationPage = IsProjectPage && current == WorkspacePage.Calibration;
+        IsBurnPage = IsProjectPage && current == WorkspacePage.Burn;
+        BurnWorkspace?.SetActive(IsBurnPage);
         CalibrationWorkspace?.SetActive(IsCalibrationPage);
-        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export or WorkspacePage.Calibration);
+        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export or WorkspacePage.Calibration or WorkspacePage.Burn);
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -1098,6 +1117,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ExportWorkspace.Clear();
         ExportWorkspace.RequestRefresh();
         CalibrationWorkspace.Clear();
+        BurnWorkspace.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -1137,6 +1157,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewWorkspace.Clear();
         ExportWorkspace.Clear();
         CalibrationWorkspace.Clear();
+        BurnWorkspace.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
@@ -1489,6 +1510,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Export => (
                 _text["export.page.title"],
                 _text["export.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Burn => (
+                _text["burn.page.title"],
+                _text["burn.page.description"],
                 ProjectFamilyBadge),
             WorkspacePage.Calibration => (
                 _text["calibration.page.title"],

@@ -466,6 +466,9 @@
                     <views:ExportWorkspaceView DataContext="{Binding ExportWorkspace}"
                                                IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsExportPage}" />
 
+                    <views:BurnWorkspaceView DataContext="{Binding BurnWorkspace}"
+                                             IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsBurnPage}" />
+
                     <views:CalibrationWorkspaceView DataContext="{Binding CalibrationWorkspace}"
                                                     IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsCalibrationPage}" />
 

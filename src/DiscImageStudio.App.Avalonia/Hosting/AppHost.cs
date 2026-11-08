@@ -128,6 +128,14 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.Application.Preview.PreviewCoordinator(
                 DiscImageStudio.Preview.PreviewServices.CreateAll(previewSources)));
 
+        // Linux has no validated burning backend yet (Tasks 13.3–13.5). The simulated recorders are
+        // offered only when explicitly asked for, to exercise the Burn page without hardware.
+        DiscImageStudio.Burning.IOpticalDeviceService burning =
+            Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1"
+                ? DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo()
+                : new DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend(
+                    "Burning on Linux is enabled only after it is validated on real recorders.");
+
         MainViewModel viewModel = new(
             paths,
             filePicker,
@@ -149,13 +157,16 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
             services.Previews,
             new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
-            new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation));
+            new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation),
+            burning,
+            burning as DiscImageStudio.Burning.IOpticalBurner);
         viewModel.ExportWorkspace.AttachRunner(
             new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
             jobs,
             launcher,
             clipboard);
         viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
+        viewModel.BurnWorkspace.AttachJobs(jobs);
         viewModel.CalibrationWorkspace.AttachRecovery(
             DiscImageStudio.Application.Calibration.CalibrationRecoveryStore.Under(paths, new DiscImageStudio.Application.Ports.SystemClock()));
         prompts.Attach(viewModel);

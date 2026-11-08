@@ -1,0 +1,158 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:burn="using:DiscImageStudio.App.Avalonia.ViewModels.Burn"
+             xmlns:export="using:DiscImageStudio.App.Avalonia.ViewModels.Export"
+             x:Class="DiscImageStudio.App.Avalonia.Views.BurnWorkspaceView"
+             x:DataType="burn:BurnWorkspaceViewModel">
+    <Grid x:Name="Panes" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+        <Border Classes="design-panel" VerticalAlignment="Top">
+            <StackPanel Spacing="16">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding SourceTitle}" Classes="settings-section-title" />
+                    <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="burn:BurnSourceOption">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="{Binding SourceText}" Classes="settings-hint" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding DevicesTitle}" Classes="settings-section-title" />
+                            <TextBlock Text="{Binding BackendText}" Classes="settings-hint" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                            <ProgressBar IsIndeterminate="True" Width="50" IsVisible="{Binding IsRefreshing}" VerticalAlignment="Center" />
+                            <Button Classes="secondary" Content="{Binding RefreshLabel}" Command="{Binding RefreshCommand}" />
+                        </StackPanel>
+                    </Grid>
+                    <Border Classes="settings-asset-summary missing" IsVisible="{Binding !IsBackendAvailable}">
+                        <TextBlock Text="{Binding BackendUnavailableText}" TextWrapping="Wrap" />
+                    </Border>
+                    <ListBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}" IsVisible="{Binding IsBackendAvailable}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="burn:BurnDeviceItem">
+                                <StackPanel Spacing="2" Margin="0,2">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Detail}" Classes="settings-hint" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsBackendAvailable}">
+                    <TextBlock Text="{Binding ModesTitle}" Classes="settings-field-label" />
+                    <ItemsControl ItemsSource="{Binding ModeRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="export:ExportSummaryRow">
+                                <Border Classes="export-row">
+                                    <Grid ColumnDefinitions="140,*" ColumnSpacing="12">
+                                        <TextBlock Text="{Binding Label}" Classes="settings-field-label" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border x:Name="SidePane" Grid.Column="1" Classes="design-panel" VerticalAlignment="Top">
+            <StackPanel Spacing="16">
+                <StackPanel Spacing="8" IsVisible="{Binding IsBackendAvailable}">
+                    <TextBlock Text="{Binding SpeedLabel}" Classes="settings-field-label" />
+                    <ComboBox ItemsSource="{Binding Speeds}" SelectedItem="{Binding SelectedSpeed}" HorizontalAlignment="Stretch"
+                              IsEnabled="{Binding !IsRunning}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="burn:BurnSpeedOption">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding HasProblems}">
+                    <TextBlock Text="{Binding ProblemsTitle}" Classes="settings-field-label" />
+                    <Border Classes="settings-asset-summary missing">
+                        <ItemsControl ItemsSource="{Binding Problems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <Button Classes="secondary" HorizontalAlignment="Stretch" Content="{Binding ExportInsteadLabel}"
+                            Command="{Binding ExportInsteadCommand}" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="{DynamicResource DiscWarningBrush}"
+                           IsVisible="{Binding Notice, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <Border Classes="export-status" Classes.ready="{Binding IsReady}" IsVisible="{Binding IsReviewPhase}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding ReviewCommand}">
+                            <TextBlock Text="{Binding ReviewLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- One screen with everything that is about to happen. -->
+                <Border Classes="export-confirm" IsVisible="{Binding IsConfirming}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding ConfirmTitle}" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding ConfirmRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="export:ExportSummaryRow">
+                                    <Border Classes="export-row">
+                                        <Grid ColumnDefinitions="84,*" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding Label}" Classes="settings-field-label" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding IrreversibleText}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding BluRayWarningText}" TextWrapping="Wrap"
+                                   Classes="settings-hint" IsVisible="{Binding ShowBluRayWarning}" />
+                        <CheckBox IsChecked="{Binding Acknowledged}">
+                            <TextBlock Text="{Binding AcknowledgeLabel}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <UniformGrid Rows="1" ColumnSpacing="8">
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding BackLabel}" Command="{Binding BackToReviewCommand}" />
+                            <Button Classes="danger" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding BurnLabel}" Command="{Binding BurnCommand}" />
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="export-status" IsVisible="{Binding IsRunning}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding StageText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" IsIndeterminate="{Binding !IsProgressKnown}" />
+                        <TextBlock Text="{Binding ProgressText}" Classes="settings-hint" TextWrapping="Wrap" />
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Content="{Binding CancelRunLabel}" Command="{Binding CancelRunCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="export-outcome" Classes.succeeded="{Binding IsSucceeded}" IsVisible="{Binding HasOutcome}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding OutcomeTitle}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding OutcomeText}" TextWrapping="Wrap" />
+                        <Button Classes="ghost" HorizontalAlignment="Right" Content="{Binding DoneLabel}" Command="{Binding DoneCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
