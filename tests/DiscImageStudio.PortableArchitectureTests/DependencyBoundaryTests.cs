@@ -109,6 +109,7 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Application/DiscImageStudio.Application.csproj",
             "src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj",
             "src/DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj",
+            "src/DiscImageStudio.Burning.Linux/DiscImageStudio.Burning.Linux.csproj",
             "src/DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj",
             "src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj",
             "src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj",

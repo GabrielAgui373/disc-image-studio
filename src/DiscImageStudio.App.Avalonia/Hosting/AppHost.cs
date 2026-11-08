@@ -128,13 +128,17 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.Application.Preview.PreviewCoordinator(
                 DiscImageStudio.Preview.PreviewServices.CreateAll(previewSources)));
 
-        // Linux has no validated burning backend yet (Tasks 13.3–13.5). The simulated recorders are
-        // offered only when explicitly asked for, to exercise the Burn page without hardware.
+        // Linux lists the real drives and their discs read-only (Task 13.4); writing stays
+        // disabled until each mode is validated on real recorders (Task 13.5). The simulated
+        // recorders are offered only when explicitly asked for, to exercise the Burn page.
+        DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend noWriter = new(
+            "Burning on Linux is enabled only after it is validated on real recorders.");
         DiscImageStudio.Burning.IOpticalDeviceService burning =
             Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1"
                 ? DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo()
-                : new DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend(
-                    "Burning on Linux is enabled only after it is validated on real recorders.");
+                : OperatingSystem.IsLinux()
+                    ? new DiscImageStudio.Burning.Linux.LinuxOpticalDeviceService()
+                    : noWriter;
 
         MainViewModel viewModel = new(
             paths,
@@ -159,7 +163,7 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
             new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation),
             burning,
-            burning as DiscImageStudio.Burning.IOpticalBurner);
+            burning as DiscImageStudio.Burning.IOpticalBurner ?? noWriter);
         viewModel.ExportWorkspace.AttachRunner(
             new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
             jobs,

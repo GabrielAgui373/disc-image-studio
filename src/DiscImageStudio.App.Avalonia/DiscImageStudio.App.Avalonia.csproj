@@ -41,6 +41,7 @@
     <ProjectReference Include="../DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
     <ProjectReference Include="../DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj" />
     <ProjectReference Include="../DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Burning.Linux/DiscImageStudio.Burning.Linux.csproj" />
     <ProjectReference Include="../DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
     <ProjectReference Include="../DiscImageStudio.Preview/DiscImageStudio.Preview.csproj" />
   </ItemGroup>

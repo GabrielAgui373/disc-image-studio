@@ -602,7 +602,12 @@ public sealed partial class BurnWorkspaceViewModel : ObservableObject
                     Problems.Add(string.Format(CultureInfo.CurrentUICulture, _text["burn.problem.mode"], ModeText(mode), ReasonText(capability.Reason)));
                     if (capability.Reason == OpticalBurnUnavailableReason.PermissionDenied)
                     {
-                        Problems.Add(_text["burn.problem.permissionHelp"]);
+                        // The backend's explanation names the node, its group and mode; the generic text is the fallback.
+                        Problems.Add(device.Status.AccessDetail ?? _text["burn.problem.permissionHelp"]);
+                    }
+                    else if (capability.Reason == OpticalBurnUnavailableReason.NotValidated)
+                    {
+                        Problems.Add(_text["burn.problem.notValidated"]);
                     }
                 }
                 else if (device.Status.Media is { } media && source.Bytes > media.FreeBytes(mode))

@@ -753,6 +753,7 @@ public sealed class EnglishTextCatalog : ITextCatalog
         ["burn.problem.noDevice"] = "No recorder found.",
         ["burn.problem.mode"] = "{0}: {1}.",
         ["burn.problem.permissionHelp"] = "Add your user to the group that owns the recorder (usually \"cdrom\" or \"optical\") and log in again. The app never asks for root.",
+        ["burn.problem.notValidated"] = "Each write mode is enabled only after a recorded test on real recorders and discs. Until then, export the image and burn it with another tool.",
         ["burn.problem.capacity"] = "The image ({0}) does not fit on the disc ({1} free).",
         ["burn.stage.prepare"] = "Checking the recorder",
         ["burn.stage.media"] = "Checking the disc again",
