@@ -161,4 +161,15 @@ public interface IDiscGenerationService
         Stream output,
         IProgress<GenerationProgress>? progress = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>Checks destination, existing files, permission and free space before a long job.</summary>
+    OutputPreflight Preflight(GenerationPlan plan, string outputPath, ArtifactReplacePolicy replacePolicy);
+
+    /// <summary>Generates and publishes artifact, sidecars and manifest as one unit.</summary>
+    Task<PublishedArtifact> PublishFileAsync(
+        GenerationPlan plan,
+        string outputPath,
+        ArtifactPublishOptions? options = null,
+        IProgress<GenerationProgress>? progress = null,
+        CancellationToken cancellationToken = default);
 }

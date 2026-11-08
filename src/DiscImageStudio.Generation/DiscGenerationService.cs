@@ -9,7 +9,7 @@ using DiscImageStudio.ImageIO;
 
 namespace DiscImageStudio.Generation;
 
-public sealed class DiscGenerationService : IDiscGenerationService
+public sealed partial class DiscGenerationService : IDiscGenerationService
 {
     private const long MaximumSourceBytes = 256L * 1024 * 1024;
     private const long MaximumSourcePixels = 64L * 1024 * 1024;
@@ -26,49 +26,22 @@ public sealed class DiscGenerationService : IDiscGenerationService
         return Task.Run(() => Plan(request, cancellationToken), cancellationToken);
     }
 
+    /// <summary>
+    /// Generates and publishes <paramref name="outputPath"/> with its sidecars, replacing an
+    /// existing output as this method always did. Use <see cref="PublishFileAsync"/> to choose the
+    /// replace policy and get the published files back.
+    /// </summary>
     public Task GenerateFileAsync(
         GenerationPlan plan,
         string outputPath,
         IProgress<GenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(plan);
-        return Task.Run(() =>
-        {
-            string target = ValidateOutputPath(plan, outputPath);
-            string directory = Path.GetDirectoryName(target)!;
-            Directory.CreateDirectory(directory);
-            string temporary = Path.Combine(
-                directory,
-                $".{Path.GetFileName(target)}.{Guid.NewGuid():N}.partial");
-            try
-            {
-                using (FileStream output = new(
-                    temporary,
-                    FileMode.CreateNew,
-                    FileAccess.Write,
-                    FileShare.None,
-                    1024 * 1024,
-                    FileOptions.SequentialScan))
-                {
-                    GenerateStream(plan, output, progress, cancellationToken);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    output.Flush(flushToDisk: true);
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                File.Move(temporary, target, overwrite: true);
-                WriteSidecars(plan, target, cancellationToken);
-            }
-            finally
-            {
-                if (File.Exists(temporary))
-                {
-                    File.Delete(temporary);
-                }
-            }
-        }, cancellationToken);
-    }
+        => PublishFileAsync(
+            plan,
+            outputPath,
+            new ArtifactPublishOptions(ArtifactReplacePolicy.Replace),
+            progress,
+            cancellationToken);
 
     public Task GenerateStreamAsync(
         GenerationPlan plan,
@@ -413,38 +386,43 @@ public sealed class DiscGenerationService : IDiscGenerationService
             "generation.complete"));
     }
 
-    private void WriteSidecars(GenerationPlan plan, string outputPath, CancellationToken cancellationToken)
+    /// <summary>
+    /// Writes the plan's sidecars next to <paramref name="locationPath"/>, describing the artifact
+    /// at <paramref name="contentPath"/>. Publishing stages them beside a staged artifact with the
+    /// final file name, so the recorded paths are the published ones.
+    /// </summary>
+    private void WriteSidecars(GenerationPlan plan, string contentPath, string locationPath, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         switch (plan.Details)
         {
             case CdGenerationPlanDetails cd:
-                WriteCdSidecars(cd, outputPath);
+                WriteCdSidecars(cd, contentPath, locationPath);
                 break;
             case DvdGenerationPlanDetails dvd:
-                WriteDvdSidecar(dvd, outputPath);
+                WriteDvdSidecar(dvd, locationPath);
                 break;
             case BluRayGenerationPlanDetails bluRay:
                 BluRayIsoMetadata.FromPlan(
                         bluRay.IsoLayout,
                         bluRay.Request.SourceImagePath,
-                        outputPath,
+                        contentPath,
                         bluRay.Request.InvertMapping,
                         bluRay.Request.Tone,
                         _utcNow())
-                    .Save(outputPath);
+                    .Save(locationPath);
                 break;
         }
     }
 
-    private static void WriteCdSidecars(CdGenerationPlanDetails details, string outputPath)
+    private static void WriteCdSidecars(CdGenerationPlanDetails details, string contentPath, string locationPath)
     {
         GenerateCdRequest request = details.Request;
         if (request.Format == CdArtifactFormat.Mode1Iso)
         {
             CdDataLayoutPlan layout = details.DataLayout!;
             CdDataImageMetadata.Save(
-                outputPath,
+                locationPath,
                 new CdDataImageMetadata(
                     request.Parameters,
                     layout.DrawingStartLba,
@@ -455,10 +433,10 @@ public sealed class DiscGenerationService : IDiscGenerationService
         }
 
         CdTrackMetadata.Save(
-            outputPath,
+            locationPath,
             new CdTrackMetadata(
                 Path.GetFullPath(request.SourceImagePath),
-                outputPath,
+                contentPath,
                 request.Parameters.InnerRadiusMm,
                 request.Parameters.OuterRadiusMm,
                 request.Parameters.Sectors,
@@ -473,8 +451,8 @@ public sealed class DiscGenerationService : IDiscGenerationService
         if (request.Format == CdArtifactFormat.WaveAudio && request.WriteCue)
         {
             File.WriteAllText(
-                Path.ChangeExtension(outputPath, ".cue"),
-                $"FILE \"{Path.GetFileName(outputPath)}\" WAVE\r\n"
+                Path.ChangeExtension(locationPath, ".cue"),
+                $"FILE \"{Path.GetFileName(contentPath)}\" WAVE\r\n"
                     + "  TRACK 01 AUDIO\r\n"
                     + "    INDEX 01 00:00:00\r\n",
                 new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
