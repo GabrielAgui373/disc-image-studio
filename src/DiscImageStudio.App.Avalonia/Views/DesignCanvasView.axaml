@@ -9,6 +9,37 @@
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <TextBlock Classes="settings-section-title" Text="{Binding CanvasTitle}" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <ToggleButton Classes="ghost compact-action history-action canvas-tone-toggle"
+                                  IsChecked="{Binding IsHandTool}"
+                                  ToolTip.Tip="{Binding HandToolTip}"
+                                  AutomationProperties.Name="{Binding HandToolTip}">
+                        <Viewbox Width="14" Height="14">
+                            <Canvas Width="24" Height="24">
+                                <Path Classes="history-icon" Data="M8,12 V5.5 A1.5,1.5 0 0 1 11,5.5 V11 M11,10 V4 A1.5,1.5 0 0 1 14,4 V11 M14,10 V5.5 A1.5,1.5 0 0 1 17,5.5 V12 M17,9 A1.5,1.5 0 0 1 20,9 V14 A6,6 0 0 1 14,20 H13 C10.5,20 9,19 7.5,17 L4.2,12.6 A1.6,1.6 0 0 1 6.6,10.5 L8,12" />
+                            </Canvas>
+                        </Viewbox>
+                    </ToggleButton>
+                    <Button Classes="ghost compact-action history-action"
+                            Command="{Binding RotateLeftCommand}"
+                            ToolTip.Tip="{Binding RotateLeftTip}"
+                            AutomationProperties.Name="{Binding RotateLeftTip}">
+                        <Viewbox Width="14" Height="14">
+                            <Canvas Width="24" Height="24">
+                                <Path Classes="history-icon" Data="M11,11 H20 V20 H11 Z M14,5 A8,8 0 0 0 5,12 M5,12 L3,9.5 M5,12 L7.8,10.6" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button Classes="ghost compact-action history-action"
+                            Command="{Binding RotateRightCommand}"
+                            ToolTip.Tip="{Binding RotateRightTip}"
+                            AutomationProperties.Name="{Binding RotateRightTip}">
+                        <Viewbox Width="14" Height="14">
+                            <Canvas Width="24" Height="24">
+                                <Path Classes="history-icon" Data="M4,11 H13 V20 H4 Z M10,5 A8,8 0 0 1 19,12 M19,12 L21,9.5 M19,12 L16.2,10.6" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Border Classes="toolbar-separator" />
                     <Button Classes="ghost compact-action history-action"
                             Command="{Binding ZoomOutCommand}"
                             ToolTip.Tip="{Binding ZoomOutLabel}"

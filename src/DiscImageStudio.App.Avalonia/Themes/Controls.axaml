@@ -1549,4 +1549,32 @@
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
     <Setter Property="Padding" Value="12,9" />
   </Style>
+  <!-- Canvas toolbar: a thin divider between view/rotate tools and zoom, and the checked look
+       of the view toggles (hand tool and tone), which stays readable in both themes. -->
+  <Style Selector="Border.toolbar-separator">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="Margin" Value="4,0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource DiscBorderBrush}" />
+  </Style>
+
+  <Style Selector="ToggleButton.canvas-tone-toggle /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <Style Selector="ToggleButton.canvas-tone-toggle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  </Style>
+
+  <Style Selector="ToggleButton.canvas-tone-toggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="ToggleButton.canvas-tone-toggle:checked Path.history-icon">
+    <Setter Property="Stroke" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
 </Styles>
