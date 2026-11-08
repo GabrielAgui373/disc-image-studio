@@ -100,6 +100,9 @@ public sealed class AppHost : IDisposable
             compositions,
             Path.Combine(paths.CacheDirectory, "preview"));
 
+        // One typed pipeline for planning (Export review) and running exports.
+        DiscImageStudio.Generation.DiscGenerationService generation = new();
+
         HostServices services = new(
             paths,
             filePicker,
@@ -145,9 +148,12 @@ public sealed class AppHost : IDisposable
             compositions,
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
             services.Previews,
-            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(
-                services.PreviewSources,
-                new DiscImageStudio.Generation.DiscGenerationService()));
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation));
+        viewModel.ExportWorkspace.AttachRunner(
+            new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
+            jobs,
+            launcher,
+            clipboard);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

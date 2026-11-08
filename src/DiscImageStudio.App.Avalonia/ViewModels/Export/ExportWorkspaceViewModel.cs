@@ -63,7 +63,6 @@ public sealed partial class ExportWorkspaceViewModel : ObservableObject
         ProblemsTitle = text["export.problems.title"];
         NotesTitle = text["export.notes.title"];
         PlanningLabel = text["export.planning"];
-        GenerateHint = text["export.generateHint"];
         Problems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasProblems));
         Notes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasNotes));
     }
@@ -89,8 +88,6 @@ public sealed partial class ExportWorkspaceViewModel : ObservableObject
     public string NotesTitle { get; }
 
     public string PlanningLabel { get; }
-
-    public string GenerateHint { get; }
 
     public ObservableCollection<ExportSummaryRow> Summary { get; } = [];
 
@@ -131,6 +128,7 @@ public sealed partial class ExportWorkspaceViewModel : ObservableObject
 
     /// <summary>CD without a data folder: the track can be written as WAVE or raw samples.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRawFormat))]
     public partial bool IsCdAudio { get; private set; }
 
     [ObservableProperty]
@@ -326,6 +324,8 @@ public sealed partial class ExportWorkspaceViewModel : ObservableObject
     {
         Plan = review.Plan;
         TargetPath = review.TargetPath;
+        _targetExists = review.Preflight?.TargetExists == true;
+        _reviewFingerprint = review.DataFingerprint;
         bool hasData = !string.IsNullOrWhiteSpace(workspace.Delivery.DataDirectory);
         IsCdAudio = workspace.Media is CdState && !hasData;
         IsWaveFormat = Path.GetExtension(review.TargetPath).Equals(".wav", StringComparison.OrdinalIgnoreCase);

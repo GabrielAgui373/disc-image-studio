@@ -77,6 +77,13 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             editor,
             filePicker,
             text);
+        ExportWorkspace.OpenInPreviewRequested += () =>
+        {
+            // Read the file that was just published back.
+            PreviewWorkspace?.ShowArtifactCommand.Execute(null);
+            NavigateTo(WorkspacePage.Preview);
+        };
+        ExportWorkspace.GoToBurnRequested += () => NavigateTo(WorkspacePage.Burn);
         PreviewWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel(
             previews ?? throw new ArgumentNullException(nameof(previews)),
             projects,

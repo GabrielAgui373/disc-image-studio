@@ -430,6 +430,26 @@
     <Setter Property="Padding" Value="12,10" />
   </Style>
 
+  <Style Selector="Border.export-confirm">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscDangerBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+
+  <Style Selector="Border.export-outcome">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscWarningBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+
+  <Style Selector="Border.export-outcome.succeeded">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscSuccessBrush}" />
+  </Style>
+
   <Style Selector="Border.export-status.ready">
     <Setter Property="BorderBrush" Value="{DynamicResource DiscSuccessBrush}" />
   </Style>

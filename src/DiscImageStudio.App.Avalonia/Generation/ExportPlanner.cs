@@ -18,7 +18,8 @@ public sealed record ExportReview(
     OutputPreflight? Preflight,
     int PaintedLayers,
     int VisibleLayers,
-    IReadOnlyList<CompositionIssue> SourceIssues);
+    IReadOnlyList<CompositionIssue> SourceIssues,
+    string? DataFingerprint = null);
 
 /// <summary>
 /// Plans an export without generating it. The plan does not depend on the picture's pixels (sizes,
@@ -39,6 +40,8 @@ public sealed class ExportPlanner(PreviewSourceCache sources, IDiscGenerationSer
         ArgumentNullException.ThrowIfNull(workspace);
         string target = ArtifactPreviewService.ArtifactPath(workspace, projectFilePath) ?? string.Empty;
         int visible = workspace.Design.Layers.Count(layer => layer.Visible);
+        string? dataDirectory = string.IsNullOrWhiteSpace(workspace.Delivery.DataDirectory) ? null : workspace.Delivery.DataDirectory.Trim();
+        string? fingerprint = await Task.Run(() => DataFolderFingerprint.Compute(dataDirectory), cancellationToken).ConfigureAwait(false);
         using PreviewSourceLease source = await _sources
             .AcquireAsync(workspace, projectFilePath, PreviewDefaults.MinimumSourceSize, cancellationToken)
             .ConfigureAwait(false);
@@ -50,7 +53,7 @@ public sealed class ExportPlanner(PreviewSourceCache sources, IDiscGenerationSer
         }
         catch (GenerationValidationException exception)
         {
-            return new ExportReview(target, null, exception.Error, null, source.PaintedLayerCount, visible, source.Issues);
+            return new ExportReview(target, null, exception.Error, null, source.PaintedLayerCount, visible, source.Issues, fingerprint);
         }
         catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException)
         {
@@ -58,12 +61,12 @@ public sealed class ExportPlanner(PreviewSourceCache sources, IDiscGenerationSer
                 "generation.plan.invalid",
                 "plan",
                 new Dictionary<string, object?>(StringComparer.Ordinal) { ["message"] = exception.Message });
-            return new ExportReview(target, null, error, null, source.PaintedLayerCount, visible, source.Issues);
+            return new ExportReview(target, null, error, null, source.PaintedLayerCount, visible, source.Issues, fingerprint);
         }
 
         OutputPreflight preflight = await Task
             .Run(() => _generation.Preflight(plan, target, ArtifactReplacePolicy.Fail), cancellationToken)
             .ConfigureAwait(false);
-        return new ExportReview(target, plan, null, preflight, source.PaintedLayerCount, visible, source.Issues);
+        return new ExportReview(target, plan, null, preflight, source.PaintedLayerCount, visible, source.Issues, fingerprint);
     }
 }

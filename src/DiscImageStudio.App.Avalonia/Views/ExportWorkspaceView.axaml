@@ -88,10 +88,73 @@
                             Command="{Binding FixExtensionCommand}" IsVisible="{Binding HasExtensionFix}" />
                 </StackPanel>
 
-                <Border Classes="export-status" Classes.ready="{Binding IsReady}">
-                    <StackPanel Spacing="4">
+                <!-- Review: verdict and Generate. -->
+                <Border Classes="export-status" Classes.ready="{Binding IsReady}" IsVisible="{Binding !IsRunning}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding GenerateHint}" Classes="settings-hint" TextWrapping="Wrap" />
+                        <CheckBox IsChecked="{Binding VerifyHash}" IsEnabled="{Binding IsReady}">
+                            <TextBlock Text="{Binding VerifyHashLabel}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Command="{Binding GenerateCommand}" IsVisible="{Binding !IsConfirmingReplace}">
+                            <TextBlock Text="{Binding GenerateLabel}" Foreground="{DynamicResource DiscOnAccentBrush}" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Replace confirmation, in place: nothing is touched until Replace. -->
+                <Border Classes="export-confirm" IsVisible="{Binding IsConfirmingReplace}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding ReplaceTitle}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ReplaceText}" Classes="settings-hint" TextWrapping="Wrap" />
+                        <UniformGrid Rows="1" ColumnSpacing="8">
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding KeepLabel}" Command="{Binding KeepExistingCommand}" />
+                            <Button Classes="danger" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding ReplaceLabel}" Command="{Binding ConfirmReplaceCommand}" />
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Running: stage, progress, rate and time left; the job dock shows the same. -->
+                <Border Classes="export-status" IsVisible="{Binding IsRunning}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding StageText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}"
+                                     IsIndeterminate="{Binding !IsProgressKnown}" />
+                        <TextBlock Text="{Binding ProgressText}" Classes="settings-hint" TextWrapping="Wrap" />
+                        <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Content="{Binding CancelRunLabel}" Command="{Binding CancelRunCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Outcome with checks and next steps. -->
+                <Border Classes="export-outcome" Classes.succeeded="{Binding IsSucceeded}" IsVisible="{Binding HasOutcome}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding OutcomeTitle}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding OutcomeText}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding ResultPath}" Classes="settings-path" TextWrapping="Wrap"
+                                   IsVisible="{Binding IsSucceeded}" />
+                        <ItemsControl ItemsSource="{Binding ResultChecks}" IsVisible="{Binding IsSucceeded}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" Classes="settings-hint" TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <UniformGrid Columns="2" ColumnSpacing="8" RowSpacing="8" IsVisible="{Binding IsSucceeded}">
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding OpenFolderLabel}" Command="{Binding OpenFolderCommand}" />
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding CopyPathLabel}" Command="{Binding CopyPathCommand}" />
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding OpenInPreviewLabel}" Command="{Binding OpenInPreviewCommand}" />
+                            <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Content="{Binding GoToBurnLabel}" Command="{Binding GoToBurnCommand}" />
+                        </UniformGrid>
+                        <TextBlock Text="{Binding ActionStatus}" Classes="settings-hint"
+                                   IsVisible="{Binding ActionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        <Button Classes="ghost" HorizontalAlignment="Right" Content="{Binding DoneLabel}" Command="{Binding DoneCommand}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
