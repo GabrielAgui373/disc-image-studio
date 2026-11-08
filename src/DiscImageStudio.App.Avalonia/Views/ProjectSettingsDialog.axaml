@@ -26,6 +26,8 @@
                                 <TextBlock Text="{Binding Labels.NameLabel}" Classes="settings-field-label" />
                                 <TextBox Text="{Binding Name, Mode=TwoWay}"
                                          AutomationProperties.Name="{Binding Labels.NameLabel}" />
+                                <TextBlock Text="{Binding RenameHint}" Classes="settings-hint" TextWrapping="Wrap"
+                                           IsVisible="{Binding HasRenameHint}" />
                             </StackPanel>
                             <StackPanel Spacing="{DynamicResource DiscSpace2}">
                                 <TextBlock Text="{Binding Labels.FamilyLabel}" Classes="settings-field-label" />

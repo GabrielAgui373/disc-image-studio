@@ -56,6 +56,20 @@ public static class ProjectPaths
     /// Resolves a stored asset path. Absolute paths (every path the WPF host writes) are used as
     /// is; a relative path is resolved against the folder that contains the project file.
     /// </summary>
+    /// <summary>
+    /// The project file name for <paramref name="projectName"/>: invalid file-name characters
+    /// become underscores and the project extension is added. New projects and renames use it.
+    /// </summary>
+    public static string FileNameFor(string projectName)
+    {
+        ArgumentNullException.ThrowIfNull(projectName);
+        char[] invalid = Path.GetInvalidFileNameChars();
+        string stem = new string(projectName.Trim().Select(character => invalid.Contains(character) ? '_' : character).ToArray())
+            .Trim()
+            .Trim('.');
+        return $"{(string.IsNullOrWhiteSpace(stem) ? "disc-project" : stem)}{DiscImageStudio.Core.ProjectJsonStore.FileExtension}";
+    }
+
     public static string? ResolveAsset(string? projectFilePath, string? storedPath)
     {
         if (string.IsNullOrWhiteSpace(storedPath))

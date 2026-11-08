@@ -19,7 +19,16 @@ public sealed record CreateProjectRequest(
 
 public sealed record ProjectOpened(string FilePath, string ProjectName);
 
-public sealed record ProjectSaved(string FilePath, string ProjectName);
+/// <summary>A project file rename that saving would perform, or the file that blocks it.</summary>
+public sealed record ProjectFileRename(string TargetPath, string? BlockedBy);
+
+/// <param name="PreviousFilePath">Set when saving renamed the project file to follow a new project name.</param>
+/// <param name="RenameBlockedBy">Set when the file would have been renamed but another file already uses that name.</param>
+public sealed record ProjectSaved(
+    string FilePath,
+    string ProjectName,
+    string? PreviousFilePath = null,
+    string? RenameBlockedBy = null);
 
 public sealed record ProjectClosed(string ProjectName);
 
@@ -77,6 +86,9 @@ public sealed class ProjectLifecycleService
     public long ContentRevision { get; private set; }
 
     private string? _savedFingerprint;
+
+    // The project name the file on disk was opened or last saved with: a rename follows it.
+    private string? _savedName;
 
     public string? ProjectFilePath { get; private set; }
 
@@ -301,14 +313,72 @@ public sealed class ProjectLifecycleService
         return changed;
     }
 
+    /// <summary>
+    /// Saves to the project file. When the project was renamed and its file still carries the
+    /// previous name (it was not named by hand), the file is renamed to follow the new name;
+    /// an existing file with that name is never overwritten.
+    /// </summary>
     public Task<ApplicationResult<ProjectWorkspace>> SaveProjectAsync(CancellationToken cancellationToken = default)
-        => ProjectFilePath is null
-            ? Task.FromResult(ApplicationResult<ProjectWorkspace>.Failure(ApplicationErrorCode.NoProjectOpen))
-            : SaveProjectAsAsync(ProjectFilePath, cancellationToken);
+    {
+        if (ProjectFilePath is not { } current || Current is null)
+        {
+            return Task.FromResult(ApplicationResult<ProjectWorkspace>.Failure(ApplicationErrorCode.NoProjectOpen));
+        }
+
+        (string target, string? blockedBy) = FollowNameTarget(current, Current.Identity.Name);
+        return SaveProjectAsAsync(target, cancellationToken, previousPath: target == current ? null : current, renameBlockedBy: blockedBy);
+    }
 
     public Task<ApplicationResult<ProjectWorkspace>> SaveProjectAsAsync(
         string path,
         CancellationToken cancellationToken = default)
+        => SaveProjectAsAsync(path, cancellationToken, previousPath: null, renameBlockedBy: null);
+
+    /// <summary>
+    /// What saving would do to the file name if the project were called <paramref name="name"/>:
+    /// <see langword="null"/> when the file keeps its name, otherwise the new path, or the existing
+    /// file that prevents the rename.
+    /// </summary>
+    public ProjectFileRename? PreviewFileRename(string name)
+    {
+        if (ProjectFilePath is not { } current || string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        (string target, string? blockedBy) = FollowNameTarget(current, name.Trim());
+        return target == current && blockedBy is null ? null : new ProjectFileRename(target, blockedBy);
+    }
+
+    private (string Target, string? BlockedBy) FollowNameTarget(string currentPath, string name)
+    {
+        if (_savedName is null || name == _savedName)
+        {
+            return (currentPath, null);
+        }
+
+        string fileName = Path.GetFileName(currentPath);
+        if (!string.Equals(fileName, ProjectPaths.FileNameFor(_savedName), ProjectPaths.Comparison))
+        {
+            // Named by hand (or through Save As): keep the user's file name.
+            return (currentPath, null);
+        }
+
+        string directory = Path.GetDirectoryName(currentPath) ?? string.Empty;
+        string candidate = _fileSystem.GetFullPath(Path.Combine(directory, ProjectPaths.FileNameFor(name)));
+        if (ProjectPaths.AreSame(candidate, currentPath))
+        {
+            return (currentPath, null);
+        }
+
+        return _fileSystem.FileExists(candidate) ? (currentPath, candidate) : (candidate, null);
+    }
+
+    private Task<ApplicationResult<ProjectWorkspace>> SaveProjectAsAsync(
+        string path,
+        CancellationToken cancellationToken,
+        string? previousPath,
+        string? renameBlockedBy)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (Current is null)
@@ -330,10 +400,18 @@ public sealed class ProjectLifecycleService
             Current = saved;
             ProjectFilePath = fullPath;
             _savedFingerprint = ContentFingerprint(saved);
+            _savedName = saved.Identity.Name;
             Dirty.AcceptChanges();
+            if (previousPath is not null && !ProjectPaths.AreSame(previousPath, fullPath))
+            {
+                // The new file is complete; only now does the old name go away.
+                TryDeleteProjectFile(previousPath);
+                _recentProjects?.Remove(previousPath);
+            }
+
             RecordRecent(fullPath, saved);
             _events.Publish(new ProjectDirtyChanged(false, null));
-            _events.Publish(new ProjectSaved(fullPath, saved.Identity.Name));
+            _events.Publish(new ProjectSaved(fullPath, saved.Identity.Name, previousPath, renameBlockedBy));
             return Task.FromResult(ApplicationResult<ProjectWorkspace>.Success(saved));
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidDataException or IOException or UnauthorizedAccessException)
@@ -364,6 +442,7 @@ public sealed class ProjectLifecycleService
         Current = null;
         ProjectFilePath = null;
         _savedFingerprint = null;
+        _savedName = null;
         SessionId = Guid.Empty;
         ContentRevision++;
         Dirty.AcceptChanges();
@@ -410,6 +489,7 @@ public sealed class ProjectLifecycleService
         SessionId = Guid.NewGuid();
         ContentRevision++;
         _savedFingerprint = ContentFingerprint(Current);
+        _savedName = workspace.Identity.Name;
         Dirty.AcceptChanges();
         Navigation.ProjectOpened();
         RecordRecent(fullPath, workspace);
@@ -446,6 +526,21 @@ public sealed class ProjectLifecycleService
     /// presentation layers refreshing on that event already see it. The store degrades to a
     /// logged warning on I/O failure; history never blocks a project operation.
     /// </summary>
+    private void TryDeleteProjectFile(string path)
+    {
+        try
+        {
+            if (_fileSystem.FileExists(path))
+            {
+                _fileSystem.DeleteFile(path);
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // The project now lives under its new name; a leftover old file only duplicates it.
+        }
+    }
+
     private void RecordRecent(string fullPath, ProjectWorkspace workspace)
         => _recentProjects?.Record(new RecentProjectEntry(
             workspace.Identity.Name,

@@ -1077,10 +1077,23 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     {
         RefreshProjectState();
         _ = Recent.RefreshAsync();
-        ProjectActionStatus = string.Format(
-            System.Globalization.CultureInfo.CurrentUICulture,
-            _text["project.status.saved"],
-            project.ProjectName);
+        ProjectActionStatus = project switch
+        {
+            { PreviousFilePath: not null } => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.savedRenamed"],
+                project.ProjectName,
+                Path.GetFileName(project.FilePath)),
+            { RenameBlockedBy: { } blocked } => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.savedRenameBlocked"],
+                project.ProjectName,
+                Path.GetFileName(blocked)),
+            _ => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.saved"],
+                project.ProjectName),
+        };
     }
 
     private void OnProjectClosed(ProjectClosed project)
@@ -1378,14 +1391,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         }
     }
 
-    private static string BuildProjectFileName(string name)
-    {
-        char[] invalidCharacters = Path.GetInvalidFileNameChars();
-        string stem = new string(name.Trim().Select(character => invalidCharacters.Contains(character) ? '_' : character).ToArray())
-            .Trim()
-            .Trim('.');
-        return $"{(string.IsNullOrWhiteSpace(stem) ? "disc-project" : stem)}{ProjectJsonStore.FileExtension}";
-    }
+    private static string BuildProjectFileName(string name) => ProjectPaths.FileNameFor(name);
+
 
     private static IReadOnlyList<NewProjectPresetOption> CreateProjectPresets(ITextCatalog text)
     {
