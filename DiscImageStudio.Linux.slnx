@@ -11,6 +11,8 @@
     <Project Path="src/DvdImageSolver/DvdImageSolver.csproj" />
     <Project Path="src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
     <Project Path="src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+    <Project Path="src/DiscImageStudio.Preview/DiscImageStudio.Preview.csproj" />
+    <Project Path="src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj" />
     <Project Path="src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj" />
   </Folder>
   <Folder Name="/tests/">

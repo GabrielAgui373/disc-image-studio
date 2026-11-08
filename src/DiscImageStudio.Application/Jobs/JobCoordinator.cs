@@ -16,6 +16,8 @@ public sealed record JobCompletion(Guid JobId, string Name, DateTimeOffset Start
 
 public sealed record JobStarted(Guid JobId, string Name);
 
+public sealed record JobProgressReported(Guid JobId, JobProgress Progress);
+
 public sealed record JobFinished(Guid JobId, string Name, ApplicationErrorCode? ErrorCode);
 
 /// <summary>
@@ -28,6 +30,7 @@ public sealed class JobCoordinator
     private readonly Dictionary<Guid, RunningJob> _running = [];
     private readonly IClock _clock;
     private readonly IApplicationEventPublisher _events;
+    private bool _acceptingJobs = true;
 
     public JobCoordinator(IClock clock, IApplicationEventPublisher? events = null)
     {
@@ -42,6 +45,17 @@ public sealed class JobCoordinator
             lock (_gate)
             {
                 return _running.Keys.ToArray();
+            }
+        }
+    }
+
+    public bool IsAcceptingJobs
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _acceptingJobs;
             }
         }
     }
@@ -62,22 +76,37 @@ public sealed class JobCoordinator
         Guid jobId = Guid.NewGuid();
         DateTimeOffset startedUtc = _clock.UtcNow;
         CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_gate)
         {
+            if (!_acceptingJobs)
+            {
+                linked.Dispose();
+                return ApplicationResult<JobCompletion>.Failure(
+                    ApplicationErrorCode.ApplicationShuttingDown,
+                    request.Name);
+            }
+
             if (HasConflict(request))
             {
                 linked.Dispose();
                 return ApplicationResult<JobCompletion>.Failure(ApplicationErrorCode.JobConflict, request.Name);
             }
 
-            _running.Add(jobId, new RunningJob(request, linked));
+            _running.Add(jobId, new RunningJob(request, linked, completion));
         }
 
         _events.Publish(new JobStarted(jobId, request.Name));
         ApplicationErrorCode? errorCode = null;
         try
         {
-            await operation(new JobExecutionContext(jobId, progress, linked.Token));
+            IProgress<JobProgress> reportedProgress = new Progress<JobProgress>(update =>
+            {
+                progress?.Report(update);
+                _events.Publish(new JobProgressReported(jobId, update));
+            });
+
+            await operation(new JobExecutionContext(jobId, reportedProgress, linked.Token));
             return ApplicationResult<JobCompletion>.Success(
                 new JobCompletion(jobId, request.Name, startedUtc, _clock.UtcNow));
         }
@@ -99,6 +128,7 @@ public sealed class JobCoordinator
             }
 
             linked.Dispose();
+            completion.TrySetResult();
             _events.Publish(new JobFinished(jobId, request.Name, errorCode));
         }
     }
@@ -129,8 +159,50 @@ public sealed class JobCoordinator
         }
     }
 
+    public async Task<bool> ShutdownAsync(
+        TimeSpan timeout,
+        CancellationToken cancellationToken = default)
+    {
+        if (timeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timeout));
+        }
+
+        RunningJob[] running;
+        lock (_gate)
+        {
+            _acceptingJobs = false;
+            running = _running.Values.ToArray();
+        }
+
+        foreach (RunningJob job in running)
+        {
+            try
+            {
+                job.Cancellation.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+        }
+
+        try
+        {
+            await Task.WhenAll(running.Select(job => job.Completion.Task))
+                .WaitAsync(timeout, cancellationToken);
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
+
     private bool HasConflict(JobRequest candidate)
         => _running.Values.Any(running => candidate.Exclusive || running.Request.Exclusive);
 
-    private sealed record RunningJob(JobRequest Request, CancellationTokenSource Cancellation);
+    private sealed record RunningJob(
+        JobRequest Request,
+        CancellationTokenSource Cancellation,
+        TaskCompletionSource Completion);
 }

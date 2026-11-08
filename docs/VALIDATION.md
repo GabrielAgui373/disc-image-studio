@@ -79,6 +79,18 @@ Resultados: solução Linux, aplicação WPF e harness Windows cross-target comp
 
 O harness Windows foi compilado, mas não executado no Linux. O workflow passou a executar o self-test extraído nos jobs Linux e Windows; a confirmação dos demais RIDs e da execução completa do harness depende do CI do pull request.
 
+## Host Avalonia e serviços Linux/XDG — 2026-11-06
+
+A Task 05 foi validada por build Release da solução Linux e pela suíte `DiscImageStudio.PortableArchitectureTests`: compilação sem warnings/erros e 45 testes aprovados. Os testes novos cobrem paths XDG e permissões, recuperação/falhas de persistência, ciclo de shutdown com jobs, composição independente do estado Avalonia e diagnóstico da ausência de display.
+
+O smoke visual da janela não foi executado nesta validação. Portanto, a abertura e interação em uma sessão Fedora X11/XWayland continuam como confirmação manual pendente; os resultados automatizados não alegam validação visual.
+
+## Shell visual Avalonia — 2026-11-06
+
+A Subtask 06.1 havia sido validada anteriormente com build Release de `DiscImageStudio.App.Avalonia` sem warnings ou erros e 46 testes portáveis aprovados. Esse registro histórico cobre somente os controles-base e a troca de preferência de tema.
+
+As Subtasks 06.2 a 06.5 completaram shell responsivo, navegação compartilhada, feedback global, acessibilidade e refinamentos visuais da sidebar. A conclusão atual usa build Release, auditoria estática de resources e a verificação manual feita durante as iterações no Fedora. Não foram adicionados nem executados testes nesta etapa; Avalonia Headless e snapshots foram adiados para um módulo de testes separado.
+
 ## 本地验证
 
 最近一次完整架构回归：2026-10-28，覆盖界面修复、标定生成优化与 Verbatim BD-R (64099) 预设（对应提交 `3088802`、`49a0e4d`、`46e2c53`），Windows、.NET SDK 10.0.400（运行时 10.0.11），Release 配置。完整 solution 构建（0 警告、0 错误）与架构回归全部通过；测试入口直接运行自研 Exe harness，不使用 `dotnet test`。

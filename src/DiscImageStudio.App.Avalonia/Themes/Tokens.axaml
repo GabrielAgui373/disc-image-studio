@@ -1,0 +1,212 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Semantic colors adapt to the requested Avalonia theme. Views consume these names,
+       never raw colors, so a future visual refresh stays localized to this dictionary. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="DiscBackgroundColor">#F6F7FB</Color>
+      <Color x:Key="DiscSurfaceColor">#FFFFFF</Color>
+      <Color x:Key="DiscSurfaceRaisedColor">#EEF1F7</Color>
+      <Color x:Key="DiscTextColor">#1B1D24</Color>
+      <Color x:Key="DiscTextMutedColor">#5B6270</Color>
+      <Color x:Key="DiscBorderColor">#D8DCE6</Color>
+      <Color x:Key="DiscAccentColor">#1E63D5</Color>
+      <Color x:Key="DiscAccentHoverColor">#174FAE</Color>
+      <Color x:Key="DiscAccentSoftColor">#1A1E63D5</Color>
+      <Color x:Key="DiscSuccessColor">#16803C</Color>
+      <Color x:Key="DiscWarningColor">#A85D00</Color>
+      <Color x:Key="DiscDangerColor">#C72D4E</Color>
+      <Color x:Key="DiscOverlayColor">#990B0D12</Color>
+      <Color x:Key="DiscOnAccentColor">#FFFFFF</Color>
+      <!-- Fluent derives sliders, radio buttons, check boxes and focus accents from these. -->
+      <Color x:Key="SystemAccentColor">#1E63D5</Color>
+      <Color x:Key="SystemAccentColorDark1">#174FAE</Color>
+      <Color x:Key="SystemAccentColorDark2">#123F8C</Color>
+      <Color x:Key="SystemAccentColorDark3">#0D2F69</Color>
+      <Color x:Key="SystemAccentColorLight1">#4A82E0</Color>
+      <Color x:Key="SystemAccentColorLight2">#78A2EA</Color>
+      <Color x:Key="SystemAccentColorLight3">#A6C2F2</Color>
+      <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="DiscTextBrush" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="DiscTextMutedBrush" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="DiscBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="DiscAccentBrush" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="DiscAccentHoverBrush" Color="{DynamicResource DiscAccentHoverColor}" />
+      <SolidColorBrush x:Key="DiscAccentSoftBrush" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="DiscSuccessBrush" Color="{DynamicResource DiscSuccessColor}" />
+      <SolidColorBrush x:Key="DiscWarningBrush" Color="{DynamicResource DiscWarningColor}" />
+      <SolidColorBrush x:Key="DiscDangerBrush" Color="{DynamicResource DiscDangerColor}" />
+      <SolidColorBrush x:Key="DiscOverlayBrush" Color="{DynamicResource DiscOverlayColor}" />
+      <SolidColorBrush x:Key="DiscOnAccentBrush" Color="{DynamicResource DiscOnAccentColor}" />
+      <!-- Fluent Expander parts follow the Disc surface palette instead of the stock gray chrome. -->
+      <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForeground" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForegroundPressed" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForeground" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForegroundPointerOver" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForegroundPressed" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver" Color="Transparent" />
+      <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
+      <SolidColorBrush x:Key="ExpanderContentBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <!-- ComboBox drop-downs use the Disc palette instead of Fluent's stock selection blue. -->
+      <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="{DynamicResource DiscTextColor}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <Color x:Key="DiscBackgroundColor">#11131A</Color>
+      <Color x:Key="DiscSurfaceColor">#191C25</Color>
+      <Color x:Key="DiscSurfaceRaisedColor">#242936</Color>
+      <Color x:Key="DiscTextColor">#F5F7FC</Color>
+      <Color x:Key="DiscTextMutedColor">#B6BDCB</Color>
+      <Color x:Key="DiscBorderColor">#343B4A</Color>
+      <Color x:Key="DiscAccentColor">#6BA5FF</Color>
+      <Color x:Key="DiscAccentHoverColor">#9AC3FF</Color>
+      <Color x:Key="DiscAccentSoftColor">#246BA5FF</Color>
+      <Color x:Key="DiscSuccessColor">#5DCC86</Color>
+      <Color x:Key="DiscWarningColor">#F2B558</Color>
+      <Color x:Key="DiscDangerColor">#FF7893</Color>
+      <Color x:Key="DiscOverlayColor">#AA05070D</Color>
+      <Color x:Key="DiscOnAccentColor">#0B1426</Color>
+      <Color x:Key="SystemAccentColor">#6BA5FF</Color>
+      <Color x:Key="SystemAccentColorDark1">#4A88E8</Color>
+      <Color x:Key="SystemAccentColorDark2">#2F6CCB</Color>
+      <Color x:Key="SystemAccentColorDark3">#1E52A6</Color>
+      <Color x:Key="SystemAccentColorLight1">#6BA5FF</Color>
+      <Color x:Key="SystemAccentColorLight2">#8DBAFF</Color>
+      <Color x:Key="SystemAccentColorLight3">#AFCFFF</Color>
+      <SolidColorBrush x:Key="DiscBackgroundBrush" Color="{DynamicResource DiscBackgroundColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceBrush" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="DiscSurfaceRaisedBrush" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="DiscTextBrush" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="DiscTextMutedBrush" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="DiscBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="DiscAccentBrush" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="DiscAccentHoverBrush" Color="{DynamicResource DiscAccentHoverColor}" />
+      <SolidColorBrush x:Key="DiscAccentSoftBrush" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="DiscSuccessBrush" Color="{DynamicResource DiscSuccessColor}" />
+      <SolidColorBrush x:Key="DiscWarningBrush" Color="{DynamicResource DiscWarningColor}" />
+      <SolidColorBrush x:Key="DiscDangerBrush" Color="{DynamicResource DiscDangerColor}" />
+      <SolidColorBrush x:Key="DiscOverlayBrush" Color="{DynamicResource DiscOverlayColor}" />
+      <SolidColorBrush x:Key="DiscOnAccentBrush" Color="{DynamicResource DiscOnAccentColor}" />
+      <!-- Fluent Expander parts follow the Disc surface palette instead of the stock gray chrome. -->
+      <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForeground" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderForegroundPressed" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForeground" Color="{DynamicResource DiscTextMutedColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForegroundPointerOver" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronForegroundPressed" Color="{DynamicResource DiscAccentColor}" />
+      <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver" Color="Transparent" />
+      <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
+      <SolidColorBrush x:Key="ExpanderContentBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <!-- ComboBox drop-downs use the Disc palette instead of Fluent's stock selection blue. -->
+      <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource DiscSurfaceColor}" />
+      <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{DynamicResource DiscBorderColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="{DynamicResource DiscSurfaceRaisedColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="{DynamicResource DiscAccentSoftColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource DiscTextColor}" />
+      <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="{DynamicResource DiscTextColor}" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
+  <!-- Disc artwork palettes are physical media colors, identical in light and dark themes. -->
+  <ConicGradientBrush x:Key="DiscArtCdSurfaceBrush" Center="50%,50%" Angle="24">
+    <GradientStop Offset="0" Color="#C9CFD8" />
+    <GradientStop Offset="0.12" Color="#EEF2F6" />
+    <GradientStop Offset="0.22" Color="#BFE3F0" />
+    <GradientStop Offset="0.32" Color="#F3DDF0" />
+    <GradientStop Offset="0.42" Color="#E9EDF2" />
+    <GradientStop Offset="0.55" Color="#C7CDD6" />
+    <GradientStop Offset="0.65" Color="#F1F4F7" />
+    <GradientStop Offset="0.74" Color="#F7E7C4" />
+    <GradientStop Offset="0.84" Color="#CDE8E2" />
+    <GradientStop Offset="0.93" Color="#E4E8EE" />
+    <GradientStop Offset="1" Color="#C9CFD8" />
+  </ConicGradientBrush>
+  <ConicGradientBrush x:Key="DiscArtDvdSurfaceBrush" Center="50%,50%" Angle="24">
+    <GradientStop Offset="0" Color="#5A4A96" />
+    <GradientStop Offset="0.12" Color="#8F7FD0" />
+    <GradientStop Offset="0.22" Color="#4F6FC6" />
+    <GradientStop Offset="0.32" Color="#A98ED8" />
+    <GradientStop Offset="0.42" Color="#6A59AA" />
+    <GradientStop Offset="0.55" Color="#574693" />
+    <GradientStop Offset="0.65" Color="#9584D3" />
+    <GradientStop Offset="0.74" Color="#C59AD8" />
+    <GradientStop Offset="0.84" Color="#5F84D2" />
+    <GradientStop Offset="0.93" Color="#7B6BBE" />
+    <GradientStop Offset="1" Color="#5A4A96" />
+  </ConicGradientBrush>
+  <ConicGradientBrush x:Key="DiscArtBdSurfaceBrush" Center="50%,50%" Angle="24">
+    <GradientStop Offset="0" Color="#1D2742" />
+    <GradientStop Offset="0.12" Color="#34507F" />
+    <GradientStop Offset="0.22" Color="#2C6DB4" />
+    <GradientStop Offset="0.32" Color="#4A3F86" />
+    <GradientStop Offset="0.42" Color="#223259" />
+    <GradientStop Offset="0.55" Color="#1B2540" />
+    <GradientStop Offset="0.65" Color="#375C92" />
+    <GradientStop Offset="0.74" Color="#5A4C9E" />
+    <GradientStop Offset="0.84" Color="#2A7BB8" />
+    <GradientStop Offset="0.93" Color="#26385F" />
+    <GradientStop Offset="1" Color="#1D2742" />
+  </ConicGradientBrush>
+  <LinearGradientBrush x:Key="DiscArtGlossBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+    <GradientStop Offset="0" Color="#66FFFFFF" />
+    <GradientStop Offset="0.42" Color="#00FFFFFF" />
+    <GradientStop Offset="0.7" Color="#00FFFFFF" />
+    <GradientStop Offset="1" Color="#26FFFFFF" />
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="DiscArtRimBrush" Color="#1FFFFFFF" />
+  <LinearGradientBrush x:Key="DiscArtMirrorBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+    <GradientStop Offset="0" Color="#F1F3F6" />
+    <GradientStop Offset="0.5" Color="#A9B1BD" />
+    <GradientStop Offset="1" Color="#E4E8ED" />
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="DiscArtHubBrush" Color="#8CD5DCE5" />
+
+  <x:Double x:Key="DiscSpace1">4</x:Double>
+  <x:Double x:Key="DiscSpace2">8</x:Double>
+  <x:Double x:Key="DiscSpace3">12</x:Double>
+  <x:Double x:Key="DiscSpace4">16</x:Double>
+  <x:Double x:Key="DiscSpace5">24</x:Double>
+  <x:Double x:Key="DiscSpace6">32</x:Double>
+  <Thickness x:Key="DiscPagePadding">32,24,32,32</Thickness>
+  <Thickness x:Key="DiscHeaderPadding">16</Thickness>
+  <Thickness x:Key="DiscCardPadding">24</Thickness>
+  <CornerRadius x:Key="DiscRadiusField">8</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusCard">12</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusChip">6</CornerRadius>
+  <CornerRadius x:Key="DiscRadiusFloating">10</CornerRadius>
+  <x:Double x:Key="DiscControlHeight">34</x:Double>
+  <x:Double x:Key="DiscCompactControlHeight">28</x:Double>
+  <FontFamily x:Key="DiscFontFamily">Inter, sans-serif</FontFamily>
+  <FontFamily x:Key="DiscMonoFontFamily">Cascadia Mono, Monospace</FontFamily>
+</ResourceDictionary>

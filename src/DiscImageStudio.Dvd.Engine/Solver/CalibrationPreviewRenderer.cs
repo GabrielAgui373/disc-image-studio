@@ -74,9 +74,25 @@ public static class CalibrationPreviewRenderer
         CalibrationPreviewOptions options,
         CancellationToken cancellationToken = default)
     {
+        string outputFullPath = Path.GetFullPath(outputPath);
+        byte[] pixels = RenderPixels(imagePath, options, out CalibrationPreviewSummary summary, cancellationToken);
+        WritePng(outputFullPath, options.PreviewSize, pixels);
+        return summary with { OutputImage = outputFullPath };
+    }
+
+    /// <summary>
+    /// The projection behind <see cref="Render"/> as an opaque BGRA buffer of
+    /// <see cref="CalibrationPreviewOptions.PreviewSize"/>²; the summary's
+    /// <see cref="CalibrationPreviewSummary.OutputImage"/> is empty because nothing is written.
+    /// </summary>
+    public static byte[] RenderPixels(
+        string imagePath,
+        CalibrationPreviewOptions options,
+        out CalibrationPreviewSummary summary,
+        CancellationToken cancellationToken = default)
+    {
         Validate(options);
         string sourceFullPath = Path.GetFullPath(imagePath);
-        string outputFullPath = Path.GetFullPath(outputPath);
         RasterImage source = RasterImage.Load(sourceFullPath);
         double trackLengthMm = options.TotalSectors
             * (double)DvdEccBlockEncoder.ChannelBitsPerSector
@@ -210,10 +226,9 @@ public static class CalibrationPreviewRenderer
             }
         });
 
-        WritePng(outputFullPath, size, pixels);
-        return new CalibrationPreviewSummary(
+        summary = new CalibrationPreviewSummary(
             sourceFullPath,
-            outputFullPath,
+            string.Empty,
             source.Width,
             source.Height,
             size,
@@ -242,6 +257,7 @@ public static class CalibrationPreviewRenderer
             options.ActualPitchQuadratic,
             options.ActualPitchCubic,
             options.Tone);
+        return pixels;
     }
 
     private static void WritePng(string outputPath, int size, byte[] pixels)

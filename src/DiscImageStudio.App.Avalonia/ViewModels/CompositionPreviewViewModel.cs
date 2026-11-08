@@ -1,0 +1,240 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
+using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DiscImageStudio.App.Avalonia.Localization;
+using DiscImageStudio.App.Avalonia.Platform;
+using DiscImageStudio.Application.Composition;
+using DiscImageStudio.Application.Projects;
+using DiscImageStudio.Rendering;
+
+namespace DiscImageStudio.App.Avalonia.ViewModels;
+
+/// <summary>
+/// Design-page preview of the project's composed layers at 2048 px. Composition and bitmap
+/// conversion run off the UI thread; a newer refresh supersedes older ones at both the service
+/// channel and here, so a slow composition can never replace a newer preview.
+/// </summary>
+public sealed partial class CompositionPreviewViewModel : ObservableObject
+{
+    private const string Channel = "design-preview";
+
+    /// <summary>Side of the view-box the ring overlay is drawn in.</summary>
+    public const double OverlaySize = 200;
+
+    private readonly ProjectCompositionService _compositions;
+    private readonly ProjectLifecycleService _projects;
+    private readonly ITextCatalog _text;
+    private long _generation;
+    private readonly DiscImageStudio.App.Avalonia.Design.Debouncer _refresh;
+    private bool _isActive;
+    private bool _stale;
+
+    public CompositionPreviewViewModel(
+        ProjectCompositionService compositions,
+        ProjectLifecycleService projects,
+        ITextCatalog text)
+    {
+        _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
+        _projects = projects ?? throw new ArgumentNullException(nameof(projects));
+        _text = text ?? throw new ArgumentNullException(nameof(text));
+        Title = text["design.preview.title"];
+        Description = text["design.preview.description"];
+        RenderingLabel = text["design.preview.rendering"];
+        NoLayersTitle = text["design.preview.noLayers.title"];
+        NoLayersDescription = text["design.preview.noLayers.description"];
+        Issues.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasIssues));
+        _refresh = new DiscImageStudio.App.Avalonia.Design.Debouncer(RefreshDelay, () => _ = RefreshAsync());
+    }
+
+    /// <summary>Quiet period after the last committed change before recomposing at 2048 px.</summary>
+    public static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(250);
+
+    /// <summary>
+    /// Asks for a recomposition after the quiet period. While the Design page is hidden the
+    /// preview is only marked stale, so editing elsewhere never pays for 2048 px compositions.
+    /// </summary>
+    public void RequestRefresh()
+    {
+        if (!_isActive)
+        {
+            _stale = true;
+            return;
+        }
+
+        _refresh.Schedule();
+    }
+
+    /// <summary>Called when the Design page is shown or hidden; showing it refreshes a stale preview.</summary>
+    public void SetActive(bool active)
+    {
+        _isActive = active;
+        if (active && _stale)
+        {
+            _stale = false;
+            _refresh.Schedule();
+        }
+        else if (!active)
+        {
+            _refresh.Cancel();
+        }
+    }
+
+    public string Title { get; }
+
+    public string Description { get; }
+
+    public string RenderingLabel { get; }
+
+    public string NoLayersTitle { get; }
+
+    public string NoLayersDescription { get; }
+
+    /// <summary>
+    /// Raised with each new composition, and with <see langword="null"/> when there is none, so
+    /// the tone before/after and the toned canvas can reuse it instead of composing again.
+    /// </summary>
+    public event Action<ComposedDesign?>? Composed;
+
+    public ObservableCollection<string> Issues { get; } = [];
+
+    public bool HasIssues => Issues.Count > 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasImage))]
+    public partial IImage? Image { get; private set; }
+
+    public bool HasImage => Image is not null;
+
+    [ObservableProperty]
+    public partial bool IsRendering { get; private set; }
+
+    [ObservableProperty]
+    public partial bool HasNoLayers { get; private set; }
+
+    [ObservableProperty]
+    public partial string Summary { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string? Error { get; private set; }
+
+    /// <summary>Diameter and offset of the inner (hub) ring inside the overlay view-box.</summary>
+    [ObservableProperty]
+    public partial double InnerRingDiameter { get; private set; }
+
+    [ObservableProperty]
+    public partial double InnerRingOffset { get; private set; }
+
+    public async Task RefreshAsync()
+    {
+        long generation = ++_generation;
+        ProjectWorkspace? workspace = _projects.Current;
+        string? projectPath = _projects.ProjectFilePath;
+        if (workspace is null)
+        {
+            Clear();
+            return;
+        }
+
+        HasNoLayers = workspace.Design.Layers.Count == 0;
+        if (HasNoLayers)
+        {
+            Image = null;
+            Issues.Clear();
+            Summary = string.Empty;
+            Error = null;
+            Composed?.Invoke(null);
+            return;
+        }
+
+        IsRendering = true;
+        try
+        {
+            ProjectComposition? composition = await _compositions.ComposeLatestAsync(
+                Channel,
+                workspace,
+                projectPath,
+                ProjectCompositionService.PreviewSize);
+            if (composition is null || generation != _generation)
+            {
+                return;
+            }
+
+            IImage bitmap = await Task.Run(() => CompositionBitmap.ToBitmap(composition.Image));
+            if (generation != _generation)
+            {
+                return;
+            }
+
+            Image = bitmap;
+            Error = null;
+            ApplyDetails(workspace, composition);
+            Composed?.Invoke(new ComposedDesign(composition.Image, composition.CanvasOuterRadiusMm, workspace.Design));
+        }
+        catch (Exception exception) when (exception is IOException
+                                              or UnauthorizedAccessException
+                                              or InvalidDataException
+                                              or ArgumentException
+                                              or InvalidOperationException)
+        {
+            if (generation == _generation)
+            {
+                Error = _text["design.preview.error"];
+            }
+        }
+        finally
+        {
+            if (generation == _generation)
+            {
+                IsRendering = false;
+            }
+        }
+    }
+
+    public void Clear()
+    {
+        _refresh.Cancel();
+        _stale = false;
+        ++_generation;
+        Image = null;
+        Issues.Clear();
+        Summary = string.Empty;
+        Error = null;
+        HasNoLayers = false;
+        IsRendering = false;
+        Composed?.Invoke(null);
+    }
+
+    private void ApplyDetails(ProjectWorkspace workspace, ProjectComposition composition)
+    {
+        int total = workspace.Design.Layers.Count(layer => layer.Visible);
+        Summary = string.Format(
+            CultureInfo.CurrentUICulture,
+            _text["design.preview.summary"],
+            composition.PaintedLayerCount,
+            total,
+            composition.Size);
+        double ratio = Math.Clamp(composition.ContentInnerRadiusMm / composition.CanvasOuterRadiusMm, 0, 1);
+        InnerRingDiameter = OverlaySize * ratio;
+        InnerRingOffset = (OverlaySize - InnerRingDiameter) / 2;
+
+        Issues.Clear();
+        foreach (CompositionIssue issue in composition.Issues)
+        {
+            string layerName = workspace.Design.Layers.FirstOrDefault(layer => layer.Id == issue.LayerId)?.Name ?? issue.LayerId;
+            string key = issue.Kind switch
+            {
+                CompositionIssueKind.ImageMissing => "design.preview.issue.missing",
+                CompositionIssueKind.ImageTooLarge => "design.preview.issue.tooLarge",
+                _ => "design.preview.issue.unreadable",
+            };
+            Issues.Add(string.Format(CultureInfo.CurrentUICulture, _text[key], layerName));
+        }
+    }
+}
+
+/// <summary>
+/// A composition of the design, with the canvas radius its square covers and the design it was
+/// made from, so consumers can tell whether it still matches the project.
+/// </summary>
+public sealed record ComposedDesign(DiscImageStudio.ImageIO.BgraRaster Image, double CanvasOuterRadiusMm, DesignState Design);

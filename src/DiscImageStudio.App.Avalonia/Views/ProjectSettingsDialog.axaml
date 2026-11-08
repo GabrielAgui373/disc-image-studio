@@ -1,0 +1,225 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls"
+             xmlns:vm="using:DiscImageStudio.App.Avalonia.ViewModels"
+             x:Class="DiscImageStudio.App.Avalonia.Views.ProjectSettingsDialog"
+             x:DataType="vm:ProjectSettingsViewModel">
+    <Border Classes="modal-scrim">
+        <Border Classes="new-project-dialog project-settings-dialog">
+            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource DiscSpace4}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,0,22,0">
+                    <controls:DiscArt Variant="{Binding FamilyVariant}" Width="52" Height="52" VerticalAlignment="Top" />
+                    <StackPanel Grid.Column="1" Spacing="{DynamicResource DiscSpace1}">
+                        <TextBlock Text="{Binding Labels.Title}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Labels.Description}"
+                                   Classes="new-project-description"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="{DynamicResource DiscSpace5}" Margin="0,0,22,0">
+                        <!-- General -->
+                        <StackPanel Spacing="{DynamicResource DiscSpace3}">
+                            <TextBlock Text="{Binding Labels.GeneralSection}" Classes="settings-section-title" />
+                            <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                                <TextBlock Text="{Binding Labels.NameLabel}" Classes="settings-field-label" />
+                                <TextBox Text="{Binding Name, Mode=TwoWay}"
+                                         AutomationProperties.Name="{Binding Labels.NameLabel}" />
+                            </StackPanel>
+                            <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                                <TextBlock Text="{Binding Labels.FamilyLabel}" Classes="settings-field-label" />
+                                <Border Classes="settings-readonly-chip">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding FamilyTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Labels.FamilyLocked}" Classes="settings-hint" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Geometry and user presets -->
+                        <StackPanel Spacing="{DynamicResource DiscSpace3}">
+                            <TextBlock Text="{Binding Labels.GeometrySection}" Classes="settings-section-title" />
+                            <TextBlock Text="{Binding Labels.GeometryHint}" Classes="settings-hint" TextWrapping="Wrap" />
+                            <ComboBox Classes="new-project-preset"
+                                      ItemsSource="{Binding Presets}"
+                                      SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                      MaxDropDownHeight="300"
+                                      AutomationProperties.Name="{Binding Labels.GeometrySection}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:NewProjectPresetOption">
+                                        <StackPanel Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                <Border Classes="media-template-badge" IsVisible="{Binding IsUserPreset}">
+                                                    <TextBlock Text="CUSTOM" Classes="media-template-badge-text" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Description}"
+                                                       Classes="new-project-preset-description"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Text="{Binding GeometrySummary}" Classes="settings-hint" />
+                            <!-- One Auto column holds both buttons so a hidden Delete leaves no spacing gap. -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace2}">
+                                <TextBox Text="{Binding NewPresetName, Mode=TwoWay}"
+                                         PlaceholderText="{Binding Labels.NewPresetWatermark}"
+                                         AutomationProperties.Name="{Binding Labels.NewPresetWatermark}" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource DiscSpace2}">
+                                    <Button Classes="ghost"
+                                            Content="{Binding Labels.DeletePreset}"
+                                            Command="{Binding DeletePresetCommand}"
+                                            IsVisible="{Binding CanDeleteSelectedPreset}" />
+                                    <Button Classes="secondary"
+                                            Content="{Binding Labels.SavePreset}"
+                                            Command="{Binding SavePresetCommand}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Output -->
+                        <StackPanel Spacing="{DynamicResource DiscSpace3}">
+                            <TextBlock Text="{Binding Labels.OutputSection}" Classes="settings-section-title" />
+                            <StackPanel Spacing="{DynamicResource DiscSpace2}">
+                                <TextBlock Text="{Binding Labels.VolumeLabel}" Classes="settings-field-label" />
+                                <TextBox Text="{Binding VolumeLabel, Mode=TwoWay}"
+                                         AutomationProperties.Name="{Binding Labels.VolumeLabel}" />
+                            </StackPanel>
+                            <CheckBox Content="{Binding Labels.OuterRing}"
+                                      IsChecked="{Binding FilesAtOuterRing, Mode=TwoWay}" />
+                            <controls:PathField Label="{Binding Labels.OutputLabel}"
+                                                Text="{Binding OutputPath, Mode=TwoWay}"
+                                                BrowseText="{Binding Labels.Browse}"
+                                                BrowseCommand="{Binding BrowseOutputCommand}"
+                                                ShowBrowse="True"
+                                                AutomationProperties.Name="{Binding Labels.OutputLabel}" />
+                            <controls:PathField Label="{Binding Labels.DataLabel}"
+                                                Text="{Binding DataDirectory, Mode=TwoWay}"
+                                                Hint="{Binding Labels.DataHint}"
+                                                BrowseText="{Binding Labels.Browse}"
+                                                BrowseCommand="{Binding BrowseDataDirectoryCommand}"
+                                                ShowBrowse="True"
+                                                AutomationProperties.Name="{Binding Labels.DataLabel}" />
+                        </StackPanel>
+
+                        <!-- Assets and missing-asset recovery -->
+                        <StackPanel x:Name="AssetsSection" Spacing="{DynamicResource DiscSpace3}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace3}">
+                                <TextBlock Text="{Binding Labels.AssetsSection}"
+                                           Classes="settings-section-title"
+                                           VerticalAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Classes="secondary compact-action"
+                                        Content="{Binding Labels.SearchFolder}"
+                                        Command="{Binding SearchFolderCommand}"
+                                        IsVisible="{Binding HasMissingAssets}" />
+                            </Grid>
+                            <Border Classes="settings-asset-summary" Classes.missing="{Binding HasMissingAssets}">
+                                <TextBlock Text="{Binding AssetSummary}" TextWrapping="Wrap" />
+                            </Border>
+                            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+                            <Border Classes="settings-review" IsVisible="{Binding IsReviewingProposals}">
+                                <StackPanel Spacing="{DynamicResource DiscSpace3}">
+                                    <TextBlock Text="{Binding ReviewSummary}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                    <ItemsControl ItemsSource="{Binding Proposals}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="6" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:RelinkProposalItem">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                    <CheckBox IsChecked="{Binding IsAccepted, Mode=TwoWay}"
+                                                              IsEnabled="{Binding CanAccept}"
+                                                              VerticalAlignment="Top"
+                                                              AutomationProperties.Name="{Binding AssetLabel}" />
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding AssetLabel}" FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding MatchLabel}"
+                                                                       Classes="settings-match"
+                                                                       Classes.attention="{Binding NeedsAttention}" />
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding CandidatePath}"
+                                                                   Classes="settings-path"
+                                                                   TextTrimming="LeadingCharacterEllipsis"
+                                                                   IsVisible="{Binding CanAccept}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <Button Classes="ghost compact-action"
+                                                Content="{Binding Labels.CancelReview}"
+                                                Command="{Binding CancelReviewCommand}" />
+                                        <Button Classes="primary compact-action"
+                                                Content="{Binding Labels.ApplyProposals}"
+                                                Command="{Binding ApplyProposalsCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <ItemsControl ItemsSource="{Binding Assets}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ProjectAssetItem">
+                                        <Border Classes="settings-asset-row" Classes.missing="{Binding IsMissing}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                <Ellipse Classes="settings-asset-dot" VerticalAlignment="Center" />
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding KindLabel}" Classes="settings-hint" IsVisible="{Binding ShowKindLabel}" />
+                                                        <TextBlock Text="{Binding StatusLabel}" Classes="settings-asset-status" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Path}"
+                                                               Classes="settings-path"
+                                                               TextTrimming="LeadingCharacterEllipsis"
+                                                               ToolTip.Tip="{Binding Path}" />
+                                                </StackPanel>
+                                                <Button Grid.Column="2"
+                                                        Classes="secondary compact-action"
+                                                        Content="{Binding $parent[UserControl].((vm:ProjectSettingsViewModel)DataContext).Labels.Relink}"
+                                                        Command="{Binding $parent[UserControl].((vm:ProjectSettingsViewModel)DataContext).RelinkCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="2" Spacing="{DynamicResource DiscSpace3}" Margin="0,0,22,0">
+                    <Border Classes="new-project-error" IsVisible="{Binding HasError}">
+                        <TextBlock Text="{Binding Error}" TextWrapping="Wrap" />
+                    </Border>
+                    <Border Classes="home-selection-status" IsVisible="{Binding HasStatus}">
+                        <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button Classes="secondary"
+                                Content="{Binding Labels.Cancel}"
+                                Command="{Binding CancelCommand}" />
+                        <Button Classes="primary"
+                                Content="{Binding Labels.Apply}"
+                                Command="{Binding ApplyCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Border>
+</UserControl>

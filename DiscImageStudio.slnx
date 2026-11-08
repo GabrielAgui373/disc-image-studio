@@ -5,12 +5,14 @@
   <Project Path="src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
   <Project Path="src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj" />
   <Project Path="src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+  <Project Path="src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj" />
   <Project Path="src/DiscImageStudio.Imaging/DiscImageStudio.Imaging.csproj" />
   <Project Path="src/DiscImageStudio.Burning/DiscImageStudio.Burning.csproj" />
   <Project Path="src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
   <Project Path="src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
   <Project Path="src/DiscImageStudio.Dvd.Engine/DiscImageStudio.Dvd.Engine.csproj" />
   <Project Path="src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+  <Project Path="src/DiscImageStudio.Preview/DiscImageStudio.Preview.csproj" />
   <Folder Name="/src/">
     <Project Path="src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
   </Folder>

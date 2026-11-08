@@ -102,7 +102,8 @@ public static class ProjectDocumentMapper
             layer.TranslateXMm,
             layer.TranslateYMm,
             layer.RotationDeg,
-            layer.Scale);
+            layer.Scale,
+            layer.Opacity ?? 1.0);
 
     private static ProjectLayer ToProjectLayer(DesignLayerState layer)
         => new(
@@ -113,7 +114,9 @@ public static class ProjectDocumentMapper
             layer.TranslateXMm,
             layer.TranslateYMm,
             layer.RotationDeg,
-            layer.Scale);
+            layer.Scale,
+            // Full opacity is the default and is not written (keeps schema 2 files).
+            layer.Opacity < 1 ? layer.Opacity : null);
 
     private static string FamilyToken(OpticalDiscFamily family)
         => family switch

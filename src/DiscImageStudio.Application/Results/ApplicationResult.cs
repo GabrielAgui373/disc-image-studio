@@ -9,13 +9,17 @@ public enum ApplicationErrorCode
     InvalidRequest,
     NoProjectOpen,
     ProjectReadFailed,
+    ProjectSchemaUnsupported,
     ProjectWriteFailed,
+    PresetReadFailed,
+    PresetWriteFailed,
     UserCanceled,
     NavigationRequiresProject,
     JobConflict,
     JobNotFound,
     JobFailed,
     JobCanceled,
+    ApplicationShuttingDown,
 }
 
 public sealed record ApplicationError(

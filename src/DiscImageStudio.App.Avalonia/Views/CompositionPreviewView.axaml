@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:DiscImageStudio.App.Avalonia.Controls"
+             xmlns:vm="using:DiscImageStudio.App.Avalonia.ViewModels"
+             x:Class="DiscImageStudio.App.Avalonia.Views.CompositionPreviewView"
+             x:DataType="vm:CompositionPreviewViewModel">
+    <controls:SectionCard Title="{Binding Title}" Description="{Binding Description}">
+        <StackPanel Spacing="{DynamicResource DiscSpace3}">
+            <controls:EmptyState IsVisible="{Binding HasNoLayers}"
+                                 Title="{Binding NoLayersTitle}"
+                                 Description="{Binding NoLayersDescription}" />
+
+            <!-- Shrinks the fixed 440 px stage on narrow windows, never enlarges it. -->
+            <Viewbox IsVisible="{Binding !HasNoLayers}"
+                     StretchDirection="DownOnly"
+                     MaxWidth="440"
+                     HorizontalAlignment="Center">
+                <!-- The composition canvas is square and centred on the disc; the overlay rings
+                     use the same square, so the image and the rings stay aligned at any size. -->
+                <Border Classes="composition-stage">
+                    <Grid>
+                        <Image Source="{Binding Image}" Stretch="Uniform" />
+                        <Viewbox Stretch="Uniform" IsHitTestVisible="False">
+                            <Canvas Width="200" Height="200">
+                                <Ellipse Classes="composition-ring" Width="200" Height="200" />
+                                <Ellipse Classes="composition-ring hub"
+                                         Width="{Binding InnerRingDiameter}"
+                                         Height="{Binding InnerRingDiameter}"
+                                         Canvas.Left="{Binding InnerRingOffset}"
+                                         Canvas.Top="{Binding InnerRingOffset}" />
+                            </Canvas>
+                        </Viewbox>
+                        <Border Classes="composition-busy" IsVisible="{Binding IsRendering}">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ProgressBar IsIndeterminate="True" Width="140" />
+                                <TextBlock Text="{Binding RenderingLabel}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Viewbox>
+
+            <TextBlock Text="{Binding Summary}" Classes="settings-hint" HorizontalAlignment="Center" />
+
+            <Border Classes="new-project-error" IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TextBlock Text="{Binding Error}" TextWrapping="Wrap" />
+            </Border>
+
+            <Border Classes="settings-asset-summary missing" IsVisible="{Binding HasIssues}">
+                <ItemsControl ItemsSource="{Binding Issues}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </StackPanel>
+    </controls:SectionCard>
+</UserControl>

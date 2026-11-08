@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>DiscImageStudio.Preview</AssemblyName>
+    <RootNamespace>DiscImageStudio.Preview</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Per-media preview services: the bridge between the application contracts and the disc
+       engines. Portable on purpose; it must never reference a UI framework. -->
+  <ItemGroup>
+    <ProjectReference Include="../DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
+    <ProjectReference Include="../DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />
+    <ProjectReference Include="../DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/BluRayImageLoader.cs" Link="BluRay/BluRayImageLoader.cs" />
+  </ItemGroup>
+</Project>
