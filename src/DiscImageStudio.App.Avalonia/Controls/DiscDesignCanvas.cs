@@ -100,9 +100,23 @@ public sealed class DiscDesignCanvas : Control
         double hubRadius = viewport.ToScreenLength(HubRadiusMm);
         context.DrawEllipse(Brush("DiscSurfaceRaisedBrush", Colors.Gainsboro), null, origin, hubRadius, hubRadius);
 
-        foreach (CanvasLayer layer in model.Layers)
+        if (model.ShowsToneImage && model.ToneImage is { } toned)
         {
-            DrawLayer(context, viewport, layer, model.MissingLabel);
+            // The composition's square spans the canvas radius; the mask below hides what lies
+            // outside the recordable ring, exactly as over the layers.
+            double half = viewport.ToScreenLength(toned.CanvasOuterRadiusMm);
+            Rect target = new(origin.X - half, origin.Y - half, half * 2, half * 2);
+            using (context.PushRenderOptions(new RenderOptions { BitmapInterpolationMode = global::Avalonia.Media.Imaging.BitmapInterpolationMode.LowQuality }))
+            {
+                context.DrawImage(toned.Image, new Rect(toned.Image.Size), target);
+            }
+        }
+        else
+        {
+            foreach (CanvasLayer layer in model.Layers)
+            {
+                DrawLayer(context, viewport, layer, model.MissingLabel);
+            }
         }
 
         DrawMask(context, bounds, origin, outerRadius, innerRadius);

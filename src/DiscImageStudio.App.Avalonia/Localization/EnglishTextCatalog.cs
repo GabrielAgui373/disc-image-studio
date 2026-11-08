@@ -273,6 +273,8 @@ public sealed class EnglishTextCatalog : ITextCatalog
         ["preview.failure.ArtifactMissing"] = "No generated file was found. Generate the disc first, or check the output path.",
         ["preview.failure.ArtifactUnreadable"] = "The generated file could not be read as this disc type.",
         ["preview.failure.unexpected"] = "The preview could not be rendered.",
+        ["design.canvas.tone"] = "Tone",
+        ["design.canvas.toneTip"] = "View the design with its tone applied. Layers come back while you drag them.",
         ["design.tone.before"] = "Before",
         ["design.tone.after"] = "After",
         ["design.preview.title"] = "Composition preview",

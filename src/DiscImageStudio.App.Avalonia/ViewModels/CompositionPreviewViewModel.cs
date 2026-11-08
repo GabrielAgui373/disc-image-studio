@@ -92,9 +92,9 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
 
     /// <summary>
     /// Raised with each new composition, and with <see langword="null"/> when there is none, so
-    /// the tone before/after can reuse it instead of composing again.
+    /// the tone before/after and the toned canvas can reuse it instead of composing again.
     /// </summary>
-    public event Action<DiscImageStudio.ImageIO.BgraRaster?>? Composed;
+    public event Action<ComposedDesign?>? Composed;
 
     public ObservableCollection<string> Issues { get; } = [];
 
@@ -169,7 +169,7 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
             Image = bitmap;
             Error = null;
             ApplyDetails(workspace, composition);
-            Composed?.Invoke(composition.Image);
+            Composed?.Invoke(new ComposedDesign(composition.Image, composition.CanvasOuterRadiusMm, workspace.Design));
         }
         catch (Exception exception) when (exception is IOException
                                               or UnauthorizedAccessException
@@ -232,3 +232,9 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
         }
     }
 }
+
+/// <summary>
+/// A composition of the design, with the canvas radius its square covers and the design it was
+/// made from, so consumers can tell whether it still matches the project.
+/// </summary>
+public sealed record ComposedDesign(DiscImageStudio.ImageIO.BgraRaster Image, double CanvasOuterRadiusMm, DesignState Design);

@@ -34,8 +34,9 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
     private readonly Debouncer _preview;
     private ProjectEditor.DragEdit? _adjustment;
     private bool _syncing;
-    private BgraRaster? _source;
+    private ComposedDesign? _source;
     private long _previewGeneration;
+    private bool _renderCanvas;
 
     public ToneSettingsViewModel(ProjectLifecycleService projects, ProjectEditor editor, ITextCatalog text)
     {
@@ -87,8 +88,14 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
 
     public bool HasTonePreview => BeforeImage is not null;
 
+    /// <summary>
+    /// The whole composition through the tone, for the canvas's "view with tone" mode. Raised
+    /// with <see langword="null"/> when there is no composition or the canvas stopped asking.
+    /// </summary>
+    public event Action<TonedCanvasImage?>? CanvasImageChanged;
+
     /// <summary>The latest composition (from the Design preview), or <see langword="null"/> when there is none.</summary>
-    public void SetSource(BgraRaster? source)
+    public void SetSource(ComposedDesign? source)
     {
         _source = source;
         if (source is null)
@@ -97,10 +104,25 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
             ++_previewGeneration;
             BeforeImage = null;
             AfterImage = null;
+            CanvasImageChanged?.Invoke(null);
             return;
         }
 
         _preview.Schedule();
+    }
+
+    /// <summary>Turns rendering of the full toned composition for the canvas on or off.</summary>
+    public void SetCanvasRendering(bool enabled)
+    {
+        _renderCanvas = enabled;
+        if (!enabled)
+        {
+            CanvasImageChanged?.Invoke(null);
+        }
+        else
+        {
+            SchedulePreview();
+        }
     }
 
     public string ResetLabel { get; }
@@ -197,16 +219,31 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
         long generation = ++_previewGeneration;
         OpticalDiscFamily family = workspace.Media.Family;
         ToneProfile tone = Current();
-        (IImage before, IImage after) = await Task.Run(() =>
+        bool canvas = _renderCanvas;
+        (IImage before, IImage after, IImage? full) = await Task.Run(() =>
         {
-            (byte[] beforePixels, byte[] afterPixels) = TonePreviewRenderer.Render(source, PreviewSize, family, tone);
+            BgraRaster raster = source.Image;
+            (byte[] beforePixels, byte[] afterPixels) = TonePreviewRenderer.Render(raster, PreviewSize, family, tone);
+            IImage? toned = null;
+            if (canvas)
+            {
+                // The canvas zooms up to 12x, so it gets the composition's full resolution.
+                byte[] fullPixels = TonePreviewRenderer.RenderToned(raster, raster.Width, family, tone);
+                toned = CompositionBitmap.ToBitmap(new BgraRaster(raster.Width, raster.Width, fullPixels));
+            }
+
             return ((IImage)CompositionBitmap.ToBitmap(new BgraRaster(PreviewSize, PreviewSize, beforePixels)),
-                (IImage)CompositionBitmap.ToBitmap(new BgraRaster(PreviewSize, PreviewSize, afterPixels)));
+                (IImage)CompositionBitmap.ToBitmap(new BgraRaster(PreviewSize, PreviewSize, afterPixels)),
+                toned);
         });
         if (generation == _previewGeneration)
         {
             BeforeImage = before;
             AfterImage = after;
+            if (full is not null && _renderCanvas)
+            {
+                CanvasImageChanged?.Invoke(new TonedCanvasImage(full, source.CanvasOuterRadiusMm, source.Design));
+            }
         }
     }
 
@@ -272,3 +309,6 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
             Math.Clamp(Brightness, ToneProfile.MinimumBrightness, ToneProfile.MaximumBrightness),
             IsSrgbLinearized);
 }
+
+/// <summary>The design composed through the tone, the canvas radius it covers and the design it shows.</summary>
+public sealed record TonedCanvasImage(IImage Image, double CanvasOuterRadiusMm, DesignState Design);

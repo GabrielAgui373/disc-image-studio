@@ -71,6 +71,8 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
         ZoomInLabel = text["design.zoom.in"];
         ZoomOutLabel = text["design.zoom.out"];
         FitLabel = text["design.zoom.fit"];
+        ToneLabel = text["design.canvas.tone"];
+        ToneToolTip = text["design.canvas.toneTip"];
         UpdateZoomPercent();
     }
 
@@ -100,6 +102,35 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     public string ZoomOutLabel { get; }
 
     public string FitLabel { get; }
+
+    public string ToneLabel { get; }
+
+    public string ToneToolTip { get; }
+
+    /// <summary>View option: paint the design through the tone instead of the original layers.</summary>
+    [ObservableProperty]
+    public partial bool ShowTone { get; set; }
+
+    /// <summary>The toned composition for <see cref="ShowTone"/>, or <see langword="null"/> while none matches.</summary>
+    public TonedCanvasImage? ToneImage { get; private set; }
+
+    /// <summary>
+    /// True when the canvas paints <see cref="ToneImage"/>: the option is on, nothing is being
+    /// dragged and the image was composed from the design the project has now. Otherwise the
+    /// layers are painted, so moving things always shows where they are.
+    /// </summary>
+    public bool ShowsToneImage => ShowTone
+                                  && !IsDragging
+                                  && ToneImage is { } image
+                                  && ReferenceEquals(image.Design, _projects.Current?.Design);
+
+    public void SetToneImage(TonedCanvasImage? image)
+    {
+        ToneImage = image;
+        InvalidateRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    partial void OnShowToneChanged(bool value) => InvalidateRequested?.Invoke(this, EventArgs.Empty);
 
     [ObservableProperty]
     public partial string? SelectedLayerId { get; set; }

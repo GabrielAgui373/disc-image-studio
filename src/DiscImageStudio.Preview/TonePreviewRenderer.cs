@@ -24,6 +24,24 @@ public static class TonePreviewRenderer
         OpticalDiscFamily family,
         ToneProfile tone,
         CancellationToken cancellationToken = default)
+        => Render(source, size, family, tone, includeBefore: true, cancellationToken);
+
+    /// <summary>Only the toned pixels (the "after"), for showing the whole design with its tone.</summary>
+    public static byte[] RenderToned(
+        BgraRaster source,
+        int size,
+        OpticalDiscFamily family,
+        ToneProfile tone,
+        CancellationToken cancellationToken = default)
+        => Render(source, size, family, tone, includeBefore: false, cancellationToken).After;
+
+    private static (byte[] Before, byte[] After) Render(
+        BgraRaster source,
+        int size,
+        OpticalDiscFamily family,
+        ToneProfile tone,
+        bool includeBefore,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
@@ -34,8 +52,8 @@ public static class TonePreviewRenderer
             normalized = normalized with { Levels = ToneProfile.TwoLevels };
         }
 
-        byte[] before = new byte[checked(size * size * 4)];
-        byte[] after = new byte[before.Length];
+        byte[] after = new byte[checked(size * size * 4)];
+        byte[] before = includeBefore ? new byte[after.Length] : [];
         byte[] pixels = source.Pixels;
         for (int y = 0; y < size; y++)
         {
@@ -49,10 +67,13 @@ public static class TonePreviewRenderer
                 byte blue = pixels[from], green = pixels[from + 1], red = pixels[from + 2], alpha = pixels[from + 3];
 
                 // Before: the composition over white, as it would print.
-                before[to] = OverWhite(blue, alpha);
-                before[to + 1] = OverWhite(green, alpha);
-                before[to + 2] = OverWhite(red, alpha);
-                before[to + 3] = 255;
+                if (includeBefore)
+                {
+                    before[to] = OverWhite(blue, alpha);
+                    before[to + 1] = OverWhite(green, alpha);
+                    before[to + 2] = OverWhite(red, alpha);
+                    before[to + 3] = 255;
+                }
 
                 long index = (long)(y * size) + x;
                 byte level;

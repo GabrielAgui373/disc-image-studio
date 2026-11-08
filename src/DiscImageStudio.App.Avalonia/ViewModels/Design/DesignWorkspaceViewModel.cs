@@ -64,6 +64,14 @@ public sealed partial class DesignWorkspaceViewModel : ObservableObject
         MissingLabel = text["design.canvas.missing"];
         DragLabel = text["design.layers.drag"];
         Canvas.InvalidateRequested += (_, _) => Sync();
+        Tone.CanvasImageChanged += Canvas.SetToneImage;
+        Canvas.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(DesignCanvasViewModel.ShowTone))
+            {
+                Tone.SetCanvasRendering(Canvas.ShowTone);
+            }
+        };
         Layers.Items.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasLayers));
     }
 

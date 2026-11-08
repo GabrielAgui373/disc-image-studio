@@ -33,6 +33,11 @@
                     <Button Classes="ghost compact-action"
                             Content="{Binding FitLabel}"
                             Command="{Binding FitCommand}" />
+                    <ToggleButton Classes="ghost compact-action canvas-tone-toggle"
+                                  Content="{Binding ToneLabel}"
+                                  IsChecked="{Binding ShowTone}"
+                                  ToolTip.Tip="{Binding ToneToolTip}"
+                                  AutomationProperties.Name="{Binding ToneToolTip}" />
                 </StackPanel>
             </Grid>
 
