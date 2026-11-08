@@ -143,7 +143,8 @@ public sealed class AppHost : IDisposable
             new ProjectAssetService(fileSystem, new PhysicalDirectoryScanner()),
             new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger),
             compositions,
-            new DiscImageStudio.Application.Editing.ProjectEditor(projects));
+            new DiscImageStudio.Application.Editing.ProjectEditor(projects),
+            services.Previews);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

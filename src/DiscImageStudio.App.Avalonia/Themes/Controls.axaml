@@ -400,12 +400,66 @@
     <Setter Property="Opacity" Value="0.85" />
   </Style>
 
+  <!-- Preview page: a square stage on the raised surface, so transparent track gaps read as the disc. -->
   <Style Selector="Border.tone-preview">
     <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
     <Setter Property="ClipToBounds" Value="True" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Background" Value="White" />
+  </Style>
+
+  <Style Selector="Border.preview-stage">
+    <Setter Property="Width" Value="620" />
+    <Setter Property="Height" Value="620" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
+  </Style>
+
+  <Style Selector="Border.preview-confidence">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscSuccessBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="8,2" />
+  </Style>
+
+  <Style Selector="Border.preview-confidence TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscSuccessBrush}" />
+  </Style>
+
+  <Style Selector="Border.preview-confidence.approximate">
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <Style Selector="Border.preview-confidence.approximate TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DiscWarningBrush}" />
+  </Style>
+
+  <!-- Legend swatches match the colours PreviewOverlayPainter burns into the picture. -->
+  <Style Selector="Border.preview-legend">
+    <Setter Property="Width" Value="12" />
+    <Setter Property="Height" Value="12" />
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.preview-legend.file-system">
+    <Setter Property="Background" Value="#FACC15" />
+  </Style>
+
+  <Style Selector="Border.preview-legend.useful-ring">
+    <Setter Property="BorderBrush" Value="#38BDF8" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+
+  <Style Selector="TextBlock.preview-parameter-value">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontFamily" Value="monospace" />
   </Style>
 
   <Style Selector="Border.composition-busy">

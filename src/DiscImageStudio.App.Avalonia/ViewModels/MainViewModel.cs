@@ -63,12 +63,17 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ProjectAssetService assets,
         UserPresetCatalog presets,
         ProjectCompositionService compositions,
-        ProjectEditor editor)
+        ProjectEditor editor,
+        DiscImageStudio.Application.Preview.PreviewCoordinator previews)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
         Preview.Composed += raster => DesignWorkspace?.Tone.SetSource(raster);
+        PreviewWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel(
+            previews ?? throw new ArgumentNullException(nameof(previews)),
+            projects,
+            text);
         DesignWorkspace = new DesignWorkspaceViewModel(
             new DesignCanvasViewModel(
                 projects,
@@ -324,12 +329,16 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         {
             // A committed change may have touched layers or geometry; recompose the preview.
             Preview.RequestRefresh();
+            PreviewWorkspace.RequestRefresh();
         }
     }
 
     public RecentProjectsViewModel Recent { get; }
 
     public CompositionPreviewViewModel Preview { get; }
+
+    /// <summary>The Preview page: projection of the design or read-back of the generated file.</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel PreviewWorkspace { get; }
 
     public DesignWorkspaceViewModel DesignWorkspace { get; }
 
@@ -466,6 +475,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     [ObservableProperty]
 
     public partial bool IsDesignPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsPreviewPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -943,8 +955,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsSettingsPage = current == WorkspacePage.Settings;
         IsProjectPage = hasOpenProject && RequiresProject(current);
         IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
+        IsPreviewPage = IsProjectPage && current == WorkspacePage.Preview;
         Preview?.SetActive(IsDesignPage);
-        IsPlaceholderPage = IsProjectPage && current != WorkspacePage.Design;
+        PreviewWorkspace?.SetActive(IsPreviewPage);
+        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview);
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -1030,6 +1044,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshHistoryState();
         _ = Recent.RefreshAsync();
         Preview.RequestRefresh();
+        PreviewWorkspace.Clear();
+        PreviewWorkspace.RequestRefresh();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -1053,6 +1069,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshProjectState();
         RefreshHistoryState();
         Preview.Clear();
+        PreviewWorkspace.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
@@ -1407,6 +1424,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Design => (
                 _text["design.page.title"],
                 _text["design.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Preview => (
+                _text["preview.page.title"],
+                _text["preview.page.description"],
                 ProjectFamilyBadge),
             _ => (
                 _text[$"navigation.{page.ToString().ToLowerInvariant()}"],
