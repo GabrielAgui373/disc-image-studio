@@ -76,6 +76,30 @@ O pico estimado de uma composição é `N² × 4` bytes (saída) mais, por camad
 | 2.048 px | ~260 ms | 81 MiB |
 | 8.192 px | ~840 ms | 321 MiB |
 
+## Uso nas próximas tasks
+
+**Exportação (Task 11) e Gravação (Task 13)** obtêm request e imagem prontos pelo preparador do host:
+
+```csharp
+ProjectGenerationPreparer preparer = hostServices.Generation;
+using PreparedGeneration prepared = await preparer.PrepareAsync(
+    projects.Current!,
+    projects.ProjectFilePath,
+    outputPath: "/home/user/disc.wav",
+    cancellationToken: token);
+
+if (prepared.Source.IsEmpty)
+{
+    // Nenhuma camada pôde ser pintada: avise antes de gerar um disco em branco.
+}
+
+GenerationPlan plan = await generation.PlanAsync(prepared.Request, token);
+await generation.GenerateFileAsync(plan, outputPath, progress, token);
+// Ao sair do using, a imagem temporária de 8K é apagada.
+```
+
+**Telas que recompõem com frequência** usam `ProjectCompositionService.ComposeLatestAsync` com um canal próprio: um pedido novo cancela o anterior, que devolve `null`. Para mostrar o resultado, use `CompositionBitmap.ToBitmap`, sempre fora da thread de interface. Para o tamanho físico de uma camada (por exemplo, para desenhar alças), use `ImageComposer.BaseSizeMm`.
+
 ## Cancelamento
 
 O token é verificado antes e depois do decode de cada camada, entre os níveis da pirâmide e em cada faixa de linhas durante a pintura (`ParallelOptions.CancellationToken`). Um cancelamento lança `OperationCanceledException` e nunca devolve uma composição parcial.
