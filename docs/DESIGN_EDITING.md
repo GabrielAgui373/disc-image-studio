@@ -96,3 +96,44 @@ drag.Commit();
 **Ordem das camadas:** índices de `DesignEdits` são do documento, de baixo para cima (índice 0 é pintado primeiro). A lista da interface mostra o topo primeiro e precisa converter: `índiceDocumento = total − 1 − índiceLista`.
 
 **Rótulos:** cada código de `HistoryLabels` tem a entrada `history.label.<código>` no catálogo. Um código novo precisa da entrada correspondente.
+
+## Canvas de design (Task 09.2)
+
+O canvas da página Design é a superfície de manipulação direta. Ele é dividido em peças com uma responsabilidade cada:
+
+| Peça | Papel |
+| --- | --- |
+| `CanvasViewport` | Mapeamento explícito modelo ↔ tela: milímetros a partir do centro do disco → DIP. O fit mostra o disco de 60 mm com 3 mm de margem; o zoom vai de 0,25× a 12× sobre o fit, e o pan é limitado ao raio do disco. Como a tela trabalha em DIP, a escala de renderização da plataforma cuida do DPI físico. |
+| `LayerGeometry` | Cantos da camada girada, hit test por polígono, posição da alça de rotação e diferença de ângulo sem salto na costura de ±180°. |
+| `LayerBitmapCache` | Bitmaps de interação de até 1.024 px, gerados a partir do mesmo cache de imagens decodificadas do compositor (Task 08), carregados fora da thread de interface. |
+| `DesignCanvasViewModel` | Estado de visualização (zoom, pan, seleção), que nunca suja o projeto, e as edições pelo `ProjectEditor`. |
+| `DiscDesignCanvas` | O controle: desenha e traduz ponteiro e teclado em chamadas ao view model. |
+
+**Desenho**, de baixo para cima: fundo, corpo do disco e hub, camadas na ordem do documento (com opacidade), máscara escurecendo tudo fora do anel útil (uma única geometria even-odd), guias tracejadas do anel, cruz no centro e, por fim, a moldura da seleção com quatro alças de escala nos cantos e a alça de rotação. Camadas ocultas aparecem como contorno tracejado discreto; camadas com imagem ausente ou ainda carregando aparecem como contorno tracejado de aviso, com a área estimada.
+
+**Interações:**
+
+| Gesto | Efeito | Histórico |
+| --- | --- | --- |
+| Clique | Seleciona a camada sob o ponteiro: primeiro as visíveis com imagem, depois placeholders, depois ocultas. Clique no fundo limpa a seleção. | — |
+| Arrastar a camada | Move | um passo ao soltar |
+| Arrastar um canto | Escala uniforme pela distância ao centro | um passo ao soltar |
+| Arrastar a alça superior | Gira; Shift encaixa em múltiplos de 90° | um passo ao soltar |
+| Setas / Shift+setas | Nudge de 0,1 mm / 1 mm | toques seguidos viram um passo, confirmado após 700 ms ou antes de desfazer, salvar, fechar ou abrir configurações |
+| Delete / Backspace | Remove a camada selecionada | um passo |
+| Ctrl+D | Duplica acima da original e seleciona a cópia | um passo |
+| Esc | Cancela o arraste em andamento (ou limpa a seleção) | nada |
+| Ctrl ou Alt + roda | Zoom ancorado no ponteiro | — |
+| Botão do meio | Pan (com zoom acima do fit) | — |
+| Clique duplo no fundo | Volta ao fit | — |
+
+Perder o ponteiro no meio de um arraste (outra janela, um diálogo) restaura o estado inicial. Depois de desfazer ou refazer, a camada afetada é selecionada de novo.
+
+## Contexto de projeto na interface
+
+A navegação separa o que é do aplicativo do que é do projeto aberto:
+
+- **Sem projeto:** a barra lateral mostra só Home e Settings. As etapas do projeto não aparecem, e um atalho para elas é recusado com um aviso.
+- **Com projeto:** a barra lateral ganha o grupo "PROJECT" (miniatura do disco, nome e ponto de alterações não salvas) com as etapas Design, Preview, Export e Burn. A barra do projeto (desfazer/refazer, configurações, salvar, fechar) aparece só nessas etapas, acima do título da etapa, e o badge do título mostra a família (CD, DVD, BD).
+- **Home:** o cartão "Current project" com "Continue in Design" quando há projeto aberto, o hero com Novo/Abrir e os recentes. A escolha de família fica só no diálogo de novo projeto.
+- **Settings:** concentra informações do aplicativo e diagnóstico.
