@@ -28,7 +28,8 @@ public static class PreviewCostEstimator
     {
         (OpticalDiscFamily.CompactDisc, _) => 5e6,
         (OpticalDiscFamily.Dvd, _) => 20e6,
-        _ => 3.5e6,
+        // Blu-ray measured 2.6 M px/s at 2048 px and 2.5 M px/s at 8192 px (Task 10.5).
+        _ => 2.5e6,
     };
 
     /// <summary>Source pixels decoded (PNG to BGRA, then the engine's own conversion) per second.</summary>
