@@ -761,6 +761,46 @@
     </Setter>
   </Style>
 
+  <!-- Sidebar project group: section caption, the open project and a dirty indicator. -->
+  <Style Selector="TextBlock.sidebar-section">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="1.1" />
+    <Setter Property="Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="Margin" Value="14,0,0,6" />
+  </Style>
+
+  <Style Selector="Grid.sidebar-project">
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+
+  <Style Selector="TextBlock.sidebar-project-name">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Ellipse.sidebar-dirty-dot">
+    <Setter Property="Width" Value="7" />
+    <Setter Property="Height" Value="7" />
+    <Setter Property="Fill" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="WrapPanel.project-title-row > :is(Control)">
+    <Setter Property="Margin" Value="0,0,8,2" />
+  </Style>
+
+  <Style Selector="Border.home-continue">
+    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusCard}" />
+    <Setter Property="Padding" Value="22,18" />
+    <Setter Property="BoxShadow" Value="0 6 22 0 #1A000000" />
+  </Style>
+
   <Style Selector="Border.home-hero">
     <Setter Property="Background" Value="{DynamicResource DiscSurfaceRaisedBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />

@@ -107,8 +107,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         HomeHeroDescription = text["home.hero.description"];
         NewProjectLabel = text["home.action.newProject"];
         OpenProjectLabel = text["home.action.openProject"];
-        HomeTemplatesTitle = text["home.templates.title"];
-        HomeTemplatesDescription = text["home.templates.description"];
+        ProjectSectionLabel = text["navigation.projectSection"];
+        ContinueEyebrow = text["home.continue.eyebrow"];
+        ContinueInDesignLabel = text["home.continue.action"];
+        SettingsPreferencesNote = text["settings.preferences.note"];
         RecentProjectsTitle = text["home.recent.title"];
         RecentProjectsDescription = text["home.recent.description"];
         RecentProjectsEmptyTitle = text["home.recent.emptyTitle"];
@@ -329,8 +331,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string HomeHeroDescription { get; }
     public string NewProjectLabel { get; }
     public string OpenProjectLabel { get; }
-    public string HomeTemplatesTitle { get; }
-    public string HomeTemplatesDescription { get; }
+    public string ProjectSectionLabel { get; }
+    public string ContinueEyebrow { get; }
+    public string ContinueInDesignLabel { get; }
+    public string SettingsPreferencesNote { get; }
     public string RecentProjectsTitle { get; }
     public string RecentProjectsDescription { get; }
     public string RecentProjectsEmptyTitle { get; }
@@ -401,6 +405,25 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsPlaceholderPage { get; private set; }
+
+    /// <summary>Design, Preview, Export or Burn with a project open: the project bar is shown.</summary>
+    [ObservableProperty]
+    public partial bool IsProjectPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsSettingsPage { get; private set; }
+
+    /// <summary>Family token of the open project for its disc artwork ("cd", "dvd" or "bd").</summary>
+    [ObservableProperty]
+    public partial string ProjectFamilyVariant { get; private set; } = "cd";
+
+    public bool HasPageBadge => !string.IsNullOrEmpty(CurrentPageBadge);
+
+    public bool HasHomeActionStatus => !string.IsNullOrWhiteSpace(HomeActionStatus);
+
+    partial void OnCurrentPageBadgeChanged(string value) => OnPropertyChanged(nameof(HasPageBadge));
+
+    partial void OnHomeActionStatusChanged(string value) => OnPropertyChanged(nameof(HasHomeActionStatus));
 
 
     [ObservableProperty]
@@ -772,10 +795,6 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
         SelectedHomeTemplate = template;
         RefreshProjectPresets();
-        HomeActionStatus = string.Format(
-            System.Globalization.CultureInfo.CurrentUICulture,
-            _text["home.templates.selected"],
-            template.Title);
     }
 
     [RelayCommand]
@@ -880,8 +899,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
         (CurrentPageTitle, CurrentPageDescription, CurrentPageBadge) = GetPagePresentation(current);
         IsHomePage = current == WorkspacePage.Home;
-        IsDesignPage = current == WorkspacePage.Design;
-        IsPlaceholderPage = !IsHomePage && !IsDesignPage;
+        IsSettingsPage = current == WorkspacePage.Settings;
+        IsProjectPage = hasOpenProject && RequiresProject(current);
+        IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
+        IsPlaceholderPage = IsProjectPage && current != WorkspacePage.Design;
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -889,26 +910,15 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     private void NavigateTo(WorkspacePage destination)
     {
-        var result = _projects.Navigation.NavigateTo(
-            destination,
-            _projects.HasOpenProject,
-            allowProjectlessNavigation: true);
-        if (!result.Succeeded)
-        {
-            _ = _projects.Navigation.NavigateTo(WorkspacePage.Home, hasOpenProject: false);
-            NavigationNotice = _text["navigation.requiresProject"];
-        }
-        else
-        {
-            NavigationNotice = !_projects.HasOpenProject && RequiresProject(destination)
-                ? _text["navigation.placeholderRequiresProject"]
-                : null;
-        }
+        // Project stages only exist inside an open project; without one the request is
+        // explained and the current page stays (the sidebar does not even show them).
+        var result = _projects.Navigation.NavigateTo(destination, _projects.HasOpenProject);
+        NavigationNotice = result.Succeeded ? null : _text["navigation.requiresProject"];
 
         RefreshNavigation();
     }
 
-    private static bool IsRouteAvailable(WorkspacePage page, bool hasOpenProject) => true;
+    private static bool IsRouteAvailable(WorkspacePage page, bool hasOpenProject) => hasOpenProject || !RequiresProject(page);
 
     private static bool RequiresProject(WorkspacePage page)
         => page is not (WorkspacePage.Home or WorkspacePage.Settings);
@@ -1073,6 +1083,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsProjectDirty = _projects.Dirty.IsDirty;
         ProjectName = project?.Identity.Name ?? string.Empty;
         ProjectFilePath = _projects.ProjectFilePath ?? string.Empty;
+        ProjectFamilyVariant = project is null
+            ? "cd"
+            : DiscImageStudio.Application.Projects.RecentProjectsService.ToFamilyToken(project.Media.Family);
+        RefreshNavigation();
         _ = RefreshMissingAssetsAsync();
     }
 
@@ -1341,20 +1355,23 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Home => (
                 _text["home.placeholder.title"],
                 _text["home.placeholder.description"],
-                "HOME"),
-            WorkspacePage.Design => (
-                _text["design.page.title"],
-                _text["design.page.description"],
-                "DESIGN"),
+                string.Empty),
             WorkspacePage.Settings => (
                 _text["settings.placeholder.title"],
                 _text["settings.placeholder.description"],
-                "SETTINGS"),
+                string.Empty),
+            WorkspacePage.Design => (
+                _text["design.page.title"],
+                _text["design.page.description"],
+                ProjectFamilyBadge),
             _ => (
-                _text["workspace.placeholder.title"],
+                _text[$"navigation.{page.ToString().ToLowerInvariant()}"],
                 _text["workspace.placeholder.description"],
-                page.ToString().ToUpperInvariant()),
+                ProjectFamilyBadge),
         };
+
+    /// <summary>Project pages carry the disc family as their badge (CD, DVD or BD).</summary>
+    private string ProjectFamilyBadge => ProjectFamilyVariant.ToUpperInvariant();
 
     private string BuildDiagnostics()
         => $"{Title}\nVersion: {ProductVersion}\nCommit: {Commit}\n.NET: {DotnetRuntime}\n"

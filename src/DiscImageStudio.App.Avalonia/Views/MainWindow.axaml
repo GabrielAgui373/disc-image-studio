@@ -115,68 +115,82 @@
                                 <TextBlock Grid.Column="1" Text="{Binding HomeNavigation.Label}" Classes="navigation-label sidebar-label" />
                             </Grid>
                         </Button>
-                        <Button Classes="navigation-item"
-                                Command="{Binding DesignNavigation.NavigateCommand}"
-                                Classes.current="{Binding DesignNavigation.IsCurrent}"
-                                AutomationProperties.Name="{Binding DesignNavigation.Label}"
-                                ToolTip.Tip="{Binding DesignNavigation.ToolTip}">
-                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
-                                <Border Grid.Column="0" Classes="navigation-selection" />
-                                <Viewbox Classes="navigation-icon">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Classes="navigation-stroke" Data="M3,7 L12,3 L21,7 L12,11 Z M3,12 L12,16 L21,12 M3,17 L12,21 L21,17" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="1" Text="{Binding DesignNavigation.Label}" Classes="navigation-label sidebar-label" />
+                        <!-- Project stages exist only inside an open project. -->
+                        <StackPanel IsVisible="{Binding HasOpenProject}" Spacing="2" Margin="0,14,0,0">
+                            <TextBlock Text="{Binding ProjectSectionLabel}" Classes="sidebar-section sidebar-label" />
+                            <Grid Classes="sidebar-project" ColumnDefinitions="48,*" ToolTip.Tip="{Binding ProjectFilePath}">
+                                <controls:DiscArt Variant="{Binding ProjectFamilyVariant}" Width="26" Height="26" HorizontalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ProjectName}"
+                                               Classes="sidebar-project-name sidebar-label"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="140" />
+                                    <Ellipse Classes="sidebar-dirty-dot" IsVisible="{Binding IsProjectDirty}" />
+                                </StackPanel>
                             </Grid>
-                        </Button>
-                        <Button Classes="navigation-item"
-                                Command="{Binding PreviewNavigation.NavigateCommand}"
-                                Classes.current="{Binding PreviewNavigation.IsCurrent}"
-                                AutomationProperties.Name="{Binding PreviewNavigation.Label}"
-                                ToolTip.Tip="{Binding PreviewNavigation.ToolTip}">
-                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
-                                <Border Grid.Column="0" Classes="navigation-selection" />
-                                <Viewbox Classes="navigation-icon">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Classes="navigation-stroke" Data="M2,12 C5,7 8,5 12,5 C16,5 19,7 22,12 C19,17 16,19 12,19 C8,19 5,17 2,12 Z" />
-                                        <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="1" Text="{Binding PreviewNavigation.Label}" Classes="navigation-label sidebar-label" />
-                            </Grid>
-                        </Button>
-                        <Button Classes="navigation-item"
-                                Command="{Binding ExportNavigation.NavigateCommand}"
-                                Classes.current="{Binding ExportNavigation.IsCurrent}"
-                                AutomationProperties.Name="{Binding ExportNavigation.Label}"
-                                ToolTip.Tip="{Binding ExportNavigation.ToolTip}">
-                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
-                                <Border Grid.Column="0" Classes="navigation-selection" />
-                                <Viewbox Classes="navigation-icon">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Classes="navigation-stroke" Data="M10,3 H14 V12 H18 L12,18 L6,12 H10 Z M4,20 H20" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="1" Text="{Binding ExportNavigation.Label}" Classes="navigation-label sidebar-label" />
-                            </Grid>
-                        </Button>
-                        <Button Classes="navigation-item"
-                                Command="{Binding BurnNavigation.NavigateCommand}"
-                                Classes.current="{Binding BurnNavigation.IsCurrent}"
-                                AutomationProperties.Name="{Binding BurnNavigation.Label}"
-                                ToolTip.Tip="{Binding BurnNavigation.ToolTip}">
-                            <Grid Classes="navigation-content" ColumnDefinitions="48,*">
-                                <Border Grid.Column="0" Classes="navigation-selection" />
-                                <Viewbox Classes="navigation-icon">
-                                    <Canvas Width="24" Height="24">
-                                        <Ellipse Classes="navigation-stroke" Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" />
-                                        <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="1" Text="{Binding BurnNavigation.Label}" Classes="navigation-label sidebar-label" />
-                            </Grid>
-                        </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding DesignNavigation.NavigateCommand}"
+                                    Classes.current="{Binding DesignNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding DesignNavigation.Label}"
+                                    ToolTip.Tip="{Binding DesignNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="navigation-stroke" Data="M3,7 L12,3 L21,7 L12,11 Z M3,12 L12,16 L21,12 M3,17 L12,21 L21,17" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding DesignNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding PreviewNavigation.NavigateCommand}"
+                                    Classes.current="{Binding PreviewNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding PreviewNavigation.Label}"
+                                    ToolTip.Tip="{Binding PreviewNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="navigation-stroke" Data="M2,12 C5,7 8,5 12,5 C16,5 19,7 22,12 C19,17 16,19 12,19 C8,19 5,17 2,12 Z" />
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding PreviewNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding ExportNavigation.NavigateCommand}"
+                                    Classes.current="{Binding ExportNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding ExportNavigation.Label}"
+                                    ToolTip.Tip="{Binding ExportNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="navigation-stroke" Data="M10,3 H14 V12 H18 L12,18 L6,12 H10 Z M4,20 H20" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding ExportNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding BurnNavigation.NavigateCommand}"
+                                    Classes.current="{Binding BurnNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding BurnNavigation.Label}"
+                                    ToolTip.Tip="{Binding BurnNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" />
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding BurnNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            </StackPanel>
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -186,18 +200,15 @@
                 <StackPanel MaxWidth="1280"
                             HorizontalAlignment="Stretch"
                             Spacing="{DynamicResource DiscSpace5}">
-                    <controls:PageHeader Title="{Binding CurrentPageTitle}"
-                                         Subtitle="{Binding CurrentPageDescription}"
-                                         Badge="{Binding CurrentPageBadge}"
-                                         IsBadgeVisible="True" />
-
-                    <StackPanel Spacing="{DynamicResource DiscSpace2}"
-                                IsVisible="{Binding HasProjectSurface}">
-                    <Border Classes="project-toolbar" IsVisible="{Binding HasOpenProject}">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                            <StackPanel Spacing="3" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding ProjectName}" FontWeight="SemiBold" />
+                    <!-- Project context: only on the project's stages, never on Home or Settings. -->
+                    <StackPanel Spacing="{DynamicResource DiscSpace2}" IsVisible="{Binding IsProjectPage}">
+                    <Border Classes="project-toolbar">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <controls:DiscArt Variant="{Binding ProjectFamilyVariant}" Width="38" Height="38" VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                <!-- Wraps under the name on narrow windows instead of overlapping the actions. -->
+                                <WrapPanel Classes="project-title-row">
+                                    <TextBlock Text="{Binding ProjectName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     <Border Classes="project-dirty-badge" IsVisible="{Binding IsProjectDirty}">
                                         <TextBlock Text="{Binding ProjectDirtyLabel}" />
                                     </Border>
@@ -206,12 +217,12 @@
                                             Command="{Binding OpenProjectSettingsCommand}"
                                             IsVisible="{Binding HasMissingAssets}"
                                             ToolTip.Tip="{Binding ProjectSettingsLabel}" />
-                                </StackPanel>
+                                </WrapPanel>
                                 <TextBlock Text="{Binding ProjectFilePath}"
                                            Classes="project-file-path"
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Button Classes="ghost compact-action history-action"
                                         Command="{Binding UndoCommand}"
                                         IsEnabled="{Binding CanUndo}"
@@ -234,18 +245,32 @@
                                         </Canvas>
                                     </Viewbox>
                                 </Button>
-                                <Button Classes="ghost compact-action"
-                                        Content="{Binding ProjectSettingsLabel}"
-                                        Command="{Binding OpenProjectSettingsCommand}" />
+                                <Button Classes="ghost compact-action history-action"
+                                        Command="{Binding OpenProjectSettingsCommand}"
+                                        ToolTip.Tip="{Binding ProjectSettingsLabel}"
+                                        AutomationProperties.Name="{Binding ProjectSettingsLabel}">
+                                    <Viewbox Width="15" Height="15">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="history-icon" Data="M4,7 H14 M18,7 H20 M4,17 H6 M10,17 H20 M16,4 V10 M8,14 V20" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
                                 <Button Classes="secondary compact-action"
                                         Content="{Binding SaveProjectAsLabel}"
                                         Command="{Binding SaveProjectAsCommand}" />
                                 <Button Classes="primary compact-action"
                                         Content="{Binding SaveProjectLabel}"
                                         Command="{Binding SaveProjectCommand}" />
-                                <Button Classes="ghost compact-action"
-                                        Content="{Binding CloseProjectLabel}"
-                                        Command="{Binding CloseProjectCommand}" />
+                                <Button Classes="ghost compact-action history-action"
+                                        Command="{Binding CloseProjectCommand}"
+                                        ToolTip.Tip="{Binding CloseProjectLabel}"
+                                        AutomationProperties.Name="{Binding CloseProjectLabel}">
+                                    <Viewbox Width="13" Height="13">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Classes="history-icon" Data="M6,6 L18,18 M18,6 L6,18" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -253,12 +278,19 @@
                     <TextBlock Text="{Binding ProjectActionStatus}"
                                Classes="project-action-status"
                                IsVisible="{Binding HasProjectActionStatus}" />
+                    </StackPanel>
 
                     <Border Classes="project-action-error"
                             IsVisible="{Binding HasProjectActionError}">
                         <TextBlock Text="{Binding ProjectActionError}" TextWrapping="Wrap" />
                     </Border>
-                    </StackPanel>
+
+                    <!-- On Home the hero is the heading; every other page gets its title here. -->
+                    <controls:PageHeader Title="{Binding CurrentPageTitle}"
+                                         Subtitle="{Binding CurrentPageDescription}"
+                                         Badge="{Binding CurrentPageBadge}"
+                                         IsBadgeVisible="{Binding HasPageBadge}"
+                                         IsVisible="{Binding !IsHomePage}" />
 
                     <Border Classes="navigation-notice"
                             IsVisible="{Binding HasNavigationNotice}">
@@ -266,6 +298,31 @@
                     </Border>
 
                     <StackPanel IsVisible="{Binding IsHomePage}" Spacing="{DynamicResource DiscSpace5}">
+                        <!-- Resume card: the open project is the most likely next step. -->
+                        <Border Classes="home-continue" IsVisible="{Binding HasOpenProject}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
+                                <controls:DiscArt Variant="{Binding ProjectFamilyVariant}" Width="64" Height="64" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ContinueEyebrow}" Classes="home-eyebrow" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding ProjectName}" FontSize="18" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <Border Classes="project-dirty-badge" IsVisible="{Binding IsProjectDirty}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ProjectDirtyLabel}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ProjectFilePath}" Classes="project-file-path" TextTrimming="LeadingCharacterEllipsis" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Classes="ghost"
+                                            Content="{Binding CloseProjectLabel}"
+                                            Command="{Binding CloseProjectCommand}" />
+                                    <Button Classes="primary"
+                                            Content="{Binding ContinueInDesignLabel}"
+                                            Command="{Binding NavigateDesignCommand}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
                         <Border Classes="home-hero">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DiscSpace5}">
                                 <StackPanel Spacing="{DynamicResource DiscSpace3}"
@@ -290,6 +347,10 @@
                                                 Content="{Binding OpenProjectLabel}"
                                                 Command="{Binding StartOpenProjectCommand}" />
                                     </StackPanel>
+                                    <TextBlock Text="{Binding HomeActionStatus}"
+                                               Classes="project-action-status"
+                                               TextWrapping="Wrap"
+                                               IsVisible="{Binding HasHomeActionStatus}" />
                                 </StackPanel>
 
                                 <Border Grid.Column="1" Classes="home-disc-illustration">
@@ -297,60 +358,6 @@
                                 </Border>
                             </Grid>
                         </Border>
-
-                        <controls:SectionCard Title="{Binding HomeTemplatesTitle}"
-                                              Description="{Binding HomeTemplatesDescription}">
-                            <StackPanel Spacing="{DynamicResource DiscSpace4}">
-                                <ItemsControl ItemsSource="{Binding HomeTemplates}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel ItemWidth="244" ItemHeight="188" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:HomeTemplateOption">
-                                            <Button Classes="media-template"
-                                                    Classes.selected="{Binding IsSelected}"
-                                                    Command="{Binding $parent[Window].DataContext.SelectHomeTemplateCommand}"
-                                                    CommandParameter="{Binding}"
-                                                    AutomationProperties.Name="{Binding Title}">
-                                                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
-                                                    <Grid ColumnDefinitions="*,Auto">
-                                                        <controls:DiscArt Variant="{Binding Id}" HorizontalAlignment="Left" />
-                                                        <Border Grid.Column="1"
-                                                                Classes="media-template-badge"
-                                                                VerticalAlignment="Top"
-                                                                IsVisible="{Binding !IsSelected}">
-                                                            <TextBlock Text="{Binding Badge}" Classes="media-template-badge-text" />
-                                                        </Border>
-                                                        <Border Grid.Column="1"
-                                                                Classes="media-template-selected-chip"
-                                                                VerticalAlignment="Top"
-                                                                IsVisible="{Binding IsSelected}">
-                                                            <TextBlock Text="{Binding SelectedLabel}" />
-                                                        </Border>
-                                                    </Grid>
-                                                    <StackPanel Grid.Row="1" Spacing="2">
-                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Capacity}"
-                                                                   Classes="media-template-capacity"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                    </StackPanel>
-                                                    <TextBlock Grid.Row="2"
-                                                               Text="{Binding Description}"
-                                                               Classes="media-template-description"
-                                                               TextWrapping="Wrap" />
-                                                </Grid>
-                                            </Button>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <Border Classes="home-selection-status">
-                                    <TextBlock Text="{Binding HomeActionStatus}" TextWrapping="Wrap" />
-                                </Border>
-                            </StackPanel>
-                        </controls:SectionCard>
 
                         <controls:SectionCard Title="{Binding RecentProjectsTitle}"
                                               Description="{Binding RecentProjectsDescription}">
@@ -383,12 +390,12 @@
                             </Border>
                             </StackPanel>
                         </controls:SectionCard>
+                    </StackPanel>
 
-                        <Expander Header="{Binding PlatformDetailsTitle}">
-                            <StackPanel Spacing="{DynamicResource DiscSpace3}" Margin="0,12,0,0">
-                                <TextBlock Text="{Binding PlatformDetailsDescription}"
-                                           Classes="home-platform-description"
-                                           TextWrapping="Wrap" />
+                    <StackPanel IsVisible="{Binding IsSettingsPage}" Spacing="{DynamicResource DiscSpace5}">
+                        <controls:SectionCard Title="{Binding PlatformDetailsTitle}"
+                                              Description="{Binding PlatformDetailsDescription}">
+                            <StackPanel Spacing="{DynamicResource DiscSpace3}">
                                 <Grid ColumnDefinitions="Auto,*"
                                       RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                                       ColumnSpacing="20"
@@ -424,7 +431,8 @@
                                            Foreground="{DynamicResource DiscTextMutedBrush}"
                                            IsVisible="{Binding ActionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             </StackPanel>
-                        </Expander>
+                        </controls:SectionCard>
+                        <TextBlock Text="{Binding SettingsPreferencesNote}" Classes="project-action-status" />
                     </StackPanel>
 
                     <views:CompositionPreviewView DataContext="{Binding Preview}"
