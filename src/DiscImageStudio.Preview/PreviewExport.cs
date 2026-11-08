@@ -45,15 +45,14 @@ public static class PreviewExport
         }
     }
 
-    /// <summary>A suggested file name: project, family, mode, view and size.</summary>
-    public static string SuggestedFileName(string projectName, PreviewResult result, string? appearanceId)
+    /// <summary>A suggested file name: project, family, mode and size.</summary>
+    public static string SuggestedFileName(string projectName, PreviewResult result)
     {
         string name = string.Concat((projectName.Length == 0 ? "disc" : projectName)
             .Select(c => Path.GetInvalidFileNameChars().Contains(c) || char.IsWhiteSpace(c) ? '-' : c));
-        string view = appearanceId is null ? "data" : appearanceId;
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"{name}-{result.Family.ToString().ToLowerInvariant()}-{result.Mode.ToString().ToLowerInvariant()}-{view}-{result.Size}px.png");
+            $"{name}-{result.Family.ToString().ToLowerInvariant()}-{result.Mode.ToString().ToLowerInvariant()}-{result.Size}px.png");
     }
 
     /// <summary>
@@ -62,7 +61,6 @@ public static class PreviewExport
     public static string Diagnostics(
         string projectName,
         PreviewResult result,
-        string? appearanceId,
         bool fileSystemOverlay,
         bool usefulRingOverlay)
     {
@@ -72,7 +70,6 @@ public static class PreviewExport
         Line("project", projectName);
         Line("family", result.Family.ToString());
         Line("mode", result.Mode.ToString());
-        Line("view", appearanceId is null ? "data-map" : $"appearance:{appearanceId}");
         Line("confidence", result.Confidence.ToString());
         Line("size", result.Size.ToString(CultureInfo.InvariantCulture));
         Line("elapsedSeconds", result.Elapsed.TotalSeconds.ToString("0.000", CultureInfo.InvariantCulture));

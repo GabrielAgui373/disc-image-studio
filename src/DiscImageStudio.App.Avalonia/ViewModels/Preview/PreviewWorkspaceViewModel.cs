@@ -18,9 +18,6 @@ namespace DiscImageStudio.App.Avalonia.ViewModels.Preview;
 /// <summary>A resolution the user can pick, with its label.</summary>
 public sealed record PreviewSizeOption(int Size, string Label);
 
-/// <summary>A media look the appearance view can use, with its label.</summary>
-public sealed record MediaAppearanceOption(MediaAppearance Media, string Label);
-
 /// <summary>An effective parameter as shown in the details list.</summary>
 public sealed record PreviewParameterItem(string Name, string Value);
 
@@ -78,12 +75,6 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
         RenderingLabel = text["preview.rendering"];
         ExportLabel = text["preview.export"];
         CopyDiagnosticsLabel = text["preview.copyDiagnostics"];
-        ViewTitle = text["preview.view.title"];
-        DataMapLabel = text["preview.view.dataMap"];
-        AppearanceLabel = text["preview.view.appearance"];
-        DataMapHint = text["preview.view.dataMapHint"];
-        AppearanceHint = text["preview.view.appearanceHint"];
-        MediaLabel = text["preview.media"];
         Warnings.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasWarnings));
     }
 
@@ -130,30 +121,6 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     public partial string CostWarning { get; private set; } = string.Empty;
 
     public bool HasCostWarning => CostWarning.Length > 0;
-
-    public string ViewTitle { get; }
-
-    public string DataMapLabel { get; }
-
-    public string AppearanceLabel { get; }
-
-    public string DataMapHint { get; }
-
-    public string AppearanceHint { get; }
-
-    public string MediaLabel { get; }
-
-    public ObservableCollection<MediaAppearanceOption> MediaOptions { get; } = [];
-
-    /// <summary>False shows the data map (black and white classes); true the stylized look of the recorded side.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDataMapView))]
-    public partial bool ShowAppearance { get; set; }
-
-    public bool IsDataMapView => !ShowAppearance;
-
-    [ObservableProperty]
-    public partial MediaAppearanceOption? SelectedMedia { get; set; }
 
     public ObservableCollection<PreviewSizeOption> Sizes { get; } = [];
 
@@ -294,21 +261,6 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowDataMap() => ShowAppearance = false;
-
-    [RelayCommand]
-    private void ShowAppearanceView() => ShowAppearance = true;
-
-    // The view and the media only recolour the last result; they never recompute it.
-    partial void OnShowAppearanceChanged(bool value)
-    {
-        UpdateCostEstimate();
-        _ = PresentAsync();
-    }
-
-    partial void OnSelectedMediaChanged(MediaAppearanceOption? value) => _ = PresentAsync();
-
-    [RelayCommand]
     private void ShowProjection() => IsArtifactMode = false;
 
     [RelayCommand]
@@ -377,19 +329,10 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
                 }
 
                 SelectedSize = Sizes.First(option => option.Size == standard);
-                MediaOptions.Clear();
-                foreach (MediaAppearance media in MediaAppearances.For(current))
-                {
-                    MediaOptions.Add(new MediaAppearanceOption(media, _text[$"preview.media.{media.Id}"]));
-                }
-
-                SelectedMedia = MediaOptions.FirstOrDefault();
             }
             else
             {
                 SelectedSize = null;
-                MediaOptions.Clear();
-                SelectedMedia = null;
             }
         }
         finally
@@ -417,9 +360,8 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
             workspace.Media.Sectors,
             PreviewDefaults.SamplesPerSector(family),
             UseDraftSource ? DraftSourceSize : PreviewDefaults.MaximumSize);
-        // Showing the result adds the overlay copy and the bitmap, one BGRA buffer each; the
-        // appearance view adds its recoloured buffer and two 16-bit level planes.
-        long displayBytes = (long)size.Size * size.Size * (ShowAppearance ? 16 : 8);
+        // Showing the result adds the overlay copy and the bitmap, one BGRA buffer each.
+        long displayBytes = 2L * size.Size * size.Size * 4;
         long peak = estimate.PeakBytes + displayBytes;
         CostEstimate = string.Format(
             CultureInfo.CurrentUICulture,
@@ -444,11 +386,10 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
             return;
         }
 
-        string? appearance = ShowAppearance ? SelectedMedia?.Media.Id : null;
         string projectName = _projects.Current?.Identity.Name ?? string.Empty;
         string? path = await _filePicker.SaveFileAsync(new SaveFilePickerRequest(
             _text["preview.export.pickerTitle"],
-            SuggestedFileName: PreviewExport.SuggestedFileName(projectName, result, appearance),
+            SuggestedFileName: PreviewExport.SuggestedFileName(projectName, result),
             SuggestedDirectory: _projects.ProjectFilePath is { } project ? Path.GetDirectoryName(project) : null,
             DefaultExtension: ".png",
             FileTypes: [new FilePickerType("PNG", ["*.png"], ["image/png"])]));
@@ -486,7 +427,6 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
         string text = PreviewExport.Diagnostics(
             _projects.Current?.Identity.Name ?? string.Empty,
             result with { Warnings = [.. result.Warnings.Select(NamedLayers)] },
-            ShowAppearance ? SelectedMedia?.Media.Id : null,
             ShowFileSystem,
             ShowUsefulRing);
         await _clipboard.SetTextAsync(text);
@@ -567,10 +507,9 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
         long presentation = ++_presentation;
         bool fileSystem = ShowFileSystem;
         bool usefulRing = ShowUsefulRing;
-        MediaAppearance? media = ShowAppearance ? SelectedMedia?.Media : null;
         IImage bitmap = await Task.Run(() =>
         {
-            byte[] pixels = Compose(result, media, fileSystem, usefulRing);
+            byte[] pixels = PreviewOverlayPainter.Paint(result, fileSystem, usefulRing);
             return (IImage)CompositionBitmap.ToBitmap(new BgraRaster(result.Size, result.Size, pixels));
         });
         if (presentation == _presentation && ReferenceEquals(result, _result))
@@ -581,16 +520,7 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
 
     /// <summary>The exact pixels on screen (overlays included), for export.</summary>
     public byte[]? DisplayedPixels()
-        => _result is { } result
-            ? Compose(result, ShowAppearance ? SelectedMedia?.Media : null, ShowFileSystem, ShowUsefulRing)
-            : null;
-
-    /// <summary>The data map or its media appearance, with the selected overlays on top.</summary>
-    private static byte[] Compose(PreviewResult result, MediaAppearance? media, bool fileSystem, bool usefulRing)
-    {
-        byte[] basePixels = media is null ? result.Pixels : DiscAppearanceRenderer.Render(result, media);
-        return PreviewOverlayPainter.Paint(result, basePixels, fileSystem, usefulRing);
-    }
+        => _result is { } result ? PreviewOverlayPainter.Paint(result, ShowFileSystem, ShowUsefulRing) : null;
 
     public PreviewResult? Result => _result;
 

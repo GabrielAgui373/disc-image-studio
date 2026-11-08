@@ -59,38 +59,6 @@
                 </StackPanel>
 
                 <StackPanel Spacing="8">
-                    <TextBlock Text="{Binding ViewTitle}" Classes="settings-field-label" />
-                    <Border Classes="design-tabs">
-                        <UniformGrid Rows="1">
-                            <Button Classes="design-tab"
-                                    Classes.active="{Binding IsDataMapView}"
-                                    Content="{Binding DataMapLabel}"
-                                    Command="{Binding ShowDataMapCommand}" />
-                            <Button Classes="design-tab"
-                                    Classes.active="{Binding ShowAppearance}"
-                                    Content="{Binding AppearanceLabel}"
-                                    Command="{Binding ShowAppearanceViewCommand}" />
-                        </UniformGrid>
-                    </Border>
-                    <TextBlock Text="{Binding DataMapHint}" Classes="settings-hint" TextWrapping="Wrap"
-                               IsVisible="{Binding IsDataMapView}" />
-                    <StackPanel Spacing="6" IsVisible="{Binding ShowAppearance}">
-                        <TextBlock Text="{Binding MediaLabel}" Classes="settings-field-label" />
-                        <ComboBox ItemsSource="{Binding MediaOptions}"
-                                  SelectedItem="{Binding SelectedMedia}"
-                                  HorizontalAlignment="Stretch"
-                                  AutomationProperties.Name="{Binding MediaLabel}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate x:DataType="preview:MediaAppearanceOption">
-                                    <TextBlock Text="{Binding Label}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <TextBlock Text="{Binding AppearanceHint}" Classes="settings-hint" TextWrapping="Wrap" />
-                    </StackPanel>
-                </StackPanel>
-
-                <StackPanel Spacing="8">
                     <TextBlock Text="{Binding ResolutionLabel}" Classes="settings-field-label" />
                     <ComboBox ItemsSource="{Binding Sizes}"
                               SelectedItem="{Binding SelectedSize}"

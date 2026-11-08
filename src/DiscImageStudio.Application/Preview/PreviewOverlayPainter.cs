@@ -19,28 +19,9 @@ public static class PreviewOverlayPainter
         bool fileSystem = true,
         bool usefulRing = false,
         CancellationToken cancellationToken = default)
-        => Paint(result, result?.Pixels!, fileSystem, usefulRing, cancellationToken);
-
-    /// <summary>
-    /// As <see cref="Paint(PreviewResult, bool, bool, CancellationToken)"/> over
-    /// <paramref name="basePixels"/>, a recolouring of the result in the same frame (for example
-    /// the stylized media appearance).
-    /// </summary>
-    public static byte[] Paint(
-        PreviewResult result,
-        byte[] basePixels,
-        bool fileSystem,
-        bool usefulRing,
-        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(result);
-        ArgumentNullException.ThrowIfNull(basePixels);
-        if (basePixels.Length != result.Pixels.Length)
-        {
-            throw new ArgumentException("The base pixels must match the result's size.", nameof(basePixels));
-        }
-
-        byte[] pixels = (byte[])basePixels.Clone();
+        byte[] pixels = (byte[])result.Pixels.Clone();
         int size = result.Size;
         PreviewRingOverlay[] fills = fileSystem
             ? result.Overlays.Where(overlay => overlay.Kind == PreviewOverlayKind.FileSystem).ToArray()
