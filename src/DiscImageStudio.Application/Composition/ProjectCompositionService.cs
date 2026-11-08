@@ -168,8 +168,22 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
         string? projectFilePath,
         string directory,
         CancellationToken cancellationToken = default)
+        => PrepareSourceImage(workspace, projectFilePath, directory, GenerationSize, cancellationToken);
+
+    /// <summary>
+    /// <see cref="PrepareGenerationSource"/> at another side length, for previews that trade
+    /// source resolution for memory. Generation itself always uses <see cref="GenerationSize"/>.
+    /// </summary>
+    public GenerationSourceImage PrepareSourceImage(
+        ProjectWorkspace workspace,
+        string? projectFilePath,
+        string directory,
+        int size,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, GenerationSize);
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
         Directory.CreateDirectory(directory);
         string name = $"generation-source-{Guid.NewGuid():N}.png";
@@ -181,7 +195,7 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
             IReadOnlyList<CompositionIssue> issues;
             {
                 // Scoped so the composition buffer is unreachable once the PNG is written.
-                ProjectComposition composition = Compose(workspace, projectFilePath, GenerationSize, cancellationToken);
+                ProjectComposition composition = Compose(workspace, projectFilePath, size, cancellationToken);
                 painted = composition.PaintedLayerCount;
                 issues = composition.Issues;
                 cancellationToken.ThrowIfCancellationRequested();
@@ -190,7 +204,7 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
 
             cancellationToken.ThrowIfCancellationRequested();
             File.Move(partialPath, finalPath, overwrite: false);
-            return new GenerationSourceImage(finalPath, GenerationSize, painted, issues);
+            return new GenerationSourceImage(finalPath, size, painted, issues);
         }
         finally
         {
@@ -267,6 +281,14 @@ public sealed class ProjectCompositionService : IProjectThumbnailRenderer
                    && current.Revision == revision;
         }
     }
+
+    /// <summary>
+    /// Identity of what <paramref name="workspace"/> composes to: canvas, layer transforms and each
+    /// image file's length and timestamp. Equal keys compose to identical images, so callers can
+    /// cache composed output (for example the preview's generation source) by it.
+    /// </summary>
+    public string ContentKey(ProjectWorkspace workspace, string? projectFilePath)
+        => SceneKey(CreateScene(workspace, projectFilePath));
 
     private double CanvasOuterRadius(MediaState media)
         => media is CdState ? _cdCanvasOuterRadiusMm : media.OuterRadiusMm;
