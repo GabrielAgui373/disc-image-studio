@@ -48,7 +48,20 @@ public static class ProjectDocumentMapper
                 outputs.DataDirectory,
                 outputs.VolumeLabel,
                 outputs.FilesAtOuterRing),
-            media);
+            media,
+            document.Measurement is { } measurement
+                ? new CalibrationMeasurement(
+                    measurement.InnerRadiusMm,
+                    measurement.OuterRadiusMm,
+                    measurement.Sectors,
+                    measurement.PitchLinear,
+                    measurement.PitchQuadratic,
+                    measurement.PitchCubic,
+                    measurement.TargetId,
+                    measurement.MeasuredUtc,
+                    measurement.RmsErrorMm,
+                    measurement.MaxErrorMm)
+                : null);
     }
 
     public static ProjectDocument ToDocument(ProjectWorkspace workspace)
@@ -88,7 +101,21 @@ public static class ProjectDocumentMapper
             workspace.Tone.Profile,
             media is BluRayState bluRay
                 ? new ProjectBluRaySettings(bluRay.InvertMapping)
+                : null,
+            workspace.Measurement is { } measurement
+                ? new ProjectMeasurement(
+                    measurement.InnerRadiusMm,
+                    measurement.OuterRadiusMm,
+                    measurement.Sectors,
+                    measurement.PitchLinear,
+                    measurement.PitchQuadratic,
+                    measurement.PitchCubic,
+                    measurement.TargetId,
+                    measurement.MeasuredUtc,
+                    measurement.RmsErrorMm,
+                    measurement.MaxErrorMm)
                 : null);
+        document = document with { SchemaVersion = ProjectJsonStore.RequiredSchemaVersion(document) };
         ProjectJsonStore.Validate(document);
         return document;
     }

@@ -455,6 +455,7 @@ public sealed partial class PreviewWorkspaceViewModel : ObservableObject
             _projects.ProjectFilePath,
             IsArtifactMode ? PreviewMode.Artifact : PreviewMode.Projection,
             size.Size,
+            MeasuredGeometry: workspace.MeasuredMedia,
             Revision: generation,
             SourceSize: UseDraftSource ? DraftSourceSize : null);
         IsRendering = true;

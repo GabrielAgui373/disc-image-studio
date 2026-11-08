@@ -256,6 +256,88 @@ public sealed class CalibrationPhotoStep
         }
     }
 
+    /// <summary>Most curve points a session keeps (the WPF limit).</summary>
+    public const int MaximumTracePoints = 4000;
+
+    /// <summary>Bumped by every curve edit; a fit computed for an older one is stale.</summary>
+    public long TraceRevision { get; private set; }
+
+    /// <summary>The traced curve in disc millimetres, ordered from the centre outwards.</summary>
+    public IReadOnlyList<CalibrationPoint> TracePoints => _traces.Length == 0 ? [] : _traces[0].Points;
+
+    /// <summary>
+    /// True when <paramref name="point"/> lies on the physical disc: outside the centre hole and
+    /// inside the outer edge. Curve points elsewhere cannot belong to the burned pattern.
+    /// </summary>
+    public bool IsOnDisc(CalibrationPoint point)
+    {
+        ArgumentNullException.ThrowIfNull(point);
+        double radius = Math.Sqrt((point.X * point.X) + (point.Y * point.Y));
+        return double.IsFinite(radius) && radius >= CalibrationPhotoLoader.HoleRadiusMm && radius <= PhysicalOuterRadiusMm;
+    }
+
+    /// <summary>
+    /// Adds a curve point; returns its index in radial order, or −1 when it is off the disc, the
+    /// rectification is not confirmed, or the session is full. Points are kept sorted by radius,
+    /// so a point can be inserted into any gap of the curve.
+    /// </summary>
+    public int AddTracePoint(CalibrationPoint point)
+    {
+        if (!Confirmed || !IsOnDisc(point) || TracePoints.Count >= MaximumTracePoints)
+        {
+            return -1;
+        }
+
+        return SetTrace([.. TracePoints, point], point);
+    }
+
+    /// <summary>Moves a curve point; returns its new index, or −1 when refused (off the disc).</summary>
+    public int MoveTracePoint(int index, CalibrationPoint point)
+    {
+        IReadOnlyList<CalibrationPoint> points = TracePoints;
+        if (!Confirmed || (uint)index >= (uint)points.Count || !IsOnDisc(point))
+        {
+            return -1;
+        }
+
+        CalibrationPoint[] copy = [.. points];
+        copy[index] = point;
+        return SetTrace(copy, point);
+    }
+
+    public bool RemoveTracePoint(int index)
+    {
+        IReadOnlyList<CalibrationPoint> points = TracePoints;
+        if (!Confirmed || (uint)index >= (uint)points.Count)
+        {
+            return false;
+        }
+
+        SetTrace([.. points.Where((_, i) => i != index)], null);
+        return true;
+    }
+
+    public bool ClearTrace()
+    {
+        if (TracePoints.Count == 0)
+        {
+            return false;
+        }
+
+        SetTrace([], null);
+        return true;
+    }
+
+    private int SetTrace(IEnumerable<CalibrationPoint> points, CalibrationPoint? follow)
+    {
+        // Radial order: the fitter unwraps the angle along the curve from the inside out.
+        CalibrationPoint[] ordered = [.. points.OrderBy(point => (point.X * point.X) + (point.Y * point.Y))];
+        _traces = ordered.Length == 0 ? [] : [new CalibrationCrossTrace(0, ordered)];
+        TraceRevision++;
+        Changed?.Invoke(this, EventArgs.Empty);
+        return follow is null ? -1 : Array.IndexOf(ordered, follow);
+    }
+
     /// <summary>The photo part of the session file; <see langword="null"/> without a photo.</summary>
     public CalibrationPhotoSession? ToSession()
     {
@@ -298,6 +380,7 @@ public sealed class CalibrationPhotoStep
     private void Touch()
     {
         Revision++;
+        TraceRevision++;
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }
