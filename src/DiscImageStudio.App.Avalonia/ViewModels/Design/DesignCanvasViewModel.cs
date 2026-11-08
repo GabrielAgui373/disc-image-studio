@@ -73,8 +73,6 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
         ZoomOutLabel = text["design.zoom.out"];
         FitLabel = text["design.zoom.fit"];
         HandToolTip = text["design.canvas.handTip"];
-        RotateLeftTip = text["design.canvas.rotateLeftTip"];
-        RotateRightTip = text["design.canvas.rotateRightTip"];
         ToneLabel = text["design.canvas.tone"];
         ToneToolTip = text["design.canvas.toneTip"];
         UpdateZoomPercent();
@@ -111,40 +109,12 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
 
     public string HandToolTip { get; }
 
-    public string RotateLeftTip { get; }
-
-    public string RotateRightTip { get; }
-
     /// <summary>View tool: a left drag moves the view instead of the layers (H, or hold Space).</summary>
     [ObservableProperty]
     public partial bool IsHandTool { get; set; }
 
-    public bool HasSelection => SelectedLayer is not null;
-
     [RelayCommand]
     private void ToggleHandTool() => IsHandTool = !IsHandTool;
-
-    /// <summary>Turns the selected layer a quarter turn left, as one history step.</summary>
-    [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void RotateLeft() => RotateSelected(-90);
-
-    /// <summary>Turns the selected layer a quarter turn right, as one history step.</summary>
-    [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void RotateRight() => RotateSelected(90);
-
-    /// <summary>Rotates the selected layer by <paramref name="degrees"/> as one history step.</summary>
-    public void RotateSelected(double degrees)
-    {
-        CommitPendingEdits();
-        if (SelectedLayer is not { } layer || !_editor.CanApply)
-        {
-            return;
-        }
-
-        LayerTransform turned = layer.Transform with { RotationDeg = NormalizeDegrees(layer.Transform.RotationDeg + degrees) };
-        string id = layer.Id;
-        _editor.Apply(HistoryLabels.TransformLayer, workspace => DesignEdits.SetTransform(workspace, id, turned), [id]);
-    }
 
     /// <summary>Fine rotation from the keyboard; a burst of presses becomes one step, like the arrow nudge.</summary>
     public void NudgeRotation(double degrees) => AdjustSelected(default, degrees);
@@ -196,9 +166,6 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
 
     partial void OnSelectedLayerIdChanged(string? value)
     {
-        OnPropertyChanged(nameof(HasSelection));
-        RotateLeftCommand.NotifyCanExecuteChanged();
-        RotateRightCommand.NotifyCanExecuteChanged();
         CommitPendingEdits();
         InvalidateRequested?.Invoke(this, EventArgs.Empty);
     }

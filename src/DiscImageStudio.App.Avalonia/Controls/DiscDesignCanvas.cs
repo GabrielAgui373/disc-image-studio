@@ -20,6 +20,9 @@ public sealed class DiscDesignCanvas : Control
     public const double HandleSize = 8.0;
     public const double RotateHandleDistance = 26.0;
     private const double RotateHandleRadius = 7.5;
+
+    // Just outside a corner, within this distance, a drag rotates instead of selecting.
+    private const double RotateZone = 22.0;
     private const double HubRadiusMm = 15.0;
 
     public static readonly StyledProperty<DesignCanvasViewModel?> ViewModelProperty =
@@ -283,6 +286,7 @@ public sealed class DiscDesignCanvas : Control
         }
 
         Focus();
+
         PointerPoint point = e.GetCurrentPoint(this);
         Point screen = point.Position;
         Point mm = model.Viewport.ToModel(screen);
@@ -313,7 +317,9 @@ public sealed class DiscDesignCanvas : Control
                 return;
             }
 
-            if (Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2) && model.BeginDrag())
+            if ((Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2)
+                 || InRotateZone(model, cornersMm, screen))
+                && model.BeginDrag())
             {
                 StartTransformGesture(Gesture.Rotate, e, screen, mm, selected);
                 _startAngleDeg = LayerGeometry.AngleDeg(selected.Centre, mm);
@@ -564,12 +570,6 @@ public sealed class DiscDesignCanvas : Control
         if (model.SelectedLayer is { } selected)
         {
             Point[] cornersMm = selected.Corners();
-            if (Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2))
-            {
-                Cursor = RotateCursor();
-                return;
-            }
-
             for (int index = 0; index < cornersMm.Length; index++)
             {
                 Point corner = model.Viewport.ToScreen(cornersMm[index]);
@@ -581,6 +581,13 @@ public sealed class DiscDesignCanvas : Control
                     Cursor = new Cursor(descending ? StandardCursorType.BottomRightCorner : StandardCursorType.BottomLeftCorner);
                     return;
                 }
+            }
+
+            if (Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2)
+                || InRotateZone(model, cornersMm, screen))
+            {
+                Cursor = RotateCursor();
+                return;
             }
         }
 
@@ -616,6 +623,58 @@ public sealed class DiscDesignCanvas : Control
         }
 
         return _rotateCursor;
+    }
+
+    /// <summary>
+    /// True just outside one of the selected layer's corners (beyond the scale handle, within
+    /// <see cref="RotateZone"/> and outside the layer's outline): grabbing there rotates freely.
+    /// </summary>
+    private static bool InRotateZone(DesignCanvasViewModel model, Point[] cornersMm, Point screen)
+    {
+        Point[] corners = cornersMm.Select(model.Viewport.ToScreen).ToArray();
+        if (Inside(corners, screen))
+        {
+            return false;
+        }
+
+        foreach (Point corner in corners)
+        {
+            double distance = Math.Sqrt(((screen.X - corner.X) * (screen.X - corner.X)) + ((screen.Y - corner.Y) * (screen.Y - corner.Y)));
+            if (distance > HandleSize && distance <= RotateZone)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Point in convex polygon: the point lies on the same side of every edge.</summary>
+    private static bool Inside(Point[] polygon, Point point)
+    {
+        int sign = 0;
+        for (int index = 0; index < polygon.Length; index++)
+        {
+            Point a = polygon[index];
+            Point b = polygon[(index + 1) % polygon.Length];
+            double cross = ((b.X - a.X) * (point.Y - a.Y)) - ((b.Y - a.Y) * (point.X - a.X));
+            int side = Math.Sign(cross);
+            if (side == 0)
+            {
+                continue;
+            }
+
+            if (sign == 0)
+            {
+                sign = side;
+            }
+            else if (side != sign)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static Point Centre(LayerTransform transform) => new(transform.TranslateXMm, transform.TranslateYMm);
