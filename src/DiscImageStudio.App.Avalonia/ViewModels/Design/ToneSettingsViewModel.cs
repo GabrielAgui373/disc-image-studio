@@ -2,7 +2,11 @@ using System.Globalization;
 using DiscImageStudio.App.Avalonia.Design;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Avalonia.Media;
 using DiscImageStudio.App.Avalonia.Localization;
+using DiscImageStudio.App.Avalonia.Platform;
+using DiscImageStudio.ImageIO;
+using DiscImageStudio.Preview;
 using DiscImageStudio.Application.Editing;
 using DiscImageStudio.Application.Projects;
 using DiscImageStudio.Core;
@@ -12,18 +16,26 @@ namespace DiscImageStudio.App.Avalonia.ViewModels.Design;
 /// <summary>
 /// Tone controls (dither strength, levels, brightness, sRGB). A burst of changes from a slider or
 /// the keyboard becomes one history step, committed after a short pause or before any other
-/// command; switches and the reset commit at once.
+/// command; switches and the reset commit at once. A before/after of the tone follows every
+/// value at once, including slider positions not yet committed, on the latest composition.
 /// </summary>
 public sealed partial class ToneSettingsViewModel : ObservableObject
 {
     private static readonly TimeSpan CommitDelay = TimeSpan.FromMilliseconds(600);
+    private static readonly TimeSpan PreviewDelay = TimeSpan.FromMilliseconds(120);
+
+    /// <summary>Side of the before/after thumbnails, in pixels.</summary>
+    public const int PreviewSize = 280;
 
     private readonly ProjectLifecycleService _projects;
     private readonly ProjectEditor _editor;
     private readonly ITextCatalog _text;
     private readonly Debouncer _commit;
+    private readonly Debouncer _preview;
     private ProjectEditor.DragEdit? _adjustment;
     private bool _syncing;
+    private BgraRaster? _source;
+    private long _previewGeneration;
 
     public ToneSettingsViewModel(ProjectLifecycleService projects, ProjectEditor editor, ITextCatalog text)
     {
@@ -31,6 +43,9 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _text = text ?? throw new ArgumentNullException(nameof(text));
         _commit = new Debouncer(CommitDelay, CommitPendingEdits);
+        _preview = new Debouncer(PreviewDelay, () => _ = RenderPreviewAsync());
+        BeforeLabel = text["design.tone.before"];
+        AfterLabel = text["design.tone.after"];
         Title = text["design.tone.title"];
         Description = text["design.tone.description"];
         DitherLabel = text["design.tone.dither"];
@@ -58,6 +73,35 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
     public string FourLevelsLabel { get; }
 
     public string SrgbLabel { get; }
+
+    public string BeforeLabel { get; }
+
+    public string AfterLabel { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTonePreview))]
+    public partial IImage? BeforeImage { get; private set; }
+
+    [ObservableProperty]
+    public partial IImage? AfterImage { get; private set; }
+
+    public bool HasTonePreview => BeforeImage is not null;
+
+    /// <summary>The latest composition (from the Design preview), or <see langword="null"/> when there is none.</summary>
+    public void SetSource(BgraRaster? source)
+    {
+        _source = source;
+        if (source is null)
+        {
+            _preview.Cancel();
+            ++_previewGeneration;
+            BeforeImage = null;
+            AfterImage = null;
+            return;
+        }
+
+        _preview.Schedule();
+    }
 
     public string ResetLabel { get; }
 
@@ -111,13 +155,60 @@ public sealed partial class ToneSettingsViewModel : ObservableObject
         }
     }
 
-    partial void OnDitherPercentChanged(double value) => Adjust();
+    partial void OnDitherPercentChanged(double value)
+    {
+        Adjust();
+        SchedulePreview();
+    }
 
-    partial void OnBrightnessChanged(double value) => Adjust();
+    partial void OnBrightnessChanged(double value)
+    {
+        Adjust();
+        SchedulePreview();
+    }
 
-    partial void OnIsFourLevelsChanged(bool value) => Switch();
+    partial void OnIsFourLevelsChanged(bool value)
+    {
+        Switch();
+        SchedulePreview();
+    }
 
-    partial void OnIsSrgbLinearizedChanged(bool value) => Switch();
+    partial void OnIsSrgbLinearizedChanged(bool value)
+    {
+        Switch();
+        SchedulePreview();
+    }
+
+    private void SchedulePreview()
+    {
+        if (_source is not null)
+        {
+            _preview.Schedule();
+        }
+    }
+
+    private async Task RenderPreviewAsync()
+    {
+        if (_source is not { } source || _projects.Current is not { } workspace)
+        {
+            return;
+        }
+
+        long generation = ++_previewGeneration;
+        OpticalDiscFamily family = workspace.Media.Family;
+        ToneProfile tone = Current();
+        (IImage before, IImage after) = await Task.Run(() =>
+        {
+            (byte[] beforePixels, byte[] afterPixels) = TonePreviewRenderer.Render(source, PreviewSize, family, tone);
+            return ((IImage)CompositionBitmap.ToBitmap(new BgraRaster(PreviewSize, PreviewSize, beforePixels)),
+                (IImage)CompositionBitmap.ToBitmap(new BgraRaster(PreviewSize, PreviewSize, afterPixels)));
+        });
+        if (generation == _previewGeneration)
+        {
+            BeforeImage = before;
+            AfterImage = after;
+        }
+    }
 
     [RelayCommand]
     private void Reset()

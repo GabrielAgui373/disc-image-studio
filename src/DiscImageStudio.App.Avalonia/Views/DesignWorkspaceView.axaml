@@ -218,6 +218,19 @@
                     </StackPanel>
                     <CheckBox Content="{Binding Tone.SrgbLabel}" IsChecked="{Binding Tone.IsSrgbLinearized, Mode=TwoWay}" />
                     <Button Classes="secondary" HorizontalAlignment="Left" Content="{Binding Tone.ResetLabel}" Command="{Binding Tone.ResetCommand}" />
+                    <!-- Before/after of the tone on the latest composition; follows the sliders live. -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="4"
+                          IsVisible="{Binding Tone.HasTonePreview}">
+                        <TextBlock Text="{Binding Tone.BeforeLabel}" Classes="settings-field-label" />
+                        <TextBlock Grid.Column="1" Text="{Binding Tone.AfterLabel}" Classes="settings-field-label" />
+                        <Border Grid.Row="1" Classes="tone-preview">
+                            <Image Source="{Binding Tone.BeforeImage}" Stretch="Uniform" />
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Classes="tone-preview">
+                            <Image Source="{Binding Tone.AfterImage}" Stretch="Uniform"
+                                   RenderOptions.BitmapInterpolationMode="None" />
+                        </Border>
+                    </Grid>
                     <TextBlock Text="{Binding Tone.PreviewNote}" Classes="settings-hint" TextWrapping="Wrap" />
                 </StackPanel>
 

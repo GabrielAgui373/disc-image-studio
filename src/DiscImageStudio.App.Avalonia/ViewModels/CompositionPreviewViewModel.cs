@@ -90,6 +90,12 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
 
     public string NoLayersDescription { get; }
 
+    /// <summary>
+    /// Raised with each new composition, and with <see langword="null"/> when there is none, so
+    /// the tone before/after can reuse it instead of composing again.
+    /// </summary>
+    public event Action<DiscImageStudio.ImageIO.BgraRaster?>? Composed;
+
     public ObservableCollection<string> Issues { get; } = [];
 
     public bool HasIssues => Issues.Count > 0;
@@ -137,6 +143,7 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
             Issues.Clear();
             Summary = string.Empty;
             Error = null;
+            Composed?.Invoke(null);
             return;
         }
 
@@ -162,6 +169,7 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
             Image = bitmap;
             Error = null;
             ApplyDetails(workspace, composition);
+            Composed?.Invoke(composition.Image);
         }
         catch (Exception exception) when (exception is IOException
                                               or UnauthorizedAccessException
@@ -194,6 +202,7 @@ public sealed partial class CompositionPreviewViewModel : ObservableObject
         Error = null;
         HasNoLayers = false;
         IsRendering = false;
+        Composed?.Invoke(null);
     }
 
     private void ApplyDetails(ProjectWorkspace workspace, ProjectComposition composition)

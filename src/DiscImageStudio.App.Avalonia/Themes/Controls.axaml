@@ -400,6 +400,14 @@
     <Setter Property="Opacity" Value="0.85" />
   </Style>
 
+  <Style Selector="Border.tone-preview">
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Background" Value="White" />
+  </Style>
+
   <Style Selector="Border.composition-busy">
     <Setter Property="Background" Value="{DynamicResource DiscOverlayBrush}" />
   </Style>

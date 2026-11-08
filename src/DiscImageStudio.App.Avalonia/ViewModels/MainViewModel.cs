@@ -68,6 +68,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
+        Preview.Composed += raster => DesignWorkspace?.Tone.SetSource(raster);
         DesignWorkspace = new DesignWorkspaceViewModel(
             new DesignCanvasViewModel(
                 projects,
