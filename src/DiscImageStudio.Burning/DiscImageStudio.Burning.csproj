@@ -6,4 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

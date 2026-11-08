@@ -8,12 +8,14 @@ public enum OpticalBurnMediaKind
     CdData,
 }
 
-internal static class OpticalBurnMedia
+/// <summary>Per-mode facts every backend shares: which modes are disc-at-once CD sessions, and the
+/// size of the sectors a producer hands over.</summary>
+public static class OpticalBurnMedia
 {
-    internal static bool UsesCdDao(OpticalBurnMediaKind mediaKind)
+    public static bool UsesCdDao(OpticalBurnMediaKind mediaKind)
         => mediaKind is OpticalBurnMediaKind.CdAudio or OpticalBurnMediaKind.CdData;
 
-    internal static int GetSectorBytes(OpticalBurnMediaKind mediaKind)
+    public static int GetSectorBytes(OpticalBurnMediaKind mediaKind)
         => mediaKind switch
         {
             OpticalBurnMediaKind.CdAudio => 2352,
@@ -76,6 +78,10 @@ public sealed record OpticalBurnProgress(
 /// as required by IMAPI_CD_SECTOR_AUDIO. ContentLength excludes any WAV header.
 /// CD data, DVD and Blu-ray producers supply complete 2048-byte logical data sectors.
 /// The recording backend adds physical encoding and error correction.
+/// <para><see cref="ExpectedMediaIdentity"/> is the <see cref="OpticalMediaState.Identity"/> the
+/// user confirmed; a backend that can read it checks it again just before writing and fails
+/// with <see cref="OpticalBurnErrorCode.MediaChanged"/> when the disc was swapped. The Windows
+/// backend predates it and ignores it.</para>
 /// </summary>
 public sealed record OpticalBurnRequest(
     string DeviceId,
@@ -83,7 +89,8 @@ public sealed record OpticalBurnRequest(
     long ContentLength,
     Action<Stream, CancellationToken> ProduceContent,
     OpticalWriteSpeed? WriteSpeed = null,
-    OpticalBurnBufferOptions? BufferOptions = null)
+    OpticalBurnBufferOptions? BufferOptions = null,
+    string? ExpectedMediaIdentity = null)
 {
     public OpticalBurnBufferOptions EffectiveBufferOptions => BufferOptions
         ?? (MediaKind == OpticalBurnMediaKind.BluRayData
@@ -113,11 +120,10 @@ public sealed record OpticalBurnResult(
     TimeSpan Elapsed,
     OpticalWriteSpeed? ActualWriteSpeed = null);
 
-public interface IOpticalDiscBurner
+/// <summary>Writes a request to a device. Implemented by every backend (Windows IMAPI/MMC, the
+/// simulated one, and the Linux one once validated).</summary>
+public interface IOpticalBurner
 {
-    Task<IReadOnlyList<OpticalBurnDevice>> GetDevicesAsync(
-        CancellationToken cancellationToken = default);
-
     Task<IReadOnlyList<OpticalWriteSpeed>> GetSupportedWriteSpeedsAsync(
         string deviceId,
         OpticalBurnMediaKind mediaKind,
@@ -126,5 +132,12 @@ public interface IOpticalDiscBurner
     Task<OpticalBurnResult> BurnAsync(
         OpticalBurnRequest request,
         IProgress<OpticalBurnProgress>? progress = null,
+        CancellationToken cancellationToken = default);
+}
+
+/// <summary>The original Windows contract: a burner that also lists its recorders.</summary>
+public interface IOpticalDiscBurner : IOpticalBurner
+{
+    Task<IReadOnlyList<OpticalBurnDevice>> GetDevicesAsync(
         CancellationToken cancellationToken = default);
 }
