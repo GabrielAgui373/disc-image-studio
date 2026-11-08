@@ -1094,6 +1094,7 @@
             <Canvas Canvas.Left="4" Canvas.Top="3">
             <Border Classes="disc-art-shadow" Width="100" Height="100" CornerRadius="50" />
             <Path x:Name="PART_Data" Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z" Fill="{DynamicResource DiscArtCdSurfaceBrush}" />
+            <Path x:Name="PART_Artwork" IsVisible="False" Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z" />
             <Path Data="F0 M0,50 A50,50 0 1 0 100,50 A50,50 0 1 0 0,50 Z M30.8,50 A19.2,19.2 0 1 0 69.2,50 A19.2,19.2 0 1 0 30.8,50 Z" Fill="{DynamicResource DiscArtGlossBrush}" />
             <Canvas IsHitTestVisible="False">
                 <Ellipse Classes="disc-art-groove" Canvas.Left="6" Canvas.Top="6" Width="88" Height="88" />
@@ -1277,17 +1278,6 @@
 
   <Style Selector="Grid.recent-card-host.issue Button.recent-card">
     <Setter Property="Opacity" Value="0.78" />
-  </Style>
-
-  <Style Selector="Border.recent-thumbnail">
-    <Setter Property="Width" Value="104" />
-    <Setter Property="Height" Value="104" />
-    <Setter Property="CornerRadius" Value="52" />
-    <Setter Property="ClipToBounds" Value="True" />
-    <Setter Property="HorizontalAlignment" Value="Center" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="Background" Value="{DynamicResource DiscSurfaceBrush}" />
-    <Setter Property="BoxShadow" Value="0 2 8 0 #30000000" />
   </Style>
 
   <Style Selector="controls|DiscArt.recent-fallback-art">

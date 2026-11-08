@@ -22,15 +22,12 @@
                             ToolTip.Tip="{Binding ProjectPath}">
                         <StackPanel Spacing="10">
                             <Grid Height="116">
-                                <Border Classes="recent-thumbnail" IsVisible="{Binding HasThumbnail}">
-                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
-                                </Border>
                                 <controls:DiscArt Width="104"
                                                   Height="104"
                                                   Variant="{Binding FamilyVariant}"
+                                                  Artwork="{Binding Thumbnail}"
                                                   Classes="recent-fallback-art"
-                                                  Classes.probing="{Binding IsProbing}"
-                                                  IsVisible="{Binding !HasThumbnail}" />
+                                                  Classes.probing="{Binding IsProbing}" />
                                 <Border Classes="media-template-badge"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top">

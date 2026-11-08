@@ -2,6 +2,8 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Path = Avalonia.Controls.Shapes.Path;
+using Avalonia.Media;
 
 namespace DiscImageStudio.App.Avalonia.Controls;
 
@@ -246,15 +248,58 @@ public sealed class EmptyState : ContentControl
 /// Vector artwork of an optical disc drawn to real 120 mm proportions (center hole, clamping
 /// area, mirror band, data area and rim). <see cref="Variant"/> selects the recording dye look:
 /// <c>cd</c> silver, <c>dvd</c> violet and <c>bd</c> deep blue. The artwork scales to any size.
+/// An optional <see cref="Artwork"/> is printed on the data side, between the clamping area and
+/// the rim, so a project's picture reads as a real disc rather than a cropped circle.
 /// </summary>
 public sealed class DiscArt : TemplatedControl
 {
     public static readonly StyledProperty<string> VariantProperty =
         AvaloniaProperty.Register<DiscArt, string>(nameof(Variant), "cd");
 
+    public static readonly StyledProperty<IImage?> ArtworkProperty =
+        AvaloniaProperty.Register<DiscArt, IImage?>(nameof(Artwork));
+
+    private Path? _artworkPart;
+
     public string Variant
     {
         get => GetValue(VariantProperty);
         set => SetValue(VariantProperty, value);
+    }
+
+    public IImage? Artwork
+    {
+        get => GetValue(ArtworkProperty);
+        set => SetValue(ArtworkProperty, value);
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        _artworkPart = e.NameScope.Find<Path>("PART_Artwork");
+        ApplyArtwork();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == ArtworkProperty)
+        {
+            ApplyArtwork();
+        }
+    }
+
+    private void ApplyArtwork()
+    {
+        if (_artworkPart is null)
+        {
+            return;
+        }
+
+        // The picture spans the whole disc face; the path's hole keeps the hub area clear.
+        _artworkPart.Fill = Artwork is IImageBrushSource source
+            ? new ImageBrush(source) { Stretch = Stretch.UniformToFill }
+            : null;
+        _artworkPart.IsVisible = _artworkPart.Fill is not null;
     }
 }
