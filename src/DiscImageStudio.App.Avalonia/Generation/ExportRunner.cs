@@ -124,7 +124,7 @@ public sealed class ExportRunner(ProjectGenerationPreparer preparer, IDiscGenera
     /// Turns the pipeline's byte progress into stage, rate and time left, at most a few times a
     /// second so the UI is not flooded by a fast writer.
     /// </summary>
-    private sealed class WriteProgress(IProgress<ExportProgress>? target, Stopwatch clock, long total) : IProgress<GenerationProgress>
+    internal sealed class WriteProgress(IProgress<ExportProgress>? target, Stopwatch clock, long total) : IProgress<GenerationProgress>
     {
         private readonly Stopwatch _sinceWrite = new();
         private TimeSpan? _lastReport;

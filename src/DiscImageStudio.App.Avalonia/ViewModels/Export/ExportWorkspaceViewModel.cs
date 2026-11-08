@@ -485,7 +485,10 @@ public sealed partial class ExportWorkspaceViewModel : ObservableObject
         return _text["export.note.exists"] + companions;
     }
 
-    private string ProblemText(GenerationValidationError error)
+    private string ProblemText(GenerationValidationError error) => ProblemText(_text, error);
+
+    /// <summary>Localized text of a planning or destination problem; shared with the Calibration page.</summary>
+    internal static string ProblemText(ITextCatalog _text, GenerationValidationError error)
     {
         if (error.Code == "generation.output.insufficient_space"
             && error.Parameters.TryGetValue("requiredBytes", out object? required)

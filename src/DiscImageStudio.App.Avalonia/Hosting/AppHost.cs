@@ -148,12 +148,14 @@ public sealed class AppHost : IDisposable
             compositions,
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
             services.Previews,
-            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation));
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
+            new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation));
         viewModel.ExportWorkspace.AttachRunner(
             new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
             jobs,
             launcher,
             clipboard);
+        viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {

@@ -19,4 +19,5 @@ public static class HistoryLabels
     public const string DataFolder = "data.set";
     public const string OutputFile = "output.set";
     public const string ProjectSettings = "project.settings";
+    public const string CalibrationSession = "calibration.session";
 }

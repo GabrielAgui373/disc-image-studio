@@ -23,6 +23,7 @@
         <KeyBinding Gesture="Alt+P" Command="{Binding NavigatePreviewCommand}" />
         <KeyBinding Gesture="Alt+E" Command="{Binding NavigateExportCommand}" />
         <KeyBinding Gesture="Alt+B" Command="{Binding NavigateBurnCommand}" />
+        <KeyBinding Gesture="Alt+C" Command="{Binding NavigateCalibrationCommand}" />
         <KeyBinding Gesture="Alt+S" Command="{Binding NavigateSettingsCommand}" />
         <KeyBinding Gesture="Ctrl+O" Command="{Binding StartOpenProjectCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveProjectCommand}" />
@@ -188,6 +189,24 @@
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="1" Text="{Binding BurnNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding CalibrationNavigation.NavigateCommand}"
+                                    Classes.current="{Binding CalibrationNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding CalibrationNavigation.Label}"
+                                    ToolTip.Tip="{Binding CalibrationNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <!-- A target: rings and a cross. -->
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="4" Canvas.Top="4" Width="16" Height="16" />
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                            <Path Classes="navigation-stroke" Data="M12,1 V7 M12,17 V23 M1,12 H7 M17,12 H23" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding CalibrationNavigation.Label}" Classes="navigation-label sidebar-label" />
                                 </Grid>
                             </Button>
                             </StackPanel>
@@ -446,6 +465,9 @@
 
                     <views:ExportWorkspaceView DataContext="{Binding ExportWorkspace}"
                                                IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsExportPage}" />
+
+                    <views:CalibrationWorkspaceView DataContext="{Binding CalibrationWorkspace}"
+                                                    IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsCalibrationPage}" />
 
                     <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
                                          Title="{Binding CurrentPageTitle}"

@@ -409,6 +409,31 @@
     <Setter Property="Background" Value="White" />
   </Style>
 
+  <!-- Calibration page -->
+  <Style Selector="Border.calibration-step">
+    <Setter Property="Padding" Value="12,6" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusChip}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource DiscTextMutedBrush}" />
+    <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+    <Setter Property="TextElement.FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="Border.calibration-step.active">
+    <Setter Property="Background" Value="{DynamicResource DiscAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscAccentBrush}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource DiscAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.calibration-preview">
+    <Setter Property="Background" Value="White" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DiscBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DiscRadiusField}" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+
   <!-- Export page -->
   <Style Selector="Border.export-row">
     <Setter Property="Padding" Value="0,7" />

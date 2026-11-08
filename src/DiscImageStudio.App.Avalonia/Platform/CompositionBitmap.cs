@@ -30,4 +30,19 @@ public static class CompositionBitmap
 
         return bitmap;
     }
+
+    /// <summary>Copies an 8-bit grey raster into a new opaque bitmap; safe off the UI thread.</summary>
+    public static WriteableBitmap ToBitmap(int width, int height, byte[] gray)
+    {
+        ArgumentNullException.ThrowIfNull(gray);
+        byte[] bgra = new byte[checked(width * height * 4)];
+        for (int i = 0; i < gray.Length; i++)
+        {
+            int o = i * 4;
+            bgra[o] = bgra[o + 1] = bgra[o + 2] = gray[i];
+            bgra[o + 3] = 255;
+        }
+
+        return ToBitmap(new BgraRaster(width, height, bgra));
+    }
 }

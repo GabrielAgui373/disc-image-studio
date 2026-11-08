@@ -65,7 +65,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         ProjectCompositionService compositions,
         ProjectEditor editor,
         DiscImageStudio.Application.Preview.PreviewCoordinator previews,
-        DiscImageStudio.App.Avalonia.Generation.ExportPlanner exportPlanner)
+        DiscImageStudio.App.Avalonia.Generation.ExportPlanner exportPlanner,
+        DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner? calibrationRunner = null)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
@@ -104,6 +105,14 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
+        CalibrationWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel(
+            calibrationRunner ?? new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(
+                new DiscImageStudio.Generation.DiscGenerationService()),
+            projects,
+            _editor,
+            _presetCatalog,
+            filePicker,
+            text);
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -214,6 +223,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewNavigation = CreateNavigationItem(WorkspacePage.Preview, "navigation.preview", "Alt+P");
         ExportNavigation = CreateNavigationItem(WorkspacePage.Export, "navigation.export", "Alt+E");
         BurnNavigation = CreateNavigationItem(WorkspacePage.Burn, "navigation.burn", "Alt+B");
+        CalibrationNavigation = CreateNavigationItem(WorkspacePage.Calibration, "navigation.calibration", "Alt+C");
         SettingsNavigation = CreateNavigationItem(WorkspacePage.Settings, "navigation.settings", "Alt+S");
         NavigationItems = [
             HomeNavigation,
@@ -221,6 +231,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             PreviewNavigation,
             ExportNavigation,
             BurnNavigation,
+            CalibrationNavigation,
         ];
 
         RefreshNavigation();
@@ -347,6 +358,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             Preview.RequestRefresh();
             PreviewWorkspace.RequestRefresh();
             ExportWorkspace.RequestRefresh();
+            CalibrationWorkspace.RequestRefresh();
         }
     }
 
@@ -356,6 +368,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     /// <summary>The Export page: the plan of what will be generated and its destination.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel ExportWorkspace { get; }
+
+    /// <summary>The Calibration page: target generation (Task 12.2), photo and curve later.</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel CalibrationWorkspace { get; }
 
     /// <summary>The Preview page: projection of the design or read-back of the generated file.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel PreviewWorkspace { get; }
@@ -430,6 +445,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public WorkspaceNavigationItem PreviewNavigation { get; }
     public WorkspaceNavigationItem ExportNavigation { get; }
     public WorkspaceNavigationItem BurnNavigation { get; }
+    public WorkspaceNavigationItem CalibrationNavigation { get; }
     public WorkspaceNavigationItem SettingsNavigation { get; }
     public IReadOnlyList<WorkspaceNavigationItem> NavigationItems { get; }
     public IReadOnlyList<HomeTemplateOption> HomeTemplates { get; }
@@ -501,6 +517,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsExportPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsCalibrationPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -889,6 +908,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void NavigateBurn() => NavigateTo(WorkspacePage.Burn);
 
     [RelayCommand]
+    private void NavigateCalibration() => NavigateTo(WorkspacePage.Calibration);
+
+    [RelayCommand]
     private void NavigateSettings() => NavigateTo(WorkspacePage.Settings);
 
     [RelayCommand]
@@ -983,7 +1005,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         IsExportPage = IsProjectPage && current == WorkspacePage.Export;
         PreviewWorkspace?.SetActive(IsPreviewPage);
         ExportWorkspace?.SetActive(IsExportPage);
-        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export);
+        IsCalibrationPage = IsProjectPage && current == WorkspacePage.Calibration;
+        CalibrationWorkspace?.SetActive(IsCalibrationPage);
+        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export or WorkspacePage.Calibration);
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -1073,6 +1097,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewWorkspace.RequestRefresh();
         ExportWorkspace.Clear();
         ExportWorkspace.RequestRefresh();
+        CalibrationWorkspace.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -1111,6 +1136,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         Preview.Clear();
         PreviewWorkspace.Clear();
         ExportWorkspace.Clear();
+        CalibrationWorkspace.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
@@ -1463,6 +1489,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Export => (
                 _text["export.page.title"],
                 _text["export.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Calibration => (
+                _text["calibration.page.title"],
+                _text["calibration.page.description"],
                 ProjectFamilyBadge),
             WorkspacePage.Preview => (
                 _text["preview.page.title"],
