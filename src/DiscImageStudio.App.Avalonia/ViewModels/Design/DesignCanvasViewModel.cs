@@ -51,6 +51,7 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     private ProjectEditor.DragEdit? _drag;
     private string? _dragLayerId;
     private Vector _nudgeOffset;
+    private double _nudgeRotation;
 
     public DesignCanvasViewModel(
         ProjectLifecycleService projects,
@@ -71,6 +72,7 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
         ZoomInLabel = text["design.zoom.in"];
         ZoomOutLabel = text["design.zoom.out"];
         FitLabel = text["design.zoom.fit"];
+        HandToolTip = text["design.canvas.handTip"];
         ToneLabel = text["design.canvas.tone"];
         ToneToolTip = text["design.canvas.toneTip"];
         UpdateZoomPercent();
@@ -104,6 +106,26 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     public string FitLabel { get; }
 
     public string ToneLabel { get; }
+
+    public string HandToolTip { get; }
+
+    /// <summary>View tool: a left drag moves the view instead of the layers (H, or hold Space).</summary>
+    [ObservableProperty]
+    public partial bool IsHandTool { get; set; }
+
+    [RelayCommand]
+    private void ToggleHandTool() => IsHandTool = !IsHandTool;
+
+    /// <summary>Fine rotation from the keyboard; a burst of presses becomes one step, like the arrow nudge.</summary>
+    public void NudgeRotation(double degrees) => AdjustSelected(default, degrees);
+
+    private static double NormalizeDegrees(double degrees)
+    {
+        double wrapped = Math.Round(((degrees % 360) + 360) % 360, 1);
+        return wrapped >= 360 ? 0 : wrapped;
+    }
+
+    partial void OnIsHandToolChanged(bool value) => InvalidateRequested?.Invoke(this, EventArgs.Empty);
 
     public string ToneToolTip { get; }
 
@@ -340,7 +362,10 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
     /// Moves the selected layer by an arrow-key step. Consecutive nudges are one history step,
     /// committed after a short pause or before any other command.
     /// </summary>
-    public void Nudge(double dxMm, double dyMm)
+    public void Nudge(double dxMm, double dyMm) => AdjustSelected(new Vector(dxMm, dyMm), 0);
+
+    // Arrow nudges and keyboard rotation share one grouped drag: a burst of presses is one step.
+    private void AdjustSelected(Vector offset, double rotation)
     {
         if (SelectedLayer is not { } layer)
         {
@@ -357,6 +382,7 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
             _drag = _editor.BeginDrag(HistoryLabels.TransformLayer, [layer.Id]);
             _dragLayerId = layer.Id;
             _nudgeOffset = default;
+            _nudgeRotation = 0;
             _nudging = true;
         }
         else if (_dragLayerId != layer.Id || !_nudging)
@@ -364,13 +390,15 @@ public sealed partial class DesignCanvasViewModel : ObservableObject
             return; // a pointer drag is in progress
         }
 
-        _nudgeOffset += new Vector(dxMm, dyMm);
+        _nudgeOffset += offset;
+        _nudgeRotation += rotation;
         ProjectWorkspace origin = _drag.Start;
         DesignLayerState original = origin.Design.Layers[DesignEdits.IndexOf(origin.Design.Layers, layer.Id)];
         LayerTransform moved = LayerTransform.Of(original) with
         {
             TranslateXMm = Math.Round(original.TranslateXMm + _nudgeOffset.X, 3),
             TranslateYMm = Math.Round(original.TranslateYMm + _nudgeOffset.Y, 3),
+            RotationDeg = NormalizeDegrees(original.RotationDeg + _nudgeRotation),
         };
         string id = layer.Id;
         _drag.Update(workspace => DesignEdits.SetTransform(workspace, id, moved));

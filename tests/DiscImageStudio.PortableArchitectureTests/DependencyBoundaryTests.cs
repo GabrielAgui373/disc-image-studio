@@ -108,6 +108,9 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj",
             "src/DiscImageStudio.Application/DiscImageStudio.Application.csproj",
             "src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj",
+            "src/DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj",
+            "src/DiscImageStudio.Burning.Linux/DiscImageStudio.Burning.Linux.csproj",
+            "src/DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj",
             "src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj",
             "src/DiscImageStudio.Cli/DiscImageStudio.Cli.csproj",
             "src/DiscImageStudio.Core/DiscImageStudio.Core.csproj",
@@ -116,6 +119,7 @@ public sealed class DependencyBoundaryTests
             "src/DiscImageStudio.Generation/DiscImageStudio.Generation.csproj",
             "src/DiscImageStudio.ImageIO/DiscImageStudio.ImageIO.csproj",
             "src/DiscImageStudio.Iso/DiscImageStudio.Iso.csproj",
+            "src/DiscImageStudio.Preview/DiscImageStudio.Preview.csproj",
             "src/DiscImageStudio.Rendering/DiscImageStudio.Rendering.csproj",
             "src/DvdImageSolver/DvdImageSolver.csproj",
             "tests/DiscImageStudio.PortableArchitectureTests/DiscImageStudio.PortableArchitectureTests.csproj",
@@ -123,7 +127,8 @@ public sealed class DependencyBoundaryTests
 
         Assert.Equal(expected.Order(StringComparer.Ordinal), actual);
         Assert.DoesNotContain(actual, path => path.Contains("DiscImageStudio.App/", StringComparison.Ordinal));
-        Assert.DoesNotContain(actual, path => path.Contains("DiscImageStudio.Burning", StringComparison.Ordinal));
+        // Only the portable burning contracts and the simulated backend; never the Windows backend.
+        Assert.DoesNotContain(actual, path => path.Contains("DiscImageStudio.Burning/", StringComparison.Ordinal));
         Assert.DoesNotContain(actual, path => path.Contains("DiscImageStudio.Imaging", StringComparison.Ordinal));
     }
 

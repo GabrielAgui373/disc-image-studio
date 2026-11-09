@@ -71,6 +71,51 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  linux-gui-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, rid: linux-x64 }
+          - { runner: ubuntu-24.04-arm, rid: linux-arm64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      RID: ${{ matrix.rid }}
+      PACKAGE_TAG: ${{ inputs.release_tag || 'ci' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install desktop file and AppStream validators
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends desktop-file-utils appstream
+
+      - name: Build the self-contained Linux GUI archive
+        shell: bash
+        run: packaging/linux/build-linux-gui.sh "$RID" "$PACKAGE_TAG" artifacts/linux-gui-package
+
+      - name: Test the archive (layout, per-user install, validation, uninstall)
+        shell: bash
+        run: packaging/linux/test-linux-gui-package.sh "artifacts/linux-gui-package/DiscImageStudio-Linux-$PACKAGE_TAG-$RID.tar.gz"
+
+      - uses: actions/upload-artifact@v4
+        if: inputs.release_tag != ''
+        with:
+          name: linux-gui-${{ inputs.release_tag }}-${{ matrix.rid }}
+          path: artifacts/linux-gui-package/
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+
   cli:
     strategy:
       fail-fast: false

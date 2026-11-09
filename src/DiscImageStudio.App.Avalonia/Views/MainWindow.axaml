@@ -10,7 +10,7 @@
         d:DesignHeight="620"
         x:Class="DiscImageStudio.App.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/DiscImageStudio.ico"
         Width="900"
         Height="620"
         MinWidth="620"
@@ -23,6 +23,7 @@
         <KeyBinding Gesture="Alt+P" Command="{Binding NavigatePreviewCommand}" />
         <KeyBinding Gesture="Alt+E" Command="{Binding NavigateExportCommand}" />
         <KeyBinding Gesture="Alt+B" Command="{Binding NavigateBurnCommand}" />
+        <KeyBinding Gesture="Alt+C" Command="{Binding NavigateCalibrationCommand}" />
         <KeyBinding Gesture="Alt+S" Command="{Binding NavigateSettingsCommand}" />
         <KeyBinding Gesture="Ctrl+O" Command="{Binding StartOpenProjectCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveProjectCommand}" />
@@ -42,8 +43,8 @@
                 <Button x:Name="SidebarToggleButton"
                         Classes="ghost sidebar-toggle"
                         Click="ToggleSidebar_Click"
-                        AutomationProperties.Name="Toggle sidebar"
-                        ToolTip.Tip="Toggle sidebar">
+                        AutomationProperties.Name="{Binding SidebarToggleLabel}"
+                        ToolTip.Tip="{Binding SidebarToggleLabel}">
                     <Viewbox Width="18" Height="18">
                         <Canvas Width="24" Height="24">
                             <Path Classes="sidebar-toggle-icon sidebar-toggle-expand" Data="M4,7 H20 M4,12 H20 M4,17 H20" />
@@ -55,7 +56,7 @@
                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
                     <TextBlock x:Name="HeaderSubtitle"
-                               Text="Linux desktop workspace"
+                               Text="{Binding HeaderSubtitle}"
                                Classes="sidebar-caption" />
                 </StackPanel>
 
@@ -64,7 +65,7 @@
                         CornerRadius="{DynamicResource DiscRadiusChip}"
                         Padding="8,3"
                         VerticalAlignment="Center">
-                    <TextBlock Text="LINUX" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding PlatformBadge}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{DynamicResource DiscAccentBrush}" />
                 </Border>
             </Grid>
@@ -188,6 +189,24 @@
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="1" Text="{Binding BurnNavigation.Label}" Classes="navigation-label sidebar-label" />
+                                </Grid>
+                            </Button>
+                            <Button Classes="navigation-item"
+                                    Command="{Binding CalibrationNavigation.NavigateCommand}"
+                                    Classes.current="{Binding CalibrationNavigation.IsCurrent}"
+                                    AutomationProperties.Name="{Binding CalibrationNavigation.Label}"
+                                    ToolTip.Tip="{Binding CalibrationNavigation.ToolTip}">
+                                <Grid Classes="navigation-content" ColumnDefinitions="48,*">
+                                    <Border Grid.Column="0" Classes="navigation-selection" />
+                                    <Viewbox Classes="navigation-icon">
+                                        <Canvas Width="24" Height="24">
+                                            <!-- A target: rings and a cross. -->
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="4" Canvas.Top="4" Width="16" Height="16" />
+                                            <Ellipse Classes="navigation-stroke" Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" />
+                                            <Path Classes="navigation-stroke" Data="M12,1 V7 M12,17 V23 M1,12 H7 M17,12 H23" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{Binding CalibrationNavigation.Label}" Classes="navigation-label sidebar-label" />
                                 </Grid>
                             </Button>
                             </StackPanel>
@@ -393,6 +412,65 @@
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding IsSettingsPage}" Spacing="{DynamicResource DiscSpace5}">
+                        <controls:SectionCard DataContext="{Binding Preferences}"
+                                              Title="{Binding Title}"
+                                              Description="{Binding Description}"
+                                              x:DataType="vm:PreferencesViewModel">
+                            <StackPanel Spacing="16">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding LanguageLabel}" Classes="settings-field-label" />
+                                    <Border Classes="design-tabs" MaxWidth="560" HorizontalAlignment="Left">
+                                        <UniformGrid Rows="1">
+                                            <Button Classes="design-tab" Classes.active="{Binding IsSystemLanguage}"
+                                                    Content="{Binding SystemLanguageLabel}" Command="{Binding UseSystemLanguageCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsEnglish}"
+                                                    Content="{Binding EnglishLabel}" Command="{Binding UseEnglishCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsPortuguese}"
+                                                    Content="{Binding PortugueseLabel}" Command="{Binding UsePortugueseCommand}" />
+                                        </UniformGrid>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding NeedsRestart}">
+                                        <TextBlock Text="{Binding LanguageRestartHint}" Classes="settings-hint"
+                                                   VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <Button Classes="secondary" Content="{Binding RestartLabel}" Command="{Binding RestartCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding ThemeLabel}" Classes="settings-field-label" />
+                                    <Border Classes="design-tabs" MaxWidth="420" HorizontalAlignment="Left">
+                                        <UniformGrid Rows="1">
+                                            <Button Classes="design-tab" Classes.active="{Binding IsSystemTheme}"
+                                                    Content="{Binding SystemLabel}" Command="{Binding UseSystemThemeCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsLightTheme}"
+                                                    Content="{Binding LightLabel}" Command="{Binding UseLightThemeCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsDarkTheme}"
+                                                    Content="{Binding DarkLabel}" Command="{Binding UseDarkThemeCommand}" />
+                                        </UniformGrid>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding ProjectsLabel}" Classes="settings-field-label" />
+                                    <TextBlock Text="{Binding ProjectsDirectory}" Classes="settings-path" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="secondary" Content="{Binding ChooseLabel}" Command="{Binding ChooseProjectsDirectoryCommand}" />
+                                        <Button Classes="ghost" Content="{Binding ResetLabel}" Command="{Binding ResetProjectsDirectoryCommand}"
+                                                IsVisible="{Binding IsCustomProjectsDirectory}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding CacheLabel}" Classes="settings-field-label" />
+                                    <TextBlock Text="{Binding CacheText}" Classes="settings-hint" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="secondary" Content="{Binding ClearCacheLabel}" Command="{Binding ClearCacheCommand}"
+                                                IsEnabled="{Binding !IsWorking}" />
+                                        <Button Classes="ghost" Content="{Binding RefreshCacheLabel}" Command="{Binding RefreshCacheCommand}"
+                                                IsEnabled="{Binding !IsWorking}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock Text="{Binding StatusText}" Classes="settings-hint" TextWrapping="Wrap"
+                                           IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            </StackPanel>
+                        </controls:SectionCard>
                         <controls:SectionCard Title="{Binding PlatformDetailsTitle}"
                                               Description="{Binding PlatformDetailsDescription}">
                             <StackPanel Spacing="{DynamicResource DiscSpace3}">
@@ -432,7 +510,6 @@
                                            IsVisible="{Binding ActionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             </StackPanel>
                         </controls:SectionCard>
-                        <TextBlock Text="{Binding SettingsPreferencesNote}" Classes="project-action-status" />
                     </StackPanel>
 
                     <views:DesignWorkspaceView DataContext="{Binding DesignWorkspace}"
@@ -443,6 +520,15 @@
 
                     <views:PreviewWorkspaceView DataContext="{Binding PreviewWorkspace}"
                                                 IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsPreviewPage}" />
+
+                    <views:ExportWorkspaceView DataContext="{Binding ExportWorkspace}"
+                                               IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsExportPage}" />
+
+                    <views:BurnWorkspaceView DataContext="{Binding BurnWorkspace}"
+                                             IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsBurnPage}" />
+
+                    <views:CalibrationWorkspaceView DataContext="{Binding CalibrationWorkspace}"
+                                                    IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).IsCalibrationPage}" />
 
                     <controls:EmptyState IsVisible="{Binding IsPlaceholderPage}"
                                          Title="{Binding CurrentPageTitle}"

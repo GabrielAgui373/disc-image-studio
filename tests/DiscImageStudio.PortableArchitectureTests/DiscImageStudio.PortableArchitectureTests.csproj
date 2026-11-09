@@ -21,6 +21,9 @@
     <ProjectReference Include="../../src/DiscImageStudio.App.Avalonia/DiscImageStudio.App.Avalonia.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.BluRay/DiscImageStudio.BluRay.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Burning.Linux/DiscImageStudio.Burning.Linux.csproj" />
+    <ProjectReference Include="../../src/DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Cd/DiscImageStudio.Cd.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Core/DiscImageStudio.Core.csproj" />
     <ProjectReference Include="../../src/DiscImageStudio.Dvd/DiscImageStudio.Dvd.csproj" />

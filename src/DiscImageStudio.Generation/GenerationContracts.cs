@@ -81,6 +81,28 @@ public sealed record GenerateBluRayRequest(
     public override OpticalDiscFamily Family => OpticalDiscFamily.BluRay;
 }
 
+/// <summary>
+/// A calibration target (Task 12.2): the pattern of <see cref="CalibrationSession.Target"/>
+/// drawn over the whole disc with the target's own parameters, as the WPF wizard wrote it. The
+/// session is published beside the artifact as <c>&lt;name&gt;.calibration.json</c>, the snapshot
+/// of the parameters used. There is no source image and no data folder.
+/// </summary>
+/// <param name="CdFormat">CD only: <see cref="CdArtifactFormat.WaveAudio"/> (with a cue sheet) or <see cref="CdArtifactFormat.RawAudio"/>.</param>
+public sealed record GenerateCalibrationTargetRequest(
+    DiscImageStudio.Core.Calibration.CalibrationSession Session,
+    CdArtifactFormat CdFormat = CdArtifactFormat.WaveAudio)
+    : GenerateDiscRequest(string.Empty, ToneProfile.LegacyBinary)
+{
+    public override OpticalDiscFamily Family => Session.Target.Parameters.Kind switch
+    {
+        DiscImageStudio.Core.Calibration.CalibrationDiscKind.Cd => OpticalDiscFamily.CompactDisc,
+        DiscImageStudio.Core.Calibration.CalibrationDiscKind.BluRay => OpticalDiscFamily.BluRay,
+        _ => OpticalDiscFamily.Dvd,
+    };
+}
+
+public sealed record CalibrationTargetPlanDetails(GenerateCalibrationTargetRequest Request) : GenerationPlanDetails;
+
 public sealed record GenerationRange(long StartSector, long EndSectorExclusive)
 {
     public long SectorCount => EndSectorExclusive - StartSector;
@@ -159,6 +181,17 @@ public interface IDiscGenerationService
     Task GenerateStreamAsync(
         GenerationPlan plan,
         Stream output,
+        IProgress<GenerationProgress>? progress = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Checks destination, existing files, permission and free space before a long job.</summary>
+    OutputPreflight Preflight(GenerationPlan plan, string outputPath, ArtifactReplacePolicy replacePolicy);
+
+    /// <summary>Generates and publishes artifact, sidecars and manifest as one unit.</summary>
+    Task<PublishedArtifact> PublishFileAsync(
+        GenerationPlan plan,
+        string outputPath,
+        ArtifactPublishOptions? options = null,
         IProgress<GenerationProgress>? progress = null,
         CancellationToken cancellationToken = default);
 }

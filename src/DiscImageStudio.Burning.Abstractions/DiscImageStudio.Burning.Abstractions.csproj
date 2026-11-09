@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>DiscImageStudio.Burning.Abstractions</AssemblyName>
+    <!-- The contracts keep the DiscImageStudio.Burning namespace, so the WPF host and the
+         Windows backend compile unchanged after the move. -->
+    <RootNamespace>DiscImageStudio.Burning</RootNamespace>
+  </PropertyGroup>
+</Project>

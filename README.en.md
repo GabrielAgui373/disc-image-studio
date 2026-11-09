@@ -2,8 +2,6 @@
 
 [简体中文](README.md) | [繁體中文](README.zh-TW.md) | **English** | [日本語](README.ja.md) | [Türkçe](README.tr.md) | [Español](README.es.md) | [Čeština](README.cs.md)
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>An all-in-one tool for generating and burning visible images onto optical discs</h2>
 
 Disc Image Studio is a multi-platform disc-surface image generation and burning tool that helps you etch images visible to the naked eye onto any DVD / CD / single-layer Blu-ray disc with any recorder.
@@ -19,25 +17,9 @@ Disc Image Studio is a multi-platform disc-surface image generation and burning 
 
 ---
 
-## Results
-
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
----
-
 ## Overview
 
 Disc Image Studio converts an image into data that meets the physical-layer constraints of CD, DVD, and single-layer BD-R discs. After burning, the disc surface displays a pattern visible to the naked eye.
-
-## Interface Preview
-
-![Home: templates and recent projects](docs/images/ui-home.png)
-
-![Design: layer canvas and tone controls](docs/images/ui-design.png)
-
-![Export: light theme and output image](docs/images/ui-export.png)
 
 ---
 
@@ -63,26 +45,21 @@ Live burning is experimental. Use only expendable test media.
 
 ### Disc Data Generation
 
-- **CD support**: Supports any CD. Export WAV audio tracks with format headers and accompanying CUE files, compatible with burning software such as cdrecord and ImgBurn; RAW audio track export is also available. See [CD burning compatibility](docs/CD_AUDIO_COMPATIBILITY.md).
+- **CD support**: Supports any CD. Export WAV audio tracks with format headers and accompanying CUE files, compatible with burning software such as cdrecord and ImgBurn; RAW audio track export is also available.
 - **DVD support**: Supports any DVD. Export ISO images.
-- **Blu-ray support**: Supports any single-layer 25 GB BD-R, with drawing-only mode and UDF 2.01 files. See [ADDING_BLURAY.md](docs/ADDING_BLURAY.md).
+- **Blu-ray support**: Supports any single-layer 25 GB BD-R, with drawing-only mode and UDF 2.01 files.
 - **Files on disc**: For CD, DVD, and Blu-ray, select a folder and place its files on the inner or outer ring directly from the Design page, or adjust these options on the Export page. The settings are saved with the project.
 - **File region preview**: Hybrid-disc design projections and artifact readback highlight the file region, including the file system, in yellow.
-- **Media grayscale schemes**: CD and DVD both use two black-and-white levels: `0D / AA` for CD and `A5 / 92` in the DVD scrambled domain. See [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md).
+- **Media grayscale schemes**: CD and DVD both use two black-and-white levels: `0D / AA` for CD and `A5 / 92` in the DVD scrambled domain.
 - **Grayscale dithering tool**: A standalone program can also process a source image into a two-level `0/255` black-and-white PNG. It supports opening or dragging in source images, side-by-side previews, and lossless PNG export. See the [usage and build instructions](tools/FourLevelDither/README.md).
-- **Disc presets**: Built-in disc parameters cover several brands of CD, DVD, and BD. You can also contribute your own calibrated data; see [preset maintenance](docs/DISC_PRESETS.md).
-
+- **Disc presets**: Built-in disc parameters cover several brands of CD, DVD, and BD. You can also contribute your own calibrated data.
 ### Assisted Calibration
 
 Disc Image Studio provides an intelligent, precise assisted calibration workflow. Compared with manual visual calibration, the assisted calibration algorithm improves the precision of determinable disc-surface physical parameters from 10<sup>-6</sup> to 10<sup>-14</sup>. Before calibration, constant track pitch produces noticeably curved radial crosshair lines. After regenerating and burning with the cubic track-pitch parameters obtained through assisted calibration, the lines are closer to straight radial lines.
 
 | Before calibration · Constant track pitch | After calibration · Cubic track pitch |
 | --- | --- |
-| ![DVD photo before calibration: noticeably curved radial crosshair lines](docs/images/verbatim-dvd-calibration-before.jpg) | ![DVD photo after calibration: radial crosshair lines are closer to straight](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-
-See the [assisted calibration guide](docs/CALIBRATION.md) for the workflow and parameters.
 
 ### Burning
 
@@ -109,8 +86,6 @@ Build regression checks:
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-See the [release guide](docs/RELEASING.md) for versioning rules, CI-generated EXEs, release draft checks, MSIX packaging, and signing procedures.
 
 ## Command Line
 
@@ -160,23 +135,12 @@ src/DvdImageSolver/          Isolated DVD encoding/solving engine
 tests/                       Architecture regression tests without a third-party test framework
 packaging/                   MSIX manifest and packaging scripts
 tools/                       Standalone utilities and asset generation scripts
-docs/                        Architecture, engine, preset, release, and other documentation
 ```
 
 ## Documentation
 
 | Document | Contents |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Module abstractions, boundaries between layers, and extension rules |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | Language settings and translation resource maintenance |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | DVD NRZI image constraint solver conventions, encoding chain, and self-test coverage |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | CD audio track formats, byte order, and ghosting troubleshooting |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | Blu-ray module physical model, generation/burning pipeline, and extension points |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | Layered JSON format and merging rules for editable disc presets |
-| [CALIBRATION.md](docs/CALIBRATION.md) | Photo rectification (marking the disc’s outermost physical edge and center-hole edge), curve calibration, and DVD cubic track-pitch fitting |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | Review of the CD / DVD generation physical models |
-| [VALIDATION.md](docs/VALIDATION.md) | Local validation records for builds, regressions, and physical disc tests |
-| [RELEASING.md](docs/RELEASING.md) | GitHub Releases, MSIX packaging, signing tests, and Store submission procedures |
 | [CHANGELOG.md](CHANGELOG.md) | Version change history |
 
 ## Reference Standards

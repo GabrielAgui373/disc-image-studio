@@ -35,7 +35,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private readonly ProjectLifecycleService _projects;
     private readonly JobCoordinator _jobs;
     private readonly IUiDispatcher _dispatcher;
-    private readonly UserSettings _settings;
+    private UserSettings _settings;
     private readonly ProjectAssetService _assets;
     private readonly ProjectCompositionService _compositions;
     private readonly ProjectEditor _editor;
@@ -64,12 +64,29 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         UserPresetCatalog presets,
         ProjectCompositionService compositions,
         ProjectEditor editor,
-        DiscImageStudio.Application.Preview.PreviewCoordinator previews)
+        DiscImageStudio.Application.Preview.PreviewCoordinator previews,
+        DiscImageStudio.App.Avalonia.Generation.ExportPlanner exportPlanner,
+        DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner? calibrationRunner = null,
+        DiscImageStudio.Burning.IOpticalDeviceService? burnDevices = null,
+        DiscImageStudio.Burning.IOpticalBurner? burner = null)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _compositions = compositions ?? throw new ArgumentNullException(nameof(compositions));
         Preview = new CompositionPreviewViewModel(_compositions, projects, text);
         Preview.Composed += composed => DesignWorkspace?.Tone.SetSource(composed);
+        ExportWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel(
+            exportPlanner ?? throw new ArgumentNullException(nameof(exportPlanner)),
+            projects,
+            editor,
+            filePicker,
+            text);
+        ExportWorkspace.OpenInPreviewRequested += () =>
+        {
+            // Read the file that was just published back.
+            PreviewWorkspace?.ShowArtifactCommand.Execute(null);
+            NavigateTo(WorkspacePage.Preview);
+        };
+        ExportWorkspace.GoToBurnRequested += () => NavigateTo(WorkspacePage.Burn);
         PreviewWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel(
             previews ?? throw new ArgumentNullException(nameof(previews)),
             projects,
@@ -90,6 +107,22 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             text);
         _assets = assets ?? throw new ArgumentNullException(nameof(assets));
         _presetCatalog = presets ?? throw new ArgumentNullException(nameof(presets));
+        // Without a backend the Burn page explains why and offers export instead.
+        DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend unavailable = new("No burning backend on this platform yet.");
+        BurnWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Burn.BurnWorkspaceViewModel(
+            burnDevices ?? unavailable,
+            burner ?? unavailable,
+            projects,
+            text);
+        BurnWorkspace.GoToExportRequested += () => NavigateTo(WorkspacePage.Export);
+        CalibrationWorkspace = new DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel(
+            calibrationRunner ?? new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(
+                new DiscImageStudio.Generation.DiscGenerationService()),
+            projects,
+            _editor,
+            _presetCatalog,
+            filePicker,
+            text);
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -200,6 +233,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         PreviewNavigation = CreateNavigationItem(WorkspacePage.Preview, "navigation.preview", "Alt+P");
         ExportNavigation = CreateNavigationItem(WorkspacePage.Export, "navigation.export", "Alt+E");
         BurnNavigation = CreateNavigationItem(WorkspacePage.Burn, "navigation.burn", "Alt+B");
+        CalibrationNavigation = CreateNavigationItem(WorkspacePage.Calibration, "navigation.calibration", "Alt+C");
         SettingsNavigation = CreateNavigationItem(WorkspacePage.Settings, "navigation.settings", "Alt+S");
         NavigationItems = [
             HomeNavigation,
@@ -207,6 +241,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             PreviewNavigation,
             ExportNavigation,
             BurnNavigation,
+            CalibrationNavigation,
         ];
 
         RefreshNavigation();
@@ -332,12 +367,44 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             // A committed change may have touched layers or geometry; recompose the preview.
             Preview.RequestRefresh();
             PreviewWorkspace.RequestRefresh();
+            ExportWorkspace.RequestRefresh();
+            CalibrationWorkspace.RequestRefresh();
+            BurnWorkspace.RequestRefresh();
         }
     }
 
     public RecentProjectsViewModel Recent { get; }
 
     public CompositionPreviewViewModel Preview { get; }
+
+    /// <summary>The Export page: the plan of what will be generated and its destination.</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Export.ExportWorkspaceViewModel ExportWorkspace { get; }
+
+    /// <summary>Theme, default project folder and cache on the Settings page; attached by the host.</summary>
+    [ObservableProperty]
+    public partial PreferencesViewModel? Preferences { get; private set; }
+
+    public void AttachPreferences(PreferencesViewModel preferences)
+    {
+        Preferences = preferences ?? throw new ArgumentNullException(nameof(preferences));
+        preferences.Changed += settings =>
+        {
+            bool followDefault = !IsNewProjectDialogOpen;
+            _settings = settings;
+            if (followDefault)
+            {
+                NewProjectDirectory = string.IsNullOrWhiteSpace(settings.DefaultProjectDirectory)
+                    ? _paths.ProjectsDirectory
+                    : settings.DefaultProjectDirectory;
+            }
+        };
+    }
+
+    /// <summary>The Burn page: recorders, capability gating and the confirmed burn (Task 13.2).</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Burn.BurnWorkspaceViewModel BurnWorkspace { get; }
+
+    /// <summary>The Calibration page: target generation (Task 12.2), photo and curve later.</summary>
+    public DiscImageStudio.App.Avalonia.ViewModels.Calibration.CalibrationWorkspaceViewModel CalibrationWorkspace { get; }
 
     /// <summary>The Preview page: projection of the design or read-back of the generated file.</summary>
     public DiscImageStudio.App.Avalonia.ViewModels.Preview.PreviewWorkspaceViewModel PreviewWorkspace { get; }
@@ -351,6 +418,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string ProjectSettingsLabel { get; }
 
     public string Title { get; }
+    public string HeaderSubtitle => _text["shell.subtitle"];
+    public string PlatformBadge => _text["shell.badge"];
+    public string SidebarToggleLabel => _text["shell.sidebar.toggle"];
+    public string SidebarExpandTip => _text["shell.sidebar.expand"];
+    public string SidebarCollapseTip => _text["shell.sidebar.collapse"];
     public string StatusTitle { get; }
     public string StatusDescription { get; }
     public string AboutTitle { get; }
@@ -412,6 +484,7 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public WorkspaceNavigationItem PreviewNavigation { get; }
     public WorkspaceNavigationItem ExportNavigation { get; }
     public WorkspaceNavigationItem BurnNavigation { get; }
+    public WorkspaceNavigationItem CalibrationNavigation { get; }
     public WorkspaceNavigationItem SettingsNavigation { get; }
     public IReadOnlyList<WorkspaceNavigationItem> NavigationItems { get; }
     public IReadOnlyList<HomeTemplateOption> HomeTemplates { get; }
@@ -480,6 +553,15 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
 
     [ObservableProperty]
     public partial bool IsPreviewPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsExportPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsCalibrationPage { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsBurnPage { get; private set; }
 
     [ObservableProperty]
     public partial bool IsJobDockExpanded { get; private set; }
@@ -868,6 +950,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     private void NavigateBurn() => NavigateTo(WorkspacePage.Burn);
 
     [RelayCommand]
+    private void NavigateCalibration() => NavigateTo(WorkspacePage.Calibration);
+
+    [RelayCommand]
     private void NavigateSettings() => NavigateTo(WorkspacePage.Settings);
 
     [RelayCommand]
@@ -955,12 +1040,22 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         (CurrentPageTitle, CurrentPageDescription, CurrentPageBadge) = GetPagePresentation(current);
         IsHomePage = current == WorkspacePage.Home;
         IsSettingsPage = current == WorkspacePage.Settings;
+        if (IsSettingsPage && Preferences is { } preferences)
+        {
+            _ = preferences.RefreshCacheAsync();
+        }
         IsProjectPage = hasOpenProject && RequiresProject(current);
         IsDesignPage = IsProjectPage && current == WorkspacePage.Design;
         IsPreviewPage = IsProjectPage && current == WorkspacePage.Preview;
         Preview?.SetActive(IsDesignPage);
+        IsExportPage = IsProjectPage && current == WorkspacePage.Export;
         PreviewWorkspace?.SetActive(IsPreviewPage);
-        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview);
+        ExportWorkspace?.SetActive(IsExportPage);
+        IsCalibrationPage = IsProjectPage && current == WorkspacePage.Calibration;
+        IsBurnPage = IsProjectPage && current == WorkspacePage.Burn;
+        BurnWorkspace?.SetActive(IsBurnPage);
+        CalibrationWorkspace?.SetActive(IsCalibrationPage);
+        IsPlaceholderPage = IsProjectPage && current is not (WorkspacePage.Design or WorkspacePage.Preview or WorkspacePage.Export or WorkspacePage.Calibration or WorkspacePage.Burn);
     }
 
     private WorkspaceNavigationItem CreateNavigationItem(WorkspacePage page, string labelResourceId, string shortcut)
@@ -1048,6 +1143,10 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         Preview.RequestRefresh();
         PreviewWorkspace.Clear();
         PreviewWorkspace.RequestRefresh();
+        ExportWorkspace.Clear();
+        ExportWorkspace.RequestRefresh();
+        CalibrationWorkspace.Clear();
+        BurnWorkspace.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
             _text["project.status.opened"],
@@ -1059,10 +1158,23 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     {
         RefreshProjectState();
         _ = Recent.RefreshAsync();
-        ProjectActionStatus = string.Format(
-            System.Globalization.CultureInfo.CurrentUICulture,
-            _text["project.status.saved"],
-            project.ProjectName);
+        ProjectActionStatus = project switch
+        {
+            { PreviousFilePath: not null } => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.savedRenamed"],
+                project.ProjectName,
+                Path.GetFileName(project.FilePath)),
+            { RenameBlockedBy: { } blocked } => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.savedRenameBlocked"],
+                project.ProjectName,
+                Path.GetFileName(blocked)),
+            _ => string.Format(
+                System.Globalization.CultureInfo.CurrentUICulture,
+                _text["project.status.saved"],
+                project.ProjectName),
+        };
     }
 
     private void OnProjectClosed(ProjectClosed project)
@@ -1072,6 +1184,9 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         RefreshHistoryState();
         Preview.Clear();
         PreviewWorkspace.Clear();
+        ExportWorkspace.Clear();
+        CalibrationWorkspace.Clear();
+        BurnWorkspace.Clear();
         _compositions.Clear();
         ProjectActionStatus = string.Format(
             System.Globalization.CultureInfo.CurrentUICulture,
@@ -1359,14 +1474,8 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
         }
     }
 
-    private static string BuildProjectFileName(string name)
-    {
-        char[] invalidCharacters = Path.GetInvalidFileNameChars();
-        string stem = new string(name.Trim().Select(character => invalidCharacters.Contains(character) ? '_' : character).ToArray())
-            .Trim()
-            .Trim('.');
-        return $"{(string.IsNullOrWhiteSpace(stem) ? "disc-project" : stem)}{ProjectJsonStore.FileExtension}";
-    }
+    private static string BuildProjectFileName(string name) => ProjectPaths.FileNameFor(name);
+
 
     private static IReadOnlyList<NewProjectPresetOption> CreateProjectPresets(ITextCatalog text)
     {
@@ -1426,6 +1535,18 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
             WorkspacePage.Design => (
                 _text["design.page.title"],
                 _text["design.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Export => (
+                _text["export.page.title"],
+                _text["export.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Burn => (
+                _text["burn.page.title"],
+                _text["burn.page.description"],
+                ProjectFamilyBadge),
+            WorkspacePage.Calibration => (
+                _text["calibration.page.title"],
+                _text["calibration.page.description"],
                 ProjectFamilyBadge),
             WorkspacePage.Preview => (
                 _text["preview.page.title"],

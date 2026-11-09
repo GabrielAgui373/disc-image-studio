@@ -159,7 +159,6 @@ internal static class UnifiedCommandRunner
                           [--tone-dither 0..1] [--tone-brightness -64..64] [--tone-gamma true]
             Total sectors must align to 32. Output is a complete ISO9660/Joliet image:
             inner files first, followed by picture data. Press Ctrl+C to cancel.
-            See docs/ADDING_BLURAY.md for options and physical-model limitations.
             """);
         return 0;
     }

@@ -2,8 +2,6 @@
 
 **简体中文** | [繁體中文](README.zh-TW.md) | [English](README.en.md) | [日本語](README.ja.md) | [Türkçe](README.tr.md) | [Español](README.es.md) | [Čeština](README.cs.md)
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>全能的光盘盘面可见图像生成与刻录工具</h2>
 
 Disc Image Studio 是一个多平台的光盘盘面图像生成与刻录工具，帮助您使用任何刻录光驱在任何 DVD / CD / 单层蓝光 光盘上刻蚀出肉眼可见的图像。
@@ -19,25 +17,9 @@ Disc Image Studio 是一个多平台的光盘盘面图像生成与刻录工具�
 
 ---
 
-## 效果预览
-
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
----
-
 ## 概述
 
 Disc Image Studio 可将一张图片转换成符合 CD、DVD 与单层 BD-R 光盘物理层约束的数据，刻录后将使光盘盘面呈现肉眼可见的图案。
-
-## 界面预览
-
-![主页：模板与最近工程](docs/images/ui-home.png)
-
-![设计页：图层画布与影调](docs/images/ui-design.png)
-
-![导出页：浅色主题与输出镜像](docs/images/ui-export.png)
 
 ---
 
@@ -63,14 +45,14 @@ Windows 下载 `win-x64.exe` 后可直接运行。Linux 或 macOS 请下载与 C
 
 ### 光盘数据生成
 
-- **CD 支持**：支持任何 CD 。您可导出带格式头的 WAV 音轨及配套 CUE，兼容 cdrecord, ImgBurn等刻录软件；也允许导出 RAW 音轨。详见 [CD 刻录兼容说明](docs/CD_AUDIO_COMPATIBILITY.md)。
+- **CD 支持**：支持任何 CD 。您可导出带格式头的 WAV 音轨及配套 CUE，兼容 cdrecord, ImgBurn等刻录软件；也允许导出 RAW 音轨。
 - **DVD 支持**：支持任何 DVD。您可导出 ISO 镜像。
-- **蓝光支持**：支持任何单层 BD-R 25 GB，支持纯绘图与 UDF 2.01 文件。详见 [ADDING_BLURAY.md](docs/ADDING_BLURAY.md)。
+- **蓝光支持**：支持任何单层 BD-R 25 GB，支持纯绘图与 UDF 2.01 文件。
 - **随盘文件**：CD／DVD／蓝光可在设计页直接选择要保存的文件夹及内圈／外圈位置，也可在导出页调整；设置随工程保存。
 - **文件区域预览**：混合盘的设计投影和成品读回用黄色标出文件区（含文件系统）。
-- **介质灰度方案**：CD 与 DVD 均使用黑白二阶，CD 使用 `0D / AA`，DVD 扰码域使用 `A5 / 92`。详见 [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md)。
+- **介质灰度方案**：CD 与 DVD 均使用黑白二阶，CD 使用 `0D / AA`，DVD 扰码域使用 `A5 / 92`。
 - **灰度抖动工具**：独立程序也可将原图处理为 `0/255` 黑白二阶 PNG；支持打开或拖入原图、并排预览及无损 PNG 导出。详见[使用与构建说明](tools/FourLevelDither/README.md)。
-- **盘片预设**：内置数个品牌的光盘参数，覆盖 CD／DVD／BD。您也可将自己标定好的数据贡献给我们，详见[预设维护说明](docs/DISC_PRESETS.md)。
+- **盘片预设**：内置数个品牌的光盘参数，覆盖 CD／DVD／BD。
 
 ### 辅助标定
 
@@ -78,11 +60,7 @@ Disc Image Studio 提供了一套智能且精准的辅助标定流程，相较�
 
 | 校准前 · 恒定轨距 | 校准后 · 三次轨距 |
 | --- | --- |
-| ![校准前的 DVD 实拍：径向十字线明显弯曲](docs/images/verbatim-dvd-calibration-before.jpg) | ![校准后的 DVD 实拍：径向十字线更接近直线](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-
-流程与参数说明见[辅助标定说明](docs/CALIBRATION.md)。
 
 ### 刻录
 
@@ -109,8 +87,6 @@ dotnet run --project src/DiscImageStudio.App --configuration Release
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-版本规则、CI 生成 EXE、Release 草稿检查、MSIX 打包与签名流程见[发布指南](docs/RELEASING.md)。
 
 ## 命令行
 
@@ -161,23 +137,12 @@ src/DvdImageSolver/          DVD 历史命令与 self-test 的精简启动器
 tests/                       无第三方测试框架的架构回归测试
 packaging/                   MSIX 清单与打包脚本
 tools/                       独立辅助工具与资产生成脚本
-docs/                        架构、引擎、预设、发布等文档
 ```
 
 ## 文档
 
 | 文档 | 内容 |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 模块抽象、层间边界与扩展规则 |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | 界面语言配置、系统语言回退与翻译资源维护 |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | DVD NRZI 图像约束求解器的约定、编码链与自检覆盖 |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | CD 音轨格式、字节序与重影排查 |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | 蓝光模块的物理模型、生成/刻录链路与扩展点 |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | 可编辑盘片预设的分层 JSON 格式与合并规则 |
-| [CALIBRATION.md](docs/CALIBRATION.md) | 照片矫正（框选盘片实体最外缘与中心孔边缘）、曲线标定与 DVD 三次轨距拟合 |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | CD / DVD 生成物理模型复核 |
-| [VALIDATION.md](docs/VALIDATION.md) | 各轮构建、回归与实盘测试的本地验证记录 |
-| [RELEASING.md](docs/RELEASING.md) | GitHub Release、MSIX 打包、签名测试与商店提交流程 |
 | [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
 
 ## 参考标准

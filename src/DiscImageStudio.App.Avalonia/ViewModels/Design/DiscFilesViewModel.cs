@@ -183,12 +183,5 @@ public sealed partial class DiscFilesViewModel : ObservableObject
         return (true, files, bytes, false);
     }
 
-    private static string FormatBytes(long bytes)
-        => bytes switch
-        {
-            >= 1L << 30 => string.Format(CultureInfo.CurrentUICulture, "{0:0.0} GB", bytes / (double)(1L << 30)),
-            >= 1L << 20 => string.Format(CultureInfo.CurrentUICulture, "{0:0.0} MB", bytes / (double)(1L << 20)),
-            >= 1L << 10 => string.Format(CultureInfo.CurrentUICulture, "{0:0} KB", bytes / (double)(1L << 10)),
-            _ => string.Format(CultureInfo.CurrentUICulture, "{0} B", bytes),
-        };
+    private static string FormatBytes(long bytes) => ByteSize.Format(bytes);
 }

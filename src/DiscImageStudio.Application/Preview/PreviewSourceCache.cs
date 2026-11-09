@@ -73,6 +73,29 @@ public sealed class PreviewSourceCache : IDisposable
         }
     }
 
+    /// <summary>
+    /// Forgets the cached source so the next request composes again, unless a lease holds it.
+    /// Called before the cache folder is cleared; false means a preview is using the source now.
+    /// </summary>
+    public bool Forget()
+    {
+        Entry? retired;
+        lock (_lock)
+        {
+            if (_current is { Leases: > 0 })
+            {
+                return false;
+            }
+
+            retired = _current;
+            _current = null;
+            retired?.Retire();
+        }
+
+        retired?.CollectIfUnused();
+        return true;
+    }
+
     public void Dispose()
     {
         Entry? retired;

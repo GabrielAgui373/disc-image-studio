@@ -207,7 +207,7 @@ public sealed class ProjectSettingsTests
             Assets,
             new UserPresetCatalog(Path.Combine(directory, DiscPresetJsonStore.FileName)),
             new NoFilePicker(),
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             _ => []);
         return (projects, settings, directory);
     }

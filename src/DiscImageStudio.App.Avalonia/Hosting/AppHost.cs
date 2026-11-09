@@ -53,9 +53,7 @@ public sealed class AppHost : IDisposable
         PhysicalAtomicFileStorage storage = new();
         JsonSettingsStore settingsStore = new(paths.SettingsFilePath, storage, logger);
         UserSettings settings = settingsStore.Load();
-        StartupPreferences.Apply(app, settings);
-
-        EnglishTextCatalog text = new();
+        ResourceTextCatalog text = new(StartupPreferences.Apply(app, settings));
         MainWindow? mainWindow = null;
         Func<TopLevel?> topLevel = () => mainWindow;
         Func<Window?> owner = () => mainWindow;
@@ -100,6 +98,9 @@ public sealed class AppHost : IDisposable
             compositions,
             Path.Combine(paths.CacheDirectory, "preview"));
 
+        // One typed pipeline for planning (Export review) and running exports.
+        DiscImageStudio.Generation.DiscGenerationService generation = new();
+
         HostServices services = new(
             paths,
             filePicker,
@@ -125,6 +126,40 @@ public sealed class AppHost : IDisposable
             new DiscImageStudio.Application.Preview.PreviewCoordinator(
                 DiscImageStudio.Preview.PreviewServices.CreateAll(previewSources)));
 
+        // Linux lists the real drives and their discs read-only (Task 13.4); writing stays
+        // disabled until each mode is validated on real recorders (Task 13.5). The simulated
+        // recorders are offered only when explicitly asked for, to exercise the Burn page.
+        DiscImageStudio.Burning.Simulated.UnavailableOpticalBackend noWriter = new(
+            "Burning on Linux is enabled only after it is validated on real recorders.");
+        DiscImageStudio.Burning.IOpticalDeviceService burning;
+        DiscImageStudio.Burning.IOpticalBurner? writer = null;
+        DiscImageStudio.Burning.IOpticalValidationRecorder? validationRecorder = null;
+        if (Environment.GetEnvironmentVariable("DISC_IMAGE_STUDIO_SIMULATED_BURNER") == "1")
+        {
+            DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend simulated = DiscImageStudio.Burning.Simulated.SimulatedOpticalBackend.CreateDemo();
+            simulated.TestOnlyModes = DiscImageStudio.Burning.Linux.LinuxBurnValidation.ParseModes(
+                Environment.GetEnvironmentVariable(DiscImageStudio.Burning.Linux.LinuxBurnValidation.TestModesVariable));
+            burning = simulated;
+            validationRecorder = simulated;
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            // Modes are enabled by recorded physical tests (burn-validations.json) or, for the test
+            // campaign, by DISC_IMAGE_STUDIO_BURN_TEST_MODES; every burn is logged locally (Task 13.5).
+            DiscImageStudio.Burning.Linux.LinuxBurnValidation validation = DiscImageStudio.Burning.Linux.LinuxBurnValidation.Load(
+                Path.Combine(paths.ConfigDirectory, "burn-validations.json"),
+                Environment.GetEnvironmentVariable(DiscImageStudio.Burning.Linux.LinuxBurnValidation.TestModesVariable));
+            burning = new DiscImageStudio.Burning.Linux.LinuxOpticalDeviceService(validation: validation);
+            validationRecorder = validation;
+            writer = new DiscImageStudio.Burning.Linux.LinuxOpticalBurner(
+                validation: validation,
+                log: new DiscImageStudio.Burning.Linux.BurnTestLog(Path.Combine(paths.StateDirectory, "burn-tests.jsonl")));
+        }
+        else
+        {
+            burning = noWriter;
+        }
+
         MainViewModel viewModel = new(
             paths,
             filePicker,
@@ -144,7 +179,43 @@ public sealed class AppHost : IDisposable
             new UserPresetCatalog(Path.Combine(paths.ConfigDirectory, DiscPresetJsonStore.FileName), logger),
             compositions,
             new DiscImageStudio.Application.Editing.ProjectEditor(projects),
-            services.Previews);
+            services.Previews,
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
+            new DiscImageStudio.App.Avalonia.Generation.CalibrationTargetRunner(generation),
+            burning,
+            writer ?? burning as DiscImageStudio.Burning.IOpticalBurner ?? noWriter);
+        viewModel.ExportWorkspace.AttachRunner(
+            new DiscImageStudio.App.Avalonia.Generation.ExportRunner(services.Generation, generation),
+            jobs,
+            launcher,
+            clipboard);
+        viewModel.CalibrationWorkspace.AttachRunner(jobs, launcher, clipboard);
+        viewModel.BurnWorkspace.AttachJobs(jobs);
+        if (validationRecorder is not null)
+        {
+            viewModel.BurnWorkspace.AttachValidation(validationRecorder);
+        }
+        viewModel.BurnWorkspace.AttachGeneration(
+            new DiscImageStudio.App.Avalonia.Generation.ExportPlanner(services.PreviewSources, generation),
+            services.Generation,
+            generation);
+        viewModel.CalibrationWorkspace.AttachRecovery(
+            DiscImageStudio.Application.Calibration.CalibrationRecoveryStore.Under(paths, new DiscImageStudio.Application.Ports.SystemClock()));
+        PreferencesViewModel preferences = new(
+            settings,
+            settingsStore,
+            paths,
+            cache,
+            jobs,
+            previewSources,
+            filePicker,
+            text,
+            theme => app.RequestedThemeVariant = theme);
+        AppHost? host = null;
+        preferences.RestartRequested += () => host?.RestartAsync();
+        // The lifetime saves the settings again on exit; it must save the latest ones.
+        preferences.Changed += applicationLifetime.UpdateSettings;
+        viewModel.AttachPreferences(preferences);
         prompts.Attach(viewModel);
         mainWindow = new MainWindow
         {
@@ -153,7 +224,24 @@ public sealed class AppHost : IDisposable
         mainWindow.AttachLifetime(applicationLifetime);
 
         logger.Log(AppLogLevel.Information, "host.started", "Avalonia host services were composed successfully.");
-        return new AppHost(desktop, exceptionMonitor, applicationLifetime, mainWindow, services);
+        host = new AppHost(desktop, exceptionMonitor, applicationLifetime, mainWindow, services);
+        return host;
+    }
+
+    /// <summary>
+    /// Closes the app the normal way (unsaved changes and running jobs are asked about first)
+    /// and starts it again once it has exited, so a new interface language takes effect.
+    /// </summary>
+    public async void RestartAsync()
+    {
+        if (_retryingDesktopShutdown || !await _applicationLifetime.RequestShutdownAsync())
+        {
+            return;
+        }
+
+        Program.RestartAfterExit = true;
+        _retryingDesktopShutdown = true;
+        _desktop.TryShutdown();
     }
 
     public void Dispose()

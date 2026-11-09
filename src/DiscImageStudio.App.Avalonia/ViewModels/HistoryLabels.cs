@@ -17,5 +17,9 @@ public static class HistoryLabels
     public const string RelinkLayer = "layer.relink";
     public const string Tone = "tone.set";
     public const string DataFolder = "data.set";
+    public const string OutputFile = "output.set";
     public const string ProjectSettings = "project.settings";
+    public const string CalibrationSession = "calibration.session";
+    public const string ApplyCalibration = "calibration.apply";
+    public const string ClearMeasurement = "calibration.measurement.clear";
 }

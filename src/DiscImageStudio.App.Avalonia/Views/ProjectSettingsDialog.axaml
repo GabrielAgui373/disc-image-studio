@@ -26,6 +26,8 @@
                                 <TextBlock Text="{Binding Labels.NameLabel}" Classes="settings-field-label" />
                                 <TextBox Text="{Binding Name, Mode=TwoWay}"
                                          AutomationProperties.Name="{Binding Labels.NameLabel}" />
+                                <TextBlock Text="{Binding RenameHint}" Classes="settings-hint" TextWrapping="Wrap"
+                                           IsVisible="{Binding HasRenameHint}" />
                             </StackPanel>
                             <StackPanel Spacing="{DynamicResource DiscSpace2}">
                                 <TextBlock Text="{Binding Labels.FamilyLabel}" Classes="settings-field-label" />
@@ -53,7 +55,7 @@
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
                                                 <Border Classes="media-template-badge" IsVisible="{Binding IsUserPreset}">
-                                                    <TextBlock Text="CUSTOM" Classes="media-template-badge-text" />
+                                                    <TextBlock Text="{Binding $parent[ComboBox].((vm:ProjectSettingsViewModel)DataContext).Labels.CustomBadge}" Classes="media-template-badge-text" />
                                                 </Border>
                                             </StackPanel>
                                             <TextBlock Text="{Binding Description}"

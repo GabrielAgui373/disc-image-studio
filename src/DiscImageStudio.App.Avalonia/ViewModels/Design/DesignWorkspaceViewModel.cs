@@ -21,8 +21,8 @@ public enum DesignPanel
 /// </summary>
 public sealed partial class DesignWorkspaceViewModel : ObservableObject
 {
-    private static readonly FilePickerType ImageFiles = new(
-        "Images",
+    private FilePickerType ImageFiles => new(
+        _text["fileType.images"],
         ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif"],
         ["image/png", "image/jpeg", "image/bmp", "image/gif"]);
 

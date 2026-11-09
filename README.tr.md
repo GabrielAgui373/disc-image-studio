@@ -2,8 +2,6 @@
 
 [简体中文](README.md) | [繁體中文](README.zh-TW.md) | [English](README.en.md) | [日本語](README.ja.md) | **Türkçe** | [Español](README.es.md) | [Čeština](README.cs.md)
 
-![Banner](docs/images/DiscImageStudio_Banner_2.png)
-
 <h2>Optik disklere görünür görüntüler oluşturmak ve yazmak için hepsi bir arada araç</h2>
 
 Disc Image Studio, herhangi bir kayıt sürücüsüyle herhangi bir DVD / CD / tek katmanlı Blu-ray disk üzerine çıplak gözle görülebilen görüntüler işlemenize yardımcı olan, çok platformlu bir disk yüzeyi görüntüsü oluşturma ve yazma aracıdır.
@@ -19,25 +17,9 @@ Disc Image Studio, herhangi bir kayıt sürücüsüyle herhangi bir DVD / CD / t
 
 ---
 
-## Sonuçlar
-
-![](docs/images/case1.jpg)
-
-![](docs/images/case2.jpg)
-
----
-
 ## Genel Bakış
 
 Disc Image Studio, standart bir görseli CD, DVD ve tek katmanlı BD-R disklerin fiziksel katman kısıtlamalarına tam uyumlu verilere dönüştürür. Diske yazma işleminden sonra diskin veri yüzeyinde çıplak gözle net bir şekilde görülebilen desenler ve resimler oluşur.
-
-## Arayüz Önizlemesi
-
-![Ana Sayfa: şablonlar ve son projeler](docs/images/ui-home.png)
-
-![Tasarım: katman tuvali ve ton kontrolleri](docs/images/ui-design.png)
-
-![Dışa Aktarma: açık tema ve çıktı görüntüsü](docs/images/ui-export.png)
 
 ---
 
@@ -63,14 +45,14 @@ Akışla doğrudan diske yazma deneyseldir. Yalnızca gözden çıkarabileceğin
 
 ### Disk Verisi Oluşturma
 
-- **CD Desteği**: Standart her türlü CD'yi destekler. cdrecord ve ImgBurn gibi yazma programlarıyla uyumlu biçim başlıklarına ve CUE dosyasına sahip WAV ses izleri dışa aktarılabilir; RAW ses izi dışa aktarımı da mevcuttur. Bkz. [CD Ses Uyumluluğu](docs/CD_AUDIO_COMPATIBILITY.md).
+- **CD Desteği**: Standart her türlü CD'yi destekler. cdrecord ve ImgBurn gibi yazma programlarıyla uyumlu biçim başlıklarına ve CUE dosyasına sahip WAV ses izleri dışa aktarılabilir; RAW ses izi dışa aktarımı da mevcuttur. Bkz.
 - **DVD Desteği**: Standart her türlü DVD'yi destekler. ISO imajları dışa aktarılır.
-- **Blu-ray Desteği**: Yalnızca çizim modu ve UDF 2.01 dosya yerleşimi ile her türlü tek katmanlı 25 GB BD-R'yi destekler. Bkz. [Blu-ray Desteği Ekleme](docs/ADDING_BLURAY.md).
+- **Blu-ray Desteği**: Yalnızca çizim modu ve UDF 2.01 dosya yerleşimi ile her türlü tek katmanlı 25 GB BD-R'yi destekler. Bkz.
 - **Disk Üzerinde Dosya Barındırma**: CD, DVD ve Blu-ray için doğrudan Tasarım sayfasından bir klasör seçip dosyalarını diskin iç veya dış halkasına yerleştirebilir ya da bu seçenekleri Dışa Aktarma sayfasından ayarlayabilirsiniz. Bu ayarlar projeyle birlikte kaydedilir.
 - **Dosya Bölgesi Önizlemesi**: Hibrit disk tasarım projeksiyonları ve ürün geri okumaları, dosya sistemi dahil olmak üzere dosya alanını sarı renkle vurgular.
-- **Medya Gri Tonlama Şemaları**: CD ve DVD'nin her ikisi de iki siyah-beyaz seviyesi kullanır: CD için `0D / AA` ve DVD karıştırılmış (scrambled) alanında `A5 / 92`. Bkz. [Fiziksel Model Denetimi](docs/PHYSICAL_MODEL_AUDIT.md).
+- **Medya Gri Tonlama Şemaları**: CD ve DVD'nin her ikisi de iki siyah-beyaz seviyesi kullanır: CD için `0D / AA` ve DVD karıştırılmış (scrambled) alanında `A5 / 92`. Bkz.
 - **Gri Tonlama Sarsıntı (Dithering) Aracı**: Bağımsız bir yardımcı program, bir kaynak görseli iki seviyeli `0/255` siyah-beyaz PNG'ye dönüştürebilir. Görselleri açmayı, sürükleyip bırakmayı, yan yana önizlemeyi ve kayıpsız PNG dışa aktarımını destekler. Bkz. [Kullanım ve Derleme Talimatları](tools/FourLevelDither/README.md).
-- **Disk Önayarları**: Yerleşik disk parametreleri çeşitli CD, DVD ve BD markalarını kapsar. Ayrıca kendi kalibre edilmiş verilerinizle katkıda bulunabilirsiniz; bkz. [Disk Önayarı Yönetimi](docs/DISC_PRESETS.md).
+- **Disk Önayarları**: Yerleşik disk parametreleri çeşitli CD, DVD ve BD markalarını kapsar. Ayrıca kendi kalibre edilmiş verilerinizle katkıda bulunabilirsiniz.
 
 ### Destekli Kalibrasyon (Assisted Calibration)
 
@@ -78,10 +60,7 @@ Disc Image Studio, akıllı ve hassas bir destekli kalibrasyon iş akışı suna
 
 | Kalibrasyon Öncesi · Sabit İz Aralığı | Kalibrasyon Sonrası · Kübik İz Aralığı |
 | --- | --- |
-| ![Kalibrasyon öncesi DVD fotoğrafı: belirgin şekilde kavisli radyal çizgiler](docs/images/verbatim-dvd-calibration-before.jpg) | ![Kalibrasyon sonrası DVD fotoğrafı: radyal çizgiler düz çizgiye çok daha yakın](docs/images/verbatim-dvd-calibration-after.jpg) |
 | `P20261004-133519.jpg` | `P20261004-135416.jpg` |
-
-İş akışı ve parametreler için [Destekli Kalibrasyon Kılavuzu](docs/CALIBRATION.md) sayfasına bakın.
 
 ### Diske Yazma
 
@@ -108,8 +87,6 @@ Derleme regresyon testleri:
 dotnet run --project src/DvdImageSolver --configuration Release -- selftest
 dotnet run --project tests/DiscImageStudio.ArchitectureTests --configuration Release
 ```
-
-Sürüm kuralları, CI tarafından oluşturulan EXE'ler, sürüm taslağı denetimleri, MSIX paketleme ve imzalama adımları için [Sürüm Hazırlama Kılavuzu](docs/RELEASING.md) sayfasına bakın.
 
 ## Komut Satırı (CLI)
 
@@ -159,23 +136,12 @@ src/DvdImageSolver/          Yalıtılmış DVD kodlama/çözme motoru
 tests/                       Üçüncü taraf test çerçevesi içermeyen mimari regresyon testleri
 packaging/                   MSIX bildirimi ve paketleme betikleri
 tools/                       Bağımsız yardımcı programlar ve varlık oluşturma betikleri
-docs/                        Mimari, motor, önayar, sürüm ve diğer dokümantasyonlar
 ```
 
 ## Dokümantasyon
 
 | Belge | İçerik |
 | --- | --- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modül soyutlamaları, katman sınırları ve genişletme kuralları |
-| [LOCALIZATION.md](docs/LOCALIZATION.md) | Dil ayarları ve çeviri kaynaklarının bakımı |
-| [DVD_ENGINE.md](docs/DVD_ENGINE.md) | DVD NRZI görsel kısıtlama çözücü kuralları, kodlama zinciri ve öz sınama kapsamı |
-| [CD_AUDIO_COMPATIBILITY.md](docs/CD_AUDIO_COMPATIBILITY.md) | CD ses izi biçimleri, bayt sırası ve gölgelenme sorunlarını giderme |
-| [ADDING_BLURAY.md](docs/ADDING_BLURAY.md) | Blu-ray modülü fiziksel modeli, üretim/yazma hattı ve genişletme noktaları |
-| [DISC_PRESETS.md](docs/DISC_PRESETS.md) | Düzenlenebilir disk önayarları için katmanlı JSON biçimi ve birleştirme kuralları |
-| [CALIBRATION.md](docs/CALIBRATION.md) | Fotoğraf düzeltme (diskin en dış fiziksel kenarını ve merkez delik kenarını işaretleme), eğri kalibrasyonu ve DVD kübik iz aralığı uydurma |
-| [PHYSICAL_MODEL_AUDIT.md](docs/PHYSICAL_MODEL_AUDIT.md) | CD / DVD üretim fiziksel modellerinin incelenmesi |
-| [VALIDATION.md](docs/VALIDATION.md) | Derlemeler, regresyonlar ve fiziksel disk testleri için yerel doğrulama kayıtları |
-| [RELEASING.md](docs/RELEASING.md) | GitHub Sürümleri, MSIX paketleme, imzalama testleri ve Mağaza gönderim prosedürleri |
 | [CHANGELOG.md](CHANGELOG.md) | Sürüm değişiklik geçmişi |
 
 ## Referans Standartlar

@@ -12,6 +12,22 @@ public static partial class RasterCodec
         return Decode(stream, maxPixels);
     }
 
+    /// <summary>Decodes an in-memory image (for example a PNG embedded in a session file).</summary>
+    public static BgraRaster DecodeBgra32(byte[] encoded, long maxPixels = int.MaxValue / 4)
+    {
+        ArgumentNullException.ThrowIfNull(encoded);
+        using MemoryStream stream = new(encoded, writable: false);
+        return Decode(stream, maxPixels);
+    }
+
+    /// <summary>Reads only the header: the pixel size of the first frame, within <paramref name="maxPixels"/>.</summary>
+    public static (int Width, int Height) ReadSize(string path, long maxFileBytes, long maxPixels)
+    {
+        using FileStream stream = File.OpenRead(Path.GetFullPath(path));
+        CheckFileSize(stream, maxFileBytes);
+        return HeaderSize(ReadHeader(stream, maxPixels));
+    }
+
     public static void ValidateSource(string path, long maxFileBytes, long maxPixels)
     {
         using FileStream stream = File.OpenRead(Path.GetFullPath(path));

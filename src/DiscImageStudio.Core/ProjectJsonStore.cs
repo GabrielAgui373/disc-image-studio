@@ -32,6 +32,23 @@ public sealed record ProjectLayer(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     double? Opacity = null);
 
+/// <summary>
+/// The geometry a calibration measured for the user's drive and media (schema 4): what the disc
+/// is actually read with. Written only when a calibration was applied, so other projects keep
+/// their lower schema. <see cref="TargetId"/> names the calibration target it came from.
+/// </summary>
+public sealed record ProjectMeasurement(
+    double InnerRadiusMm,
+    double OuterRadiusMm,
+    long Sectors,
+    double PitchLinear,
+    double PitchQuadratic,
+    double PitchCubic,
+    string TargetId,
+    DateTimeOffset MeasuredUtc,
+    double RmsErrorMm,
+    double MaxErrorMm);
+
 /// <summary>Where the next generation job writes, and the per-family output switches.</summary>
 public sealed record ProjectOutputs(
     string OutputPath,
@@ -65,7 +82,9 @@ public sealed record ProjectDocument(
     DateTimeOffset CreatedUtc,
     DateTimeOffset ModifiedUtc,
     ToneProfile? Tone = null,
-    ProjectBluRaySettings? BluRay = null)
+    ProjectBluRaySettings? BluRay = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    ProjectMeasurement? Measurement = null)
 {
     public const string CdFamily = "cd";
     public const string DvdFamily = "dvd";
@@ -122,6 +141,9 @@ public static class ProjectJsonStore
 
     /// <summary>Schema 3 adds per-layer <c>opacity</c>; it is written only when a layer uses it.</summary>
     public const int LayerOpacitySchemaVersion = 3;
+
+    /// <summary>Schema 4 adds <c>measurement</c>; it is written only when a calibration was applied.</summary>
+    public const int MeasurementSchemaVersion = 4;
 
     private const int LegacySchemaVersion = 1;
     public const string FileExtension = ".discproj";
@@ -216,18 +238,20 @@ public static class ProjectJsonStore
     public static int RequiredSchemaVersion(ProjectDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        return document.Layers.Any(layer => layer.Opacity is { } opacity && opacity < 1)
-            ? LayerOpacitySchemaVersion
-            : CurrentSchemaVersion;
+        return document.Measurement is not null
+            ? MeasurementSchemaVersion
+            : document.Layers.Any(layer => layer.Opacity is { } opacity && opacity < 1)
+                ? LayerOpacitySchemaVersion
+                : CurrentSchemaVersion;
     }
 
     public static void Validate(ProjectDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion or LayerOpacitySchemaVersion))
+        if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion or LayerOpacitySchemaVersion or MeasurementSchemaVersion))
         {
             InvalidDataException exception = new(
-                $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion}、{CurrentSchemaVersion} 与 {LayerOpacitySchemaVersion}。");
+                $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion}、{CurrentSchemaVersion}、{LayerOpacitySchemaVersion} 与 {MeasurementSchemaVersion}。");
             exception.Data[UnsupportedSchemaVersionKey] = document.SchemaVersion;
             throw exception;
         }
@@ -270,7 +294,43 @@ public static class ProjectJsonStore
         ValidateLayers(document);
         ValidateOutputs(document);
         ValidateTone(document);
+        ValidateMeasurement(document);
         ValidateThumbnail(document.ThumbnailPngBase64);
+    }
+
+    private static void ValidateMeasurement(ProjectDocument document)
+    {
+        if (document.Measurement is not { } measurement)
+        {
+            return;
+        }
+
+        ValidatePositiveFinite(measurement.InnerRadiusMm, "measurement.innerRadiusMm");
+        ValidatePositiveFinite(measurement.OuterRadiusMm, "measurement.outerRadiusMm");
+        if (measurement.OuterRadiusMm <= measurement.InnerRadiusMm || measurement.Sectors <= 0)
+        {
+            throw new InvalidDataException("measurement 的半径或扇区数无效。");
+        }
+
+        if (!double.IsFinite(measurement.RmsErrorMm) || !double.IsFinite(measurement.MaxErrorMm)
+            || measurement.RmsErrorMm < 0 || measurement.MaxErrorMm < 0 || string.IsNullOrWhiteSpace(measurement.TargetId))
+        {
+            throw new InvalidDataException("measurement 的残差或标靶编号无效。");
+        }
+
+        if (!document.IsDvd && (measurement.PitchLinear != 0 || measurement.PitchQuadratic != 0 || measurement.PitchCubic != 0))
+        {
+            throw new InvalidDataException("measurement 的轨距系数仅适用于 DVD。");
+        }
+
+        try
+        {
+            DvdTrackGeometry.ValidatePitchCoefficients(measurement.PitchLinear, measurement.PitchQuadratic, measurement.PitchCubic);
+        }
+        catch (ArgumentException exception)
+        {
+            throw new InvalidDataException($"measurement 轨距系数无效：{exception.Message}", exception);
+        }
     }
 
     private static void ValidateTone(ProjectDocument document)

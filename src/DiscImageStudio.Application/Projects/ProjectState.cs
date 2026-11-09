@@ -281,6 +281,85 @@ public sealed record BluRayState : MediaState
 }
 
 /// <summary>
+/// The geometry a calibration measured (Task 12.5): radii, sectors and, for DVD, the track terms
+/// the drive actually wrote. Preview reads discs with it; it stays when the generation geometry
+/// changes, because it describes the drive, not the design.
+/// </summary>
+public sealed record CalibrationMeasurement
+{
+    public CalibrationMeasurement(
+        double innerRadiusMm,
+        double outerRadiusMm,
+        long sectors,
+        double pitchLinear,
+        double pitchQuadratic,
+        double pitchCubic,
+        string targetId,
+        DateTimeOffset measuredUtc,
+        double rmsErrorMm,
+        double maxErrorMm)
+    {
+        if (!double.IsFinite(innerRadiusMm) || !double.IsFinite(outerRadiusMm) || innerRadiusMm <= 0 || outerRadiusMm <= innerRadiusMm)
+        {
+            throw new ArgumentOutOfRangeException(nameof(outerRadiusMm), "The measured radii must be positive and increasing.");
+        }
+
+        if (sectors <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sectors), "Sector count must be positive.");
+        }
+
+        DvdTrackGeometry.ValidatePitchCoefficients(pitchLinear, pitchQuadratic, pitchCubic);
+        InnerRadiusMm = innerRadiusMm;
+        OuterRadiusMm = outerRadiusMm;
+        Sectors = sectors;
+        PitchLinear = pitchLinear;
+        PitchQuadratic = pitchQuadratic;
+        PitchCubic = pitchCubic;
+        TargetId = ProjectIdentity.RequireText(targetId, nameof(targetId));
+        MeasuredUtc = measuredUtc;
+        RmsErrorMm = double.IsFinite(rmsErrorMm) && rmsErrorMm >= 0 ? rmsErrorMm : throw new ArgumentOutOfRangeException(nameof(rmsErrorMm));
+        MaxErrorMm = double.IsFinite(maxErrorMm) && maxErrorMm >= 0 ? maxErrorMm : throw new ArgumentOutOfRangeException(nameof(maxErrorMm));
+    }
+
+    public double InnerRadiusMm { get; }
+
+    public double OuterRadiusMm { get; }
+
+    public long Sectors { get; }
+
+    public double PitchLinear { get; }
+
+    public double PitchQuadratic { get; }
+
+    public double PitchCubic { get; }
+
+    public string TargetId { get; }
+
+    public DateTimeOffset MeasuredUtc { get; }
+
+    public double RmsErrorMm { get; }
+
+    public double MaxErrorMm { get; }
+
+    /// <summary>
+    /// The measured geometry as media of the project's family, keeping the generation switches
+    /// (CD cue and interleave, Blu-ray polarity) of <paramref name="generation"/>.
+    /// </summary>
+    public MediaState ToMedia(MediaState generation)
+    {
+        ArgumentNullException.ThrowIfNull(generation);
+        return generation switch
+        {
+            DvdState => new DvdState(InnerRadiusMm, OuterRadiusMm, Sectors, PitchLinear, PitchQuadratic, PitchCubic),
+            BluRayState bluRay => new BluRayState(InnerRadiusMm, OuterRadiusMm, Sectors, bluRay.InvertMapping),
+            CdState cd => new CdState(InnerRadiusMm, OuterRadiusMm, Sectors, cd.WriteCue, cd.Interleave),
+            _ => throw new ArgumentException("Unsupported media.", nameof(generation)),
+        };
+    }
+}
+
+/// <summary>
 /// Framework-neutral, validated project state. UI edit buffers are deliberately not part of
 /// this type: adapters convert complete text input to typed values before constructing it.
 /// </summary>
@@ -289,7 +368,8 @@ public sealed record ProjectWorkspace(
     DesignState Design,
     ToneState Tone,
     DeliveryState Delivery,
-    MediaState Media)
+    MediaState Media,
+    CalibrationMeasurement? Measurement = null)
 {
     public ProjectWorkspace DeepCopy()
         => new(
@@ -297,7 +377,31 @@ public sealed record ProjectWorkspace(
             new DesignState(Design.Layers),
             Tone,
             Delivery,
-            Media);
+            Media,
+            Measurement);
+
+    /// <summary>The geometry discs are read with: the applied measurement, if any, of this family.</summary>
+    public MediaState? MeasuredMedia
+    {
+        get
+        {
+            if (Measurement is not { } measurement)
+            {
+                return null;
+            }
+
+            try
+            {
+                return measurement.ToMedia(Media);
+            }
+            catch (ArgumentException)
+            {
+                // A measurement that cannot describe this family (for example a Blu-ray outer
+                // radius over 60 mm) is ignored rather than breaking the project.
+                return null;
+            }
+        }
+    }
 }
 
 public sealed record ProjectSnapshot(ProjectWorkspace Workspace);

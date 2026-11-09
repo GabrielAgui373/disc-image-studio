@@ -21,6 +21,8 @@ public sealed class ProjectSettingsLabels(ITextCatalog text)
 
     public string GeometryHint { get; } = text["projectSettings.geometry.hint"];
 
+    public string CustomBadge { get; } = text["projectSettings.preset.customBadge"];
+
     public string NewPresetWatermark { get; } = text["projectSettings.preset.newName.watermark"];
 
     public string SavePreset { get; } = text["projectSettings.preset.save"];

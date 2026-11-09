@@ -16,6 +16,8 @@ public interface IFileSystem
     bool FileExists(string path);
 
     bool DirectoryExists(string path);
+
+    void DeleteFile(string path);
 }
 
 public readonly record struct ScannedEntry(string Path, bool IsDirectory);
@@ -87,6 +89,8 @@ public sealed class PhysicalFileSystem : IFileSystem
     public bool FileExists(string path) => File.Exists(path);
 
     public bool DirectoryExists(string path) => Directory.Exists(path);
+
+    public void DeleteFile(string path) => File.Delete(path);
 }
 
 public sealed class PhysicalDirectoryScanner : IDirectoryScanner

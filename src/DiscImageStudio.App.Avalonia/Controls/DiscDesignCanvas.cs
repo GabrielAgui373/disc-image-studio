@@ -1,7 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
+using Avalonia.Threading;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using DiscImageStudio.App.Avalonia.Design;
 using DiscImageStudio.App.Avalonia.ViewModels.Design;
 using DiscImageStudio.Application.Editing;
@@ -18,6 +21,10 @@ public sealed class DiscDesignCanvas : Control
 {
     public const double HandleSize = 8.0;
     public const double RotateHandleDistance = 26.0;
+    private const double RotateHandleRadius = 7.5;
+
+    // Just outside a corner, within this distance, a drag rotates instead of selecting.
+    private const double RotateZone = 22.0;
     private const double HubRadiusMm = 15.0;
 
     public static readonly StyledProperty<DesignCanvasViewModel?> ViewModelProperty =
@@ -30,6 +37,8 @@ public sealed class DiscDesignCanvas : Control
     private LayerTransform _startTransform;
     private double _startDistanceMm;
     private double _startAngleDeg;
+    private bool _spaceHeld;
+    private static Cursor? _rotateCursor;
 
     static DiscDesignCanvas()
     {
@@ -199,7 +208,35 @@ public sealed class DiscDesignCanvas : Control
         Point topMid = new((corners[0].X + corners[1].X) / 2, (corners[0].Y + corners[1].Y) / 2);
         Point handle = viewport.ToScreen(RotateHandleMm(viewport, layer, cornersMm));
         context.DrawLine(outline, topMid, handle);
-        context.DrawEllipse(Brushes.White, outline, handle, HandleSize / 2, HandleSize / 2);
+
+        // The rotate handle is larger than the corners and carries a turn arrow, so it reads as
+        // "rotate" rather than as another resize point.
+        context.DrawEllipse(Brushes.White, outline, handle, RotateHandleRadius, RotateHandleRadius);
+        DrawTurnArrow(context, handle, RotateHandleRadius - 3.5, new Pen(accent, 1.4));
+    }
+
+    /// <summary>A three-quarter arc with an arrowhead, centred on <paramref name="centre"/>.</summary>
+    private static void DrawTurnArrow(DrawingContext context, Point centre, double radius, IPen pen)
+    {
+        const double start = -150 * Math.PI / 180;
+        const double end = 120 * Math.PI / 180;
+        Point from = new(centre.X + (radius * Math.Cos(start)), centre.Y + (radius * Math.Sin(start)));
+        Point to = new(centre.X + (radius * Math.Cos(end)), centre.Y + (radius * Math.Sin(end)));
+        StreamGeometry arc = new();
+        using (StreamGeometryContext figure = arc.Open())
+        {
+            figure.BeginFigure(from, isFilled: false);
+            figure.ArcTo(to, new Size(radius, radius), 0, isLargeArc: true, SweepDirection.Clockwise);
+            figure.EndFigure(isClosed: false);
+        }
+
+        context.DrawGeometry(null, pen, arc);
+        // Arrowhead along the tangent at the arc's end (clockwise travel).
+        Vector tangent = new(-Math.Sin(end), Math.Cos(end));
+        Vector normal = new(Math.Cos(end), Math.Sin(end));
+        double size = Math.Max(2, radius * 0.75);
+        context.DrawLine(pen, to, to - (tangent * size) + (normal * size * 0.6));
+        context.DrawLine(pen, to, to - (tangent * size) - (normal * size * 0.6));
     }
 
     private void DrawCentredText(DrawingContext context, string text, Point centre, double size, IBrush brush)
@@ -250,19 +287,20 @@ public sealed class DiscDesignCanvas : Control
             return;
         }
 
-        Focus();
+        Focus(NavigationMethod.Pointer);
+
         PointerPoint point = e.GetCurrentPoint(this);
         Point screen = point.Position;
         Point mm = model.Viewport.ToModel(screen);
 
-        if (point.Properties.IsMiddleButtonPressed)
+        // The view moves with the middle button, or with the left one under the hand tool or
+        // while Space is held. Below fit the viewport keeps the disc centred, so nothing moves.
+        bool handDrag = point.Properties.IsLeftButtonPressed && (model.IsHandTool || _spaceHeld);
+        if (point.Properties.IsMiddleButtonPressed || handDrag)
         {
-            if (model.Viewport.Zoom > 1.0001)
-            {
-                StartGesture(Gesture.Pan, e, screen, mm);
-                _panStart = model.Viewport.Pan;
-            }
-
+            StartGesture(Gesture.Pan, e, screen, mm);
+            _panStart = model.Viewport.Pan;
+            Cursor = new Cursor(StandardCursorType.DragMove);
             return;
         }
 
@@ -281,7 +319,9 @@ public sealed class DiscDesignCanvas : Control
                 return;
             }
 
-            if (Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, HandleSize + 2) && model.BeginDrag())
+            if ((Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2)
+                 || InRotateZone(model, cornersMm, screen))
+                && model.BeginDrag())
             {
                 StartTransformGesture(Gesture.Rotate, e, screen, mm, selected);
                 _startAngleDeg = LayerGeometry.AngleDeg(selected.Centre, mm);
@@ -364,6 +404,10 @@ public sealed class DiscDesignCanvas : Control
         }
 
         EndGesture(e.Pointer);
+        if (ViewModel is { } model)
+        {
+            UpdateCursor(model, e.GetPosition(this));
+        }
     }
 
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
@@ -403,8 +447,27 @@ public sealed class DiscDesignCanvas : Control
         }
 
         double step = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? DesignCanvasViewModel.LargeNudgeMm : DesignCanvasViewModel.NudgeMm;
+        double turn = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? 15 : 1;
         switch (e.Key)
         {
+            case Key.Space:
+                if (!_spaceHeld)
+                {
+                    _spaceHeld = true;
+                    Cursor = new Cursor(StandardCursorType.Hand);
+                }
+
+                break;
+            case Key.H when e.KeyModifiers == KeyModifiers.None:
+                model.IsHandTool = !model.IsHandTool;
+                Cursor = new Cursor(model.IsHandTool ? StandardCursorType.Hand : StandardCursorType.Arrow);
+                break;
+            case Key.OemOpenBrackets:
+                model.NudgeRotation(-turn);
+                break;
+            case Key.OemCloseBrackets:
+                model.NudgeRotation(turn);
+                break;
             case Key.Left:
                 model.Nudge(-step, 0);
                 break;
@@ -447,6 +510,59 @@ public sealed class DiscDesignCanvas : Control
         e.Handled = true;
     }
 
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        if (e.Key == Key.Space && _spaceHeld)
+        {
+            _spaceHeld = false;
+            if (_gesture == Gesture.None)
+            {
+                Cursor = new Cursor(ViewModel?.IsHandTool == true ? StandardCursorType.Hand : StandardCursorType.Arrow);
+            }
+
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnLostFocus(FocusChangedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        _spaceHeld = false;
+    }
+
+    /// <summary>
+    /// A click focuses the canvas (Avalonia focuses focusable elements on press), and every
+    /// scrolling ancestor then scrolls the whole canvas into view, moving it under the pointer in
+    /// the middle of a gesture: a rotation would turn around a point that just moved. GotFocus
+    /// reaches the canvas before it bubbles to those ScrollViewers, so pointer focus records their
+    /// offsets here and puts them back; keyboard focus still scrolls as usual.
+    /// </summary>
+    protected override void OnGotFocus(FocusChangedEventArgs e)
+    {
+        base.OnGotFocus(e);
+        if (e.NavigationMethod != NavigationMethod.Pointer)
+        {
+            return;
+        }
+
+        (ScrollViewer Viewer, Vector Offset)[] scrollers = [.. this.GetVisualAncestors()
+            .OfType<ScrollViewer>()
+            .Select(viewer => (viewer, viewer.Offset))];
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                foreach ((ScrollViewer viewer, Vector offset) in scrollers)
+                {
+                    if (viewer.Offset != offset)
+                    {
+                        viewer.Offset = offset;
+                    }
+                }
+            },
+            DispatcherPriority.Send);
+    }
+
     // ---- Gesture helpers ----
 
     private void StartGesture(Gesture gesture, PointerPressedEventArgs e, Point screen, Point mm)
@@ -473,25 +589,126 @@ public sealed class DiscDesignCanvas : Control
         }
     }
 
+    /// <summary>
+    /// Hand over the view tool, a turn cursor on the rotate handle, diagonal arrows on the corners
+    /// and the move cross over a layer, so each gesture announces itself before the press.
+    /// </summary>
     private void UpdateCursor(DesignCanvasViewModel model, Point screen)
     {
-        StandardCursorType cursor = StandardCursorType.Arrow;
+        if (model.IsHandTool || _spaceHeld)
+        {
+            Cursor = new Cursor(StandardCursorType.Hand);
+            return;
+        }
+
         if (model.SelectedLayer is { } selected)
         {
             Point[] cornersMm = selected.Corners();
-            if (cornersMm.Any(corner => Near(model.Viewport.ToScreen(corner), screen, HandleSize))
-                || Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, HandleSize + 2))
+            for (int index = 0; index < cornersMm.Length; index++)
             {
-                cursor = StandardCursorType.SizeAll;
+                Point corner = model.Viewport.ToScreen(cornersMm[index]);
+                if (Near(corner, screen, HandleSize))
+                {
+                    // Pick the diagonal from where the corner sits relative to the layer's centre.
+                    Point centre = model.Viewport.ToScreen(selected.Centre);
+                    bool descending = (corner.X - centre.X) * (corner.Y - centre.Y) > 0;
+                    Cursor = new Cursor(descending ? StandardCursorType.BottomRightCorner : StandardCursorType.BottomLeftCorner);
+                    return;
+                }
+            }
+
+            if (Near(model.Viewport.ToScreen(RotateHandleMm(model.Viewport, selected, cornersMm)), screen, RotateHandleRadius + 2)
+                || InRotateZone(model, cornersMm, screen))
+            {
+                Cursor = RotateCursor();
+                return;
             }
         }
 
-        if (cursor == StandardCursorType.Arrow && model.HitTest(model.Viewport.ToModel(screen)) is not null)
+        Cursor = new Cursor(model.HitTest(model.Viewport.ToModel(screen)) is not null
+            ? StandardCursorType.SizeAll
+            : StandardCursorType.Arrow);
+    }
+
+    /// <summary>A small turn-arrow cursor drawn once; falls back to the cross if bitmaps are unavailable.</summary>
+    private static Cursor RotateCursor()
+    {
+        if (_rotateCursor is not null)
         {
-            cursor = StandardCursorType.Hand;
+            return _rotateCursor;
         }
 
-        Cursor = new Cursor(cursor);
+        try
+        {
+            const int size = 24;
+            RenderTargetBitmap bitmap = new(new PixelSize(size, size));
+            using (DrawingContext context = bitmap.CreateDrawingContext())
+            {
+                Point centre = new(size / 2.0, size / 2.0);
+                context.DrawEllipse(new SolidColorBrush(Color.FromArgb(230, 255, 255, 255)), null, centre, 10, 10);
+                DrawTurnArrow(context, centre, 6.5, new Pen(Brushes.Black, 1.8));
+            }
+
+            _rotateCursor = new Cursor(bitmap, new PixelPoint(size / 2, size / 2));
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or NotSupportedException or PlatformNotSupportedException)
+        {
+            _rotateCursor = new Cursor(StandardCursorType.SizeAll);
+        }
+
+        return _rotateCursor;
+    }
+
+    /// <summary>
+    /// True just outside one of the selected layer's corners (beyond the scale handle, within
+    /// <see cref="RotateZone"/> and outside the layer's outline): grabbing there rotates freely.
+    /// </summary>
+    private static bool InRotateZone(DesignCanvasViewModel model, Point[] cornersMm, Point screen)
+    {
+        Point[] corners = cornersMm.Select(model.Viewport.ToScreen).ToArray();
+        if (Inside(corners, screen))
+        {
+            return false;
+        }
+
+        foreach (Point corner in corners)
+        {
+            double distance = Math.Sqrt(((screen.X - corner.X) * (screen.X - corner.X)) + ((screen.Y - corner.Y) * (screen.Y - corner.Y)));
+            if (distance > HandleSize && distance <= RotateZone)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Point in convex polygon: the point lies on the same side of every edge.</summary>
+    private static bool Inside(Point[] polygon, Point point)
+    {
+        int sign = 0;
+        for (int index = 0; index < polygon.Length; index++)
+        {
+            Point a = polygon[index];
+            Point b = polygon[(index + 1) % polygon.Length];
+            double cross = ((b.X - a.X) * (point.Y - a.Y)) - ((b.Y - a.Y) * (point.X - a.X));
+            int side = Math.Sign(cross);
+            if (side == 0)
+            {
+                continue;
+            }
+
+            if (sign == 0)
+            {
+                sign = side;
+            }
+            else if (side != sign)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static Point Centre(LayerTransform transform) => new(transform.TranslateXMm, transform.TranslateYMm);

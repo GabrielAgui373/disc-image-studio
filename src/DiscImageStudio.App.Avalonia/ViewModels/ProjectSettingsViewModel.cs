@@ -75,12 +75,12 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
 {
     private const string CurrentGeometryId = "current-geometry";
 
-    private static readonly FilePickerType ImageFileType = new(
-        "Images",
+    private FilePickerType ImageFileType => new(
+        _text["fileType.images"],
         ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.tif", "*.tiff", "*.webp"],
         ["image/*"]);
 
-    private static readonly FilePickerType CalibrationFileType = new("Calibration session", ["*.json", "*"]);
+    private FilePickerType CalibrationFileType => new(_text["fileType.calibrationSession"], ["*.json", "*"]);
 
     private readonly ProjectLifecycleService _projects;
     private readonly ProjectEditor? _editor;
@@ -131,7 +131,26 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
     public partial bool IsBusy { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RenameHint), nameof(HasRenameHint))]
     public partial string Name { get; set; } = string.Empty;
+
+    /// <summary>What saving will do to the project file name after this rename.</summary>
+    public string RenameHint
+    {
+        get
+        {
+            if (_projects.PreviewFileRename(Name) is not { } rename)
+            {
+                return string.Empty;
+            }
+
+            return rename.BlockedBy is { } blocked
+                ? string.Format(System.Globalization.CultureInfo.CurrentUICulture, _text["projectSettings.name.renameBlocked"], System.IO.Path.GetFileName(blocked))
+                : string.Format(System.Globalization.CultureInfo.CurrentUICulture, _text["projectSettings.name.renameHint"], System.IO.Path.GetFileName(rename.TargetPath));
+        }
+    }
+
+    public bool HasRenameHint => RenameHint.Length > 0;
 
     [ObservableProperty]
     public partial string FamilyTitle { get; private set; } = string.Empty;

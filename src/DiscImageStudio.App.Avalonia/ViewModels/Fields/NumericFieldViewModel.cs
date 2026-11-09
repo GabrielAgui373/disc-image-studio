@@ -118,13 +118,13 @@ public sealed partial class NumericFieldViewModel : ObservableObject
         Error = null;
     }
 
-    private string Format(double value) => value.ToString(_format, CultureInfo.CurrentCulture);
+    private string Format(double value) => value.ToString(_format, CultureInfo.CurrentUICulture);
 
-    /// <summary>Accepts the current culture's decimal separator and, as a fallback, the invariant one.</summary>
+    /// <summary>Accepts the interface language's decimal separator and, as a fallback, the invariant one.</summary>
     private static bool TryParse(string? text, out double value)
     {
         string trimmed = (text ?? string.Empty).Trim();
-        return (double.TryParse(trimmed, NumberStyles.Float, CultureInfo.CurrentCulture, out value)
+        return (double.TryParse(trimmed, NumberStyles.Float, CultureInfo.CurrentUICulture, out value)
                 || double.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
                && double.IsFinite(value);
     }

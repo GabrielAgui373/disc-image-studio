@@ -127,6 +127,38 @@ public static class DesignEdits
         };
     }
 
+    /// <summary>Sets the file generation writes, which Preview also reads back.</summary>
+    public static ProjectWorkspace SetOutputPath(ProjectWorkspace workspace, string outputPath)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
+        DeliveryState delivery = workspace.Delivery;
+        return workspace with
+        {
+            Delivery = new DeliveryState(
+                outputPath.Trim(),
+                delivery.DataDirectory,
+                delivery.VolumeLabel,
+                delivery.FilesAtOuterRing),
+        };
+    }
+
+    /// <summary>Links (or, with null/blank, unlinks) the project's calibration session file.</summary>
+    public static ProjectWorkspace SetCalibrationSession(ProjectWorkspace workspace, string? sessionPath)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        ProjectIdentity identity = workspace.Identity;
+        return workspace with
+        {
+            Identity = new ProjectIdentity(
+                identity.Name,
+                identity.CreatedUtc,
+                identity.ModifiedUtc,
+                string.IsNullOrWhiteSpace(sessionPath) ? null : sessionPath.Trim(),
+                identity.ThumbnailPngBase64),
+        };
+    }
+
     public static int IndexOf(IReadOnlyList<DesignLayerState> layers, string layerId)
     {
         for (int index = 0; index < layers.Count; index++)

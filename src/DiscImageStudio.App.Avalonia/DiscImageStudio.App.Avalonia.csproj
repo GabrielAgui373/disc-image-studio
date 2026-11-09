@@ -9,7 +9,7 @@
     <AssemblyName>DiscImageStudio.App.Avalonia</AssemblyName>
     <RootNamespace>DiscImageStudio.App.Avalonia</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\DiscImageStudio.ico</ApplicationIcon>
     <Title>Disc Image Studio</Title>
     <Product>Disc Image Studio</Product>
     <Description>Create image-mapped CD, DVD and Blu-ray artifacts on Linux.</Description>
@@ -17,6 +17,10 @@
     <Copyright>Copyright © 2026</Copyright>
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <NeutralLanguage>en</NeutralLanguage>
+    <!-- Interface languages: English (Strings.resx) and Brazilian Portuguese (Strings.pt-BR.resx).
+         Satellites of other languages that dependencies carry are left out of the output. -->
+    <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,6 +43,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../DiscImageStudio.Application/DiscImageStudio.Application.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Burning.Abstractions/DiscImageStudio.Burning.Abstractions.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Burning.Simulated/DiscImageStudio.Burning.Simulated.csproj" />
+    <ProjectReference Include="../DiscImageStudio.Burning.Linux/DiscImageStudio.Burning.Linux.csproj" />
     <ProjectReference Include="../DiscImageStudio.Generation/DiscImageStudio.Generation.csproj" />
     <ProjectReference Include="../DiscImageStudio.Preview/DiscImageStudio.Preview.csproj" />
   </ItemGroup>
