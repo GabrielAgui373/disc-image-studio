@@ -112,8 +112,8 @@ public sealed class RecentProjectsTests
         string project = Path.Combine(directory, "keep.discproj");
         Assert.True((await CreateLifecycle(store, new MutableClock(DateTimeOffset.UnixEpoch)).CreateProjectAsync(Request(project, "Keep"))).Succeeded);
         RecentProjectsService service = new(store, new JsonProjectDocumentStore(), new PhysicalFileSystem());
-        string text = new EnglishTextCatalog()["recent.removed"];
-        RecentProjectsViewModel viewModel = new(service, new FakeDecoder(), new EnglishTextCatalog(), _ => Task.FromResult(true));
+        string text = ResourceTextCatalog.English["recent.removed"];
+        RecentProjectsViewModel viewModel = new(service, new FakeDecoder(), ResourceTextCatalog.English, _ => Task.FromResult(true));
         await viewModel.RefreshAsync();
         RecentProjectItem item = Assert.Single(viewModel.Items);
 
@@ -137,7 +137,7 @@ public sealed class RecentProjectsTests
         RecentProjectsViewModel viewModel = new(
             service,
             new FakeDecoder(),
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             _ =>
             {
                 openCalls++;
@@ -168,7 +168,7 @@ public sealed class RecentProjectsTests
         RecentProjectsViewModel viewModel = new(
             service,
             decoder,
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             path =>
             {
                 opened = path;

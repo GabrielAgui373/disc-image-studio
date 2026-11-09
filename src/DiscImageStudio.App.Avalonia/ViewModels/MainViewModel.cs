@@ -418,6 +418,11 @@ public partial class MainViewModel : ViewModelBase, IOverlayPromptPresenter
     public string ProjectSettingsLabel { get; }
 
     public string Title { get; }
+    public string HeaderSubtitle => _text["shell.subtitle"];
+    public string PlatformBadge => _text["shell.badge"];
+    public string SidebarToggleLabel => _text["shell.sidebar.toggle"];
+    public string SidebarExpandTip => _text["shell.sidebar.expand"];
+    public string SidebarCollapseTip => _text["shell.sidebar.collapse"];
     public string StatusTitle { get; }
     public string StatusDescription { get; }
     public string AboutTitle { get; }

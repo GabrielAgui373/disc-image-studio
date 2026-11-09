@@ -234,7 +234,7 @@ public sealed partial class RecentProjectsViewModel : ObservableObject
         => string.Format(
             CultureInfo.CurrentUICulture,
             _text["recent.opened"],
-            openedUtc.ToLocalTime().ToString("MMM d, yyyy · HH:mm", CultureInfo.CurrentUICulture));
+            openedUtc.ToLocalTime().ToString(_text["recent.dateFormat"], CultureInfo.CurrentUICulture));
 
     private string Format(string key, string argument)
         => string.Format(CultureInfo.CurrentUICulture, _text[key], argument);

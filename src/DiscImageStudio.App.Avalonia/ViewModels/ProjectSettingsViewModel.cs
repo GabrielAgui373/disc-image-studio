@@ -75,12 +75,12 @@ public sealed partial class ProjectSettingsViewModel : ObservableObject
 {
     private const string CurrentGeometryId = "current-geometry";
 
-    private static readonly FilePickerType ImageFileType = new(
-        "Images",
+    private FilePickerType ImageFileType => new(
+        _text["fileType.images"],
         ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.tif", "*.tiff", "*.webp"],
         ["image/*"]);
 
-    private static readonly FilePickerType CalibrationFileType = new("Calibration session", ["*.json", "*"]);
+    private FilePickerType CalibrationFileType => new(_text["fileType.calibrationSession"], ["*.json", "*"]);
 
     private readonly ProjectLifecycleService _projects;
     private readonly ProjectEditor? _editor;

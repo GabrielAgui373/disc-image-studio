@@ -107,7 +107,7 @@ public sealed class AvaloniaHostTests
             prompts,
             settingsStore,
             new UserSettings { Culture = "en", Theme = ApplicationTheme.Dark },
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             new RecordingLogger());
 
         Assert.True(await lifetime.RequestShutdownAsync());
@@ -133,7 +133,7 @@ public sealed class AvaloniaHostTests
             prompts,
             new MemorySettingsStore(),
             new UserSettings(),
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             new RecordingLogger());
 
         Assert.True(await lifetime.RequestShutdownAsync());
@@ -180,7 +180,7 @@ public sealed class AvaloniaHostTests
             prompts,
             new MemorySettingsStore(),
             new UserSettings(),
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             new RecordingLogger());
 
         Assert.False(await lifetime.RequestShutdownAsync());
@@ -218,6 +218,7 @@ public sealed class AvaloniaHostTests
             StartupPreferences.Apply(app, new UserSettings
             {
                 Culture = "en",
+                Language = "en",
                 Theme = ApplicationTheme.Dark,
             });
 
@@ -297,7 +298,7 @@ public sealed class AvaloniaHostTests
             new PhysicalFileSystem(),
             clipboard,
             launcher,
-            new EnglishTextCatalog(),
+            ResourceTextCatalog.English,
             about,
             projects,
             new JobCoordinator(new FixedClock()),

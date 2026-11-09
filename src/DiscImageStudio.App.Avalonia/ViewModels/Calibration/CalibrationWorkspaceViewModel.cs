@@ -49,7 +49,7 @@ public sealed partial class CalibrationWorkspaceViewModel : ObservableObject
 {
     private const int PreviewSize = 720;
     private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(250);
-    private static readonly FilePickerType SessionFileType = new("Calibration session", ["*.calibration.json"], ["application/json"]);
+    private FilePickerType SessionFileType => new(_text["fileType.calibrationSession"], ["*.calibration.json"], ["application/json"]);
 
     private readonly CalibrationTargetRunner _runner;
     private readonly ProjectLifecycleService _projects;

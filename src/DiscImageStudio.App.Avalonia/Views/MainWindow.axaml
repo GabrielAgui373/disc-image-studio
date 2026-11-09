@@ -43,8 +43,8 @@
                 <Button x:Name="SidebarToggleButton"
                         Classes="ghost sidebar-toggle"
                         Click="ToggleSidebar_Click"
-                        AutomationProperties.Name="Toggle sidebar"
-                        ToolTip.Tip="Toggle sidebar">
+                        AutomationProperties.Name="{Binding SidebarToggleLabel}"
+                        ToolTip.Tip="{Binding SidebarToggleLabel}">
                     <Viewbox Width="18" Height="18">
                         <Canvas Width="24" Height="24">
                             <Path Classes="sidebar-toggle-icon sidebar-toggle-expand" Data="M4,7 H20 M4,12 H20 M4,17 H20" />
@@ -56,7 +56,7 @@
                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
                     <TextBlock x:Name="HeaderSubtitle"
-                               Text="Linux desktop workspace"
+                               Text="{Binding HeaderSubtitle}"
                                Classes="sidebar-caption" />
                 </StackPanel>
 
@@ -65,7 +65,7 @@
                         CornerRadius="{DynamicResource DiscRadiusChip}"
                         Padding="8,3"
                         VerticalAlignment="Center">
-                    <TextBlock Text="LINUX" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding PlatformBadge}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{DynamicResource DiscAccentBrush}" />
                 </Border>
             </Grid>
@@ -417,6 +417,24 @@
                                               Description="{Binding Description}"
                                               x:DataType="vm:PreferencesViewModel">
                             <StackPanel Spacing="16">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding LanguageLabel}" Classes="settings-field-label" />
+                                    <Border Classes="design-tabs" MaxWidth="560" HorizontalAlignment="Left">
+                                        <UniformGrid Rows="1">
+                                            <Button Classes="design-tab" Classes.active="{Binding IsSystemLanguage}"
+                                                    Content="{Binding SystemLanguageLabel}" Command="{Binding UseSystemLanguageCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsEnglish}"
+                                                    Content="{Binding EnglishLabel}" Command="{Binding UseEnglishCommand}" />
+                                            <Button Classes="design-tab" Classes.active="{Binding IsPortuguese}"
+                                                    Content="{Binding PortugueseLabel}" Command="{Binding UsePortugueseCommand}" />
+                                        </UniformGrid>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding NeedsRestart}">
+                                        <TextBlock Text="{Binding LanguageRestartHint}" Classes="settings-hint"
+                                                   VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <Button Classes="secondary" Content="{Binding RestartLabel}" Command="{Binding RestartCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
                                 <StackPanel Spacing="8">
                                     <TextBlock Text="{Binding ThemeLabel}" Classes="settings-field-label" />
                                     <Border Classes="design-tabs" MaxWidth="420" HorizontalAlignment="Left">

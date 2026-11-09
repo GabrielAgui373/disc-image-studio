@@ -53,9 +53,7 @@ public sealed class AppHost : IDisposable
         PhysicalAtomicFileStorage storage = new();
         JsonSettingsStore settingsStore = new(paths.SettingsFilePath, storage, logger);
         UserSettings settings = settingsStore.Load();
-        StartupPreferences.Apply(app, settings);
-
-        EnglishTextCatalog text = new();
+        ResourceTextCatalog text = new(StartupPreferences.Apply(app, settings));
         MainWindow? mainWindow = null;
         Func<TopLevel?> topLevel = () => mainWindow;
         Func<Window?> owner = () => mainWindow;
@@ -213,6 +211,8 @@ public sealed class AppHost : IDisposable
             filePicker,
             text,
             theme => app.RequestedThemeVariant = theme);
+        AppHost? host = null;
+        preferences.RestartRequested += () => host?.RestartAsync();
         // The lifetime saves the settings again on exit; it must save the latest ones.
         preferences.Changed += applicationLifetime.UpdateSettings;
         viewModel.AttachPreferences(preferences);
@@ -224,7 +224,24 @@ public sealed class AppHost : IDisposable
         mainWindow.AttachLifetime(applicationLifetime);
 
         logger.Log(AppLogLevel.Information, "host.started", "Avalonia host services were composed successfully.");
-        return new AppHost(desktop, exceptionMonitor, applicationLifetime, mainWindow, services);
+        host = new AppHost(desktop, exceptionMonitor, applicationLifetime, mainWindow, services);
+        return host;
+    }
+
+    /// <summary>
+    /// Closes the app the normal way (unsaved changes and running jobs are asked about first)
+    /// and starts it again once it has exited, so a new interface language takes effect.
+    /// </summary>
+    public async void RestartAsync()
+    {
+        if (_retryingDesktopShutdown || !await _applicationLifetime.RequestShutdownAsync())
+        {
+            return;
+        }
+
+        Program.RestartAfterExit = true;
+        _retryingDesktopShutdown = true;
+        _desktop.TryShutdown();
     }
 
     public void Dispose()

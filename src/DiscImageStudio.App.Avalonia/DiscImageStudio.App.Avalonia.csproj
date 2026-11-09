@@ -17,6 +17,10 @@
     <Copyright>Copyright © 2026</Copyright>
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <NeutralLanguage>en</NeutralLanguage>
+    <!-- Interface languages: English (Strings.resx) and Brazilian Portuguese (Strings.pt-BR.resx).
+         Satellites of other languages that dependencies carry are left out of the output. -->
+    <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

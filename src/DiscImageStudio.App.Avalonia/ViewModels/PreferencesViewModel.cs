@@ -11,9 +11,10 @@ using DiscImageStudio.Application.Settings;
 namespace DiscImageStudio.App.Avalonia.ViewModels;
 
 /// <summary>
-/// The application preferences on the Settings page: theme, default project folder and the
-/// cache. Each change is applied at once and saved to the settings file; nothing waits for a
-/// "Save" button. The cache is cleared only while no job runs and no preview holds its source.
+/// The application preferences on the Settings page: language, theme, default project folder
+/// and the cache. Each change is saved to the settings file at once; nothing waits for a "Save"
+/// button. The theme applies immediately, the language when the app restarts. The cache is
+/// cleared only while no job runs and no preview holds its source.
 /// </summary>
 public sealed partial class PreferencesViewModel : ObservableObject
 {
@@ -49,17 +50,37 @@ public sealed partial class PreferencesViewModel : ObservableObject
         Settings = (settings ?? throw new ArgumentNullException(nameof(settings))).Normalize();
         _loading = true;
         Theme = Settings.Theme;
+        Language = AppLanguage.Normalize(Settings.Language);
         _loading = false;
     }
 
     /// <summary>Raised after every saved change, with the new settings.</summary>
     public event Action<UserSettings>? Changed;
 
+    /// <summary>Raised by "Restart now"; the host closes the app the normal way and starts it again.</summary>
+    public event Action? RestartRequested;
+
     public UserSettings Settings { get; private set; }
 
     public string Title => _text["preferences.title"];
 
     public string Description => _text["preferences.description"];
+
+    public string LanguageLabel => _text["preferences.language"];
+
+    /// <summary>"System" names the language the system choice resolves to.</summary>
+    public string SystemLanguageLabel => string.Format(
+        _text.Culture,
+        _text["preferences.language.system"],
+        LanguageName(AppLanguage.Resolve(AppLanguage.System)));
+
+    public string EnglishLabel => _text["preferences.language.english"];
+
+    public string PortugueseLabel => _text["preferences.language.portuguese"];
+
+    public string LanguageRestartHint => _text["preferences.language.restartHint"];
+
+    public string RestartLabel => _text["preferences.language.restart"];
 
     public string ThemeLabel => _text["preferences.theme"];
 
@@ -90,6 +111,50 @@ public sealed partial class PreferencesViewModel : ObservableObject
     public bool IsLightTheme => Theme == ApplicationTheme.Light;
 
     public bool IsDarkTheme => Theme == ApplicationTheme.Dark;
+
+    /// <summary>The saved language choice: "system", "en" or "pt-BR".</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSystemLanguage), nameof(IsEnglish), nameof(IsPortuguese), nameof(NeedsRestart))]
+    public partial string Language { get; private set; } = AppLanguage.System;
+
+    public bool IsSystemLanguage => Language == AppLanguage.System;
+
+    public bool IsEnglish => Language == AppLanguage.English;
+
+    public bool IsPortuguese => Language == AppLanguage.PortugueseBrazil;
+
+    /// <summary>True when the saved choice resolves to another language than the one showing.</summary>
+    public bool NeedsRestart => AppLanguage.Resolve(Language) != _text.Culture.Name;
+
+    [RelayCommand]
+    private void UseSystemLanguage() => SetLanguage(AppLanguage.System);
+
+    [RelayCommand]
+    private void UseEnglish() => SetLanguage(AppLanguage.English);
+
+    [RelayCommand]
+    private void UsePortuguese() => SetLanguage(AppLanguage.PortugueseBrazil);
+
+    [RelayCommand]
+    private void Restart() => RestartRequested?.Invoke();
+
+    private void SetLanguage(string language)
+    {
+        if (_loading || Language == language)
+        {
+            return;
+        }
+
+        string previous = Language;
+        Language = language;
+        if (!Save(Settings with { Language = language }))
+        {
+            Language = previous;
+        }
+    }
+
+    private string LanguageName(string language)
+        => language == AppLanguage.PortugueseBrazil ? PortugueseLabel : EnglishLabel;
 
     /// <summary>The folder new projects go to by default.</summary>
     public string ProjectsDirectory => string.IsNullOrWhiteSpace(Settings.DefaultProjectDirectory)
@@ -188,7 +253,7 @@ public sealed partial class PreferencesViewModel : ObservableObject
         await RefreshCacheAsync();
     }
 
-    private void Save(UserSettings settings)
+    private bool Save(UserSettings settings)
     {
         UserSettings normalized = settings.Normalize();
         try
@@ -199,10 +264,12 @@ public sealed partial class PreferencesViewModel : ObservableObject
             OnPropertyChanged(nameof(ProjectsDirectory));
             OnPropertyChanged(nameof(IsCustomProjectsDirectory));
             Changed?.Invoke(normalized);
+            return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             StatusText = string.Format(CultureInfo.CurrentUICulture, _text["preferences.saveFailed"], exception.Message);
+            return false;
         }
     }
 }

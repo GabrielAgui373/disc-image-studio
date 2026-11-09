@@ -25,7 +25,7 @@ public enum CalibrationStep
 /// </summary>
 public sealed partial class CalibrationWorkspaceViewModel
 {
-    private static readonly FilePickerType PhotoFileType = new("Photo", ["*.jpg", "*.jpeg", "*.png", "*.bmp", "*.gif"], ["image/jpeg", "image/png"]);
+    private FilePickerType PhotoFileType => new(_text["fileType.photo"], ["*.jpg", "*.jpeg", "*.png", "*.bmp", "*.gif"], ["image/jpeg", "image/png"]);
     private static readonly TimeSpan DraftDelay = TimeSpan.FromSeconds(1.5);
 
     private readonly CalibrationPhotoStep _photo = new();

@@ -3,6 +3,7 @@
   <id>io.github.jiafeimiao_k_cat.discimagestudio</id>
   <name>Disc Image Studio</name>
   <summary>Design artwork that appears on the data side of optical discs</summary>
+  <summary xml:lang="pt-BR">Crie artes que aparecem no lado gravado de discos ópticos</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <description>
@@ -13,6 +14,10 @@
     <p>
       Design the disc surface with layers, preview how the disc will read back, export the image
       with integrity checks, calibrate the geometry of your drive and media from a photo, and burn.
+    </p>
+    <p xml:lang="pt-BR">
+      Desenhe a superfície do disco em camadas, veja na prévia como o disco será lido, exporte a imagem
+      com verificações de integridade, calibre a geometria do seu gravador e mídia a partir de uma foto e grave.
     </p>
   </description>
   <launchable type="desktop-id">disc-image-studio.desktop</launchable>
@@ -29,6 +34,10 @@
   <categories>
     <category>Graphics</category>
   </categories>
+  <languages>
+    <lang>en</lang>
+    <lang>pt_BR</lang>
+  </languages>
   <provides>
     <binary>disc-image-studio</binary>
   </provides>

@@ -13,9 +13,15 @@ public sealed record UserSettings
 {
     public const int CurrentSchemaVersion = 1;
 
+    public const string SystemLanguage = "system";
+
     public int SchemaVersion { get; init; } = CurrentSchemaVersion;
 
+    /// <summary>Formatting culture for numbers and dates that are not interface text.</summary>
     public string Culture { get; init; } = "en";
+
+    /// <summary>Interface language: "system" (follow the system) or a language tag such as "pt-BR".</summary>
+    public string Language { get; init; } = SystemLanguage;
 
     public ApplicationTheme Theme { get; init; } = ApplicationTheme.System;
 
@@ -26,6 +32,7 @@ public sealed record UserSettings
         {
             SchemaVersion = CurrentSchemaVersion,
             Culture = NormalizeCulture(Culture),
+            Language = string.IsNullOrWhiteSpace(Language) ? SystemLanguage : Language.Trim(),
             Theme = Enum.IsDefined(Theme) ? Theme : ApplicationTheme.System,
             DefaultProjectDirectory = NormalizeDirectory(DefaultProjectDirectory),
         };

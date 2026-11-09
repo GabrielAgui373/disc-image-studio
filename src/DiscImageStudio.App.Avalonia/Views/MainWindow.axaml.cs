@@ -35,6 +35,11 @@ public partial class MainWindow : Window
         await ApplySidebarToggleAsync();
     }
 
+    private string? SidebarTip(bool isCollapsed)
+        => DataContext is DiscImageStudio.App.Avalonia.ViewModels.MainViewModel shell
+            ? isCollapsed ? shell.SidebarExpandTip : shell.SidebarCollapseTip
+            : null;
+
     private void ApplyShellLayout()
     {
         bool isCompact = Bounds.Width < CompactLayoutWidth;
@@ -43,7 +48,7 @@ public partial class MainWindow : Window
         ApplySidebarState(isCollapsed, showLabels: !isCollapsed);
         HeaderSubtitle.IsVisible = !isCompact;
         SidebarToggleButton.Classes.Set("collapsed", isCollapsed);
-        ToolTip.SetTip(SidebarToggleButton, isCollapsed ? "Expand sidebar" : "Collapse sidebar");
+        ToolTip.SetTip(SidebarToggleButton, SidebarTip(isCollapsed));
     }
 
     private async Task ApplySidebarToggleAsync()
@@ -62,7 +67,7 @@ public partial class MainWindow : Window
 
         HeaderSubtitle.IsVisible = true;
         SidebarToggleButton.Classes.Set("collapsed", isCollapsed);
-        ToolTip.SetTip(SidebarToggleButton, isCollapsed ? "Expand sidebar" : "Collapse sidebar");
+        ToolTip.SetTip(SidebarToggleButton, SidebarTip(isCollapsed));
 
         try
         {

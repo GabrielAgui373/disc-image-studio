@@ -1,0 +1,841 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="app.title" xml:space="preserve"><value>Disc Image Studio</value></data>
+  <data name="host.status.title" xml:space="preserve"><value>Host Linux pronto</value></data>
+  <data name="host.status.description" xml:space="preserve"><value>Os serviços de plataforma do Avalonia estão configurados e prontos para a janela do aplicativo.</value></data>
+  <data name="about.title" xml:space="preserve"><value>Informações de execução</value></data>
+  <data name="about.version" xml:space="preserve"><value>Versão</value></data>
+  <data name="about.commit" xml:space="preserve"><value>Commit</value></data>
+  <data name="about.runtime" xml:space="preserve"><value>Runtime .NET</value></data>
+  <data name="about.avalonia" xml:space="preserve"><value>Avalonia</value></data>
+  <data name="about.operatingSystem" xml:space="preserve"><value>Sistema operacional</value></data>
+  <data name="about.configDirectory" xml:space="preserve"><value>Configuração</value></data>
+  <data name="about.dataDirectory" xml:space="preserve"><value>Dados do aplicativo</value></data>
+  <data name="about.cacheDirectory" xml:space="preserve"><value>Cache</value></data>
+  <data name="about.logsDirectory" xml:space="preserve"><value>Logs</value></data>
+  <data name="action.copyDiagnostics" xml:space="preserve"><value>Copiar diagnóstico</value></data>
+  <data name="action.openLogs" xml:space="preserve"><value>Abrir pasta de logs</value></data>
+  <data name="action.diagnosticsCopied" xml:space="preserve"><value>Diagnóstico copiado.</value></data>
+  <data name="action.logsOpened" xml:space="preserve"><value>Pasta de logs aberta.</value></data>
+  <data name="action.logsOpenFailed" xml:space="preserve"><value>Não foi possível abrir a pasta de logs.</value></data>
+  <data name="navigation.home" xml:space="preserve"><value>Início</value></data>
+  <data name="navigation.design" xml:space="preserve"><value>Design</value></data>
+  <data name="navigation.preview" xml:space="preserve"><value>Prévia</value></data>
+  <data name="navigation.export" xml:space="preserve"><value>Exportar</value></data>
+  <data name="navigation.burn" xml:space="preserve"><value>Gravar</value></data>
+  <data name="navigation.settings" xml:space="preserve"><value>Configurações</value></data>
+  <data name="navigation.requiresProject" xml:space="preserve"><value>Abra ou crie um projeto para usar esta etapa.</value></data>
+  <data name="navigation.projectSection" xml:space="preserve"><value>PROJETO</value></data>
+  <data name="home.placeholder.title" xml:space="preserve"><value>Seu espaço de trabalho de discos</value></data>
+  <data name="home.placeholder.description" xml:space="preserve"><value>Crie ou abra um projeto para começar o fluxo de imagem em disco.</value></data>
+  <data name="home.hero.eyebrow" xml:space="preserve"><value>DISC IMAGE STUDIO</value></data>
+  <data name="home.hero.title" xml:space="preserve"><value>Faça do seu próximo disco um projeto pensado.</value></data>
+  <data name="home.hero.description" xml:space="preserve"><value>Crie um projeto de CD, DVD ou Blu-ray, ou abra um existente e continue o design.</value></data>
+  <data name="home.continue.eyebrow" xml:space="preserve"><value>PROJETO ATUAL</value></data>
+  <data name="home.continue.action" xml:space="preserve"><value>Continuar no Design</value></data>
+  <data name="home.action.newProject" xml:space="preserve"><value>Novo projeto</value></data>
+  <data name="home.action.openProject" xml:space="preserve"><value>Abrir projeto</value></data>
+  <data name="openProject.title" xml:space="preserve"><value>Abrir um projeto do Disc Image Studio</value></data>
+  <data name="openProject.error.pickerUnavailable" xml:space="preserve"><value>O seletor de arquivos de projeto não está disponível no momento.</value></data>
+  <data name="openProject.error.permissionDenied" xml:space="preserve"><value>Este projeto não pode ser aberto porque o acesso ao arquivo foi negado.</value></data>
+  <data name="openProject.error.notFound" xml:space="preserve"><value>Este arquivo de projeto não está mais no local selecionado.</value></data>
+  <data name="openProject.error.unsupportedSchema" xml:space="preserve"><value>Este projeto usa um formato que esta versão do Disc Image Studio não suporta.</value></data>
+  <data name="openProject.error.invalidFile" xml:space="preserve"><value>Este arquivo não é um projeto válido do Disc Image Studio. Verifique o conteúdo JSON e tente novamente.</value></data>
+  <data name="openProject.error.readFailed" xml:space="preserve"><value>Não foi possível abrir o projeto. Verifique o arquivo e as permissões e tente novamente.</value></data>
+  <data name="saveAs.title" xml:space="preserve"><value>Salvar projeto como</value></data>
+  <data name="saveAs.error.pickerUnavailable" xml:space="preserve"><value>O seletor de arquivos de Salvar como não está disponível no momento.</value></data>
+  <data name="home.template.selectedBadge" xml:space="preserve"><value>Selecionado</value></data>
+  <data name="home.template.cd.title" xml:space="preserve"><value>Compact Disc</value></data>
+  <data name="home.template.cd.description" xml:space="preserve"><value>Prepare um projeto de disco de áudio ou de dados.</value></data>
+  <data name="home.template.cd.capacity" xml:space="preserve"><value>Até 700 MB</value></data>
+  <data name="home.template.dvd.title" xml:space="preserve"><value>DVD</value></data>
+  <data name="home.template.dvd.description" xml:space="preserve"><value>Prepare uma imagem de disco em definição padrão.</value></data>
+  <data name="home.template.dvd.capacity" xml:space="preserve"><value>4,7 GB camada simples</value></data>
+  <data name="home.template.bd.title" xml:space="preserve"><value>Blu-ray</value></data>
+  <data name="home.template.bd.description" xml:space="preserve"><value>Prepare um projeto óptico de alta capacidade.</value></data>
+  <data name="home.template.bd.capacity" xml:space="preserve"><value>25 GB camada simples</value></data>
+  <data name="home.recent.title" xml:space="preserve"><value>Projetos recentes</value></data>
+  <data name="home.recent.description" xml:space="preserve"><value>Projetos que você abriu ou salvou recentemente. Remover um só altera esta lista, nunca o arquivo.</value></data>
+  <data name="recent.opened" xml:space="preserve"><value>Aberto em {0}</value></data>
+  <data name="recent.action.remove" xml:space="preserve"><value>Remover dos projetos recentes</value></data>
+  <data name="recent.removed" xml:space="preserve"><value>{0} foi removido dos projetos recentes. O arquivo do projeto não foi alterado.</value></data>
+  <data name="recent.error.missing" xml:space="preserve"><value>{0} não está mais no local salvo. Restaure o arquivo ou remova-o da lista.</value></data>
+  <data name="recent.status.missing" xml:space="preserve"><value>Arquivo não encontrado</value></data>
+  <data name="recent.status.accessDenied" xml:space="preserve"><value>Acesso negado</value></data>
+  <data name="recent.status.unsupportedSchema" xml:space="preserve"><value>Formato de projeto mais novo</value></data>
+  <data name="recent.status.invalid" xml:space="preserve"><value>Arquivo de projeto inválido</value></data>
+  <data name="home.recent.emptyTitle" xml:space="preserve"><value>Nenhum projeto aberto ainda</value></data>
+  <data name="home.recent.emptyDescription" xml:space="preserve"><value>Crie um projeto ou abra um arquivo .discproj existente para continuar de onde parou.</value></data>
+  <data name="home.platform.title" xml:space="preserve"><value>Sobre e diagnóstico</value></data>
+  <data name="home.platform.description" xml:space="preserve"><value>Informações de execução e XDG para solução de problemas e suporte.</value></data>
+  <data name="newProject.title" xml:space="preserve"><value>Criar um novo projeto</value></data>
+  <data name="newProject.description" xml:space="preserve"><value>Escolha uma família de disco, uma predefinição padrão e onde salvar o projeto. A família não pode ser alterada depois da criação.</value></data>
+  <data name="newProject.name.label" xml:space="preserve"><value>Nome do projeto</value></data>
+  <data name="newProject.name.watermark" xml:space="preserve"><value>Meu projeto de disco</value></data>
+  <data name="newProject.directory.label" xml:space="preserve"><value>Pasta do projeto</value></data>
+  <data name="newProject.directory.hint" xml:space="preserve"><value>O arquivo do projeto e a saída futura serão criados nesta pasta.</value></data>
+  <data name="newProject.browse" xml:space="preserve"><value>Procurar</value></data>
+  <data name="newProject.family.label" xml:space="preserve"><value>Família de disco</value></data>
+  <data name="newProject.family.hint" xml:space="preserve"><value>Selecione a mídia a usar neste projeto.</value></data>
+  <data name="newProject.preset.label" xml:space="preserve"><value>Predefinição inicial</value></data>
+  <data name="newProject.advanced.label" xml:space="preserve"><value>Opções avançadas do projeto</value></data>
+  <data name="newProject.volume.label" xml:space="preserve"><value>Rótulo do volume</value></data>
+  <data name="newProject.outerRing.label" xml:space="preserve"><value>Colocar os dados de arquivos no anel externo</value></data>
+  <data name="newProject.file.label" xml:space="preserve"><value>Arquivo do projeto</value></data>
+  <data name="newProject.create" xml:space="preserve"><value>Criar projeto</value></data>
+  <data name="newProject.defaultVolumeLabel" xml:space="preserve"><value>DISC_IMAGE</value></data>
+  <data name="newProject.preset.cd.title" xml:space="preserve"><value>CD padrão de 80 minutos</value></data>
+  <data name="newProject.preset.cd.description" xml:space="preserve"><value>Um compact disc de 120 mm com a geometria padrão de 80 minutos.</value></data>
+  <data name="newProject.preset.dvd.title" xml:space="preserve"><value>DVD padrão de camada simples</value></data>
+  <data name="newProject.preset.dvd.description" xml:space="preserve"><value>Um perfil DVD-5 de 120 mm com geometria padrão.</value></data>
+  <data name="newProject.preset.bd.title" xml:space="preserve"><value>Blu-ray padrão de camada simples</value></data>
+  <data name="newProject.preset.bd.description" xml:space="preserve"><value>Um perfil BD-R de 25 GB com geometria padrão.</value></data>
+  <data name="newProject.created" xml:space="preserve"><value>{0} foi criado e está pronto para o design.</value></data>
+  <data name="newProject.error.nameRequired" xml:space="preserve"><value>Informe um nome de projeto antes de criá-lo.</value></data>
+  <data name="newProject.error.directoryRequired" xml:space="preserve"><value>Escolha uma pasta de projeto antes de criá-lo.</value></data>
+  <data name="newProject.error.directoryUnavailable" xml:space="preserve"><value>O seletor de pasta de projeto não está disponível no momento.</value></data>
+  <data name="newProject.error.presetRequired" xml:space="preserve"><value>Escolha uma família de disco e uma predefinição inicial válidas.</value></data>
+  <data name="newProject.error.fileExists" xml:space="preserve"><value>Já existe um projeto com este nome na pasta selecionada.</value></data>
+  <data name="newProject.error.invalidPath" xml:space="preserve"><value>O nome ou a pasta do projeto não pode ser usado para um arquivo de projeto.</value></data>
+  <data name="newProject.error.canceled" xml:space="preserve"><value>A criação do projeto foi cancelada porque o projeto atual foi mantido aberto.</value></data>
+  <data name="newProject.error.writeFailed" xml:space="preserve"><value>Não foi possível gravar o projeto. Verifique a pasta selecionada e as permissões.</value></data>
+  <data name="newProject.error.createFailed" xml:space="preserve"><value>Não foi possível criar o projeto. Revise os campos e tente novamente.</value></data>
+  <data name="project.action.settings" xml:space="preserve"><value>Configurações do projeto</value></data>
+  <data name="project.missingAssets.one" xml:space="preserve"><value>1 recurso ausente</value></data>
+  <data name="project.missingAssets.many" xml:space="preserve"><value>{0} recursos ausentes</value></data>
+  <data name="projectSettings.title" xml:space="preserve"><value>Configurações do projeto</value></data>
+  <data name="projectSettings.description" xml:space="preserve"><value>As alterações só chegam ao projeto aberto quando você escolhe Aplicar. Os recursos são referenciados no lugar e nunca são copiados, movidos ou apagados.</value></data>
+  <data name="projectSettings.section.general" xml:space="preserve"><value>Geral</value></data>
+  <data name="projectSettings.name.renameHint" xml:space="preserve"><value>Ao salvar, o arquivo do projeto passa a ser {0}.</value></data>
+  <data name="projectSettings.name.renameBlocked" xml:space="preserve"><value>{0} já existe nesta pasta, então o arquivo do projeto mantém o nome atual.</value></data>
+  <data name="project.status.savedRenamed" xml:space="preserve"><value>{0} salvo como {1}</value></data>
+  <data name="project.status.savedRenameBlocked" xml:space="preserve"><value>{0} salvo; o arquivo manteve o nome porque {1} já existe</value></data>
+  <data name="projectSettings.name.label" xml:space="preserve"><value>Nome do projeto</value></data>
+  <data name="projectSettings.family.label" xml:space="preserve"><value>Família de disco</value></data>
+  <data name="projectSettings.family.locked" xml:space="preserve"><value>Definida quando o projeto foi criado</value></data>
+  <data name="projectSettings.family.cd" xml:space="preserve"><value>Compact Disc</value></data>
+  <data name="projectSettings.family.dvd" xml:space="preserve"><value>DVD</value></data>
+  <data name="projectSettings.family.bd" xml:space="preserve"><value>Blu-ray</value></data>
+  <data name="projectSettings.section.geometry" xml:space="preserve"><value>Predefinição de geometria</value></data>
+  <data name="projectSettings.geometry.hint" xml:space="preserve"><value>Uma predefinição substitui os raios e o número de setores. As opções de saída do CD ficam como estão.</value></data>
+  <data name="projectSettings.geometry.summary" xml:space="preserve"><value>Raio {0:0.##}–{1:0.##} mm · {2:N0} setores</value></data>
+  <data name="projectSettings.preset.current" xml:space="preserve"><value>Geometria atual</value></data>
+  <data name="projectSettings.preset.currentDescription" xml:space="preserve"><value>Manter os raios e o número de setores atuais do projeto.</value></data>
+  <data name="projectSettings.preset.newName.watermark" xml:space="preserve"><value>Nome para uma nova predefinição</value></data>
+  <data name="projectSettings.preset.save" xml:space="preserve"><value>Salvar como predefinição</value></data>
+  <data name="projectSettings.preset.delete" xml:space="preserve"><value>Excluir predefinição</value></data>
+  <data name="projectSettings.preset.savedFrom" xml:space="preserve"><value>Salva a partir de {0}</value></data>
+  <data name="projectSettings.preset.saved" xml:space="preserve"><value>{0} foi adicionada às suas predefinições.</value></data>
+  <data name="projectSettings.preset.deleted" xml:space="preserve"><value>{0} foi excluída das suas predefinições.</value></data>
+  <data name="projectSettings.section.output" xml:space="preserve"><value>Saída</value></data>
+  <data name="projectSettings.volume.label" xml:space="preserve"><value>Rótulo do volume</value></data>
+  <data name="projectSettings.outerRing.label" xml:space="preserve"><value>Colocar os dados de arquivos no anel externo</value></data>
+  <data name="projectSettings.output.label" xml:space="preserve"><value>Arquivo de saída</value></data>
+  <data name="projectSettings.output.pickerTitle" xml:space="preserve"><value>Escolha o arquivo de saída</value></data>
+  <data name="projectSettings.data.label" xml:space="preserve"><value>Pasta de dados</value></data>
+  <data name="projectSettings.data.hint" xml:space="preserve"><value>Opcional. Os arquivos desta pasta são gravados no disco.</value></data>
+  <data name="projectSettings.data.pickerTitle" xml:space="preserve"><value>Escolha a pasta de dados</value></data>
+  <data name="projectSettings.browse" xml:space="preserve"><value>Procurar</value></data>
+  <data name="projectSettings.section.assets" xml:space="preserve"><value>Recursos</value></data>
+  <data name="projectSettings.assets.none" xml:space="preserve"><value>Este projeto ainda não referencia nenhum arquivo externo.</value></data>
+  <data name="projectSettings.assets.allFound" xml:space="preserve"><value>Todos os arquivos e pastas referenciados estão disponíveis.</value></data>
+  <data name="projectSettings.assets.missingSummary" xml:space="preserve"><value>{0} item(ns) referenciado(s) não foi(ram) encontrado(s). Revincule um por um ou procure numa pasta.</value></data>
+  <data name="projectSettings.asset.kind.LayerImage" xml:space="preserve"><value>Imagem de camada</value></data>
+  <data name="projectSettings.asset.kind.DataDirectory" xml:space="preserve"><value>Pasta de dados</value></data>
+  <data name="projectSettings.asset.kind.CalibrationSession" xml:space="preserve"><value>Sessão de calibração</value></data>
+  <data name="projectSettings.asset.found" xml:space="preserve"><value>Disponível</value></data>
+  <data name="projectSettings.asset.missing" xml:space="preserve"><value>Ausente</value></data>
+  <data name="projectSettings.relink" xml:space="preserve"><value>Revincular</value></data>
+  <data name="projectSettings.relink.pickerTitle" xml:space="preserve"><value>Localizar {0}</value></data>
+  <data name="projectSettings.relink.done" xml:space="preserve"><value>{0} agora aponta para o local selecionado.</value></data>
+  <data name="projectSettings.search" xml:space="preserve"><value>Procurar numa pasta</value></data>
+  <data name="projectSettings.review.pickerTitle" xml:space="preserve"><value>Escolha uma pasta para procurar os recursos ausentes</value></data>
+  <data name="projectSettings.review.summary" xml:space="preserve"><value>Foram encontradas correspondências para {0} de {1} itens ausentes. Revise cada uma antes de aplicar.</value></data>
+  <data name="projectSettings.review.scanLimit" xml:space="preserve"><value>A busca parou após 50.000 entradas; escolha uma pasta mais específica para um resultado completo.</value></data>
+  <data name="projectSettings.review.exact" xml:space="preserve"><value>Mesmo nome</value></data>
+  <data name="projectSettings.review.caseDiffers" xml:space="preserve"><value>Maiúsculas e minúsculas diferem — confirme que é o mesmo arquivo</value></data>
+  <data name="projectSettings.review.ambiguous" xml:space="preserve"><value>{0} itens têm este nome — revincule individualmente</value></data>
+  <data name="projectSettings.review.notFound" xml:space="preserve"><value>Não encontrado nesta pasta</value></data>
+  <data name="projectSettings.review.apply" xml:space="preserve"><value>Aplicar as correspondências selecionadas</value></data>
+  <data name="projectSettings.review.cancel" xml:space="preserve"><value>Descartar resultados</value></data>
+  <data name="projectSettings.review.applied" xml:space="preserve"><value>{0} item(ns) revinculado(s). Escolha Aplicar para atualizar o projeto.</value></data>
+  <data name="projectSettings.review.failed" xml:space="preserve"><value>{0} não pôde ser revinculado porque o arquivo mudou.</value></data>
+  <data name="projectSettings.apply" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="projectSettings.error.nameRequired" xml:space="preserve"><value>Informe um nome de projeto.</value></data>
+  <data name="projectSettings.error.outputRequired" xml:space="preserve"><value>Escolha onde o arquivo de saída será gravado.</value></data>
+  <data name="projectSettings.error.invalid" xml:space="preserve"><value>Estas configurações não são válidas para esta família de disco.</value></data>
+  <data name="projectSettings.error.noProject" xml:space="preserve"><value>O projeto foi fechado antes que as configurações pudessem ser aplicadas.</value></data>
+  <data name="projectSettings.error.relinkKind" xml:space="preserve"><value>Escolha um item existente do mesmo tipo (um arquivo para arquivos, uma pasta para pastas).</value></data>
+  <data name="projectSettings.error.searchFailed" xml:space="preserve"><value>Não foi possível procurar na pasta.</value></data>
+  <data name="projectSettings.error.pickerUnavailable" xml:space="preserve"><value>O seletor de arquivos não está disponível no momento.</value></data>
+  <data name="projectSettings.error.presetName" xml:space="preserve"><value>Informe um nome de predefinição com até 80 caracteres.</value></data>
+  <data name="projectSettings.error.presetFileUnreadable" xml:space="preserve"><value>Não foi possível ler o seu arquivo de predefinições, então ele foi mantido como está. Verifique disc-presets.json na pasta de configuração.</value></data>
+  <data name="projectSettings.error.presetWrite" xml:space="preserve"><value>Não foi possível salvar a predefinição. Verifique as permissões da pasta de configuração.</value></data>
+  <data name="design.canvas.title" xml:space="preserve"><value>Tela</value></data>
+  <data name="design.canvas.empty" xml:space="preserve"><value>Este projeto ainda não tem camadas de imagem. As camadas que você adicionar aparecem aqui.</value></data>
+  <data name="design.canvas.missing" xml:space="preserve"><value>Imagem ausente</value></data>
+  <data name="design.canvas.hint" xml:space="preserve"><value>Arraste para mover · os cantos escalam · arraste logo fora de um canto ou pela alça redonda do topo para girar (Shift ajusta a 90°) · [ e ] giram 1° (Shift 15°) · as setas deslocam 0,1 mm (Shift 1 mm) · Delete remove · Ctrl+D duplica · Ctrl/Alt + roda dá zoom · ferramenta mão (H), Espaço + arrastar ou botão do meio movem a vista · clique duplo no fundo para enquadrar</value></data>
+  <data name="design.canvas.handTip" xml:space="preserve"><value>Mão: arraste para mover a vista com zoom (H, ou segure Espaço)</value></data>
+  <data name="design.zoom.in" xml:space="preserve"><value>Aproximar</value></data>
+  <data name="design.zoom.out" xml:space="preserve"><value>Afastar</value></data>
+  <data name="design.zoom.fit" xml:space="preserve"><value>Enquadrar disco</value></data>
+  <data name="design.layer.copyName" xml:space="preserve"><value>{0} cópia</value></data>
+  <data name="design.tab.layers" xml:space="preserve"><value>Camadas</value></data>
+  <data name="design.tab.tone" xml:space="preserve"><value>Tom</value></data>
+  <data name="design.tab.files" xml:space="preserve"><value>Arquivos do disco</value></data>
+  <data name="design.layers.import" xml:space="preserve"><value>Importar imagens</value></data>
+  <data name="design.layers.importTitle" xml:space="preserve"><value>Escolha imagens para adicionar como camadas</value></data>
+  <data name="design.layers.empty" xml:space="preserve"><value>Importe uma ou mais imagens. Cada uma vira uma camada que você pode posicionar, escalar e girar no disco.</value></data>
+  <data name="design.layers.moveUp" xml:space="preserve"><value>Subir</value></data>
+  <data name="design.layers.moveDown" xml:space="preserve"><value>Descer</value></data>
+  <data name="design.layers.drag" xml:space="preserve"><value>Arraste para reordenar</value></data>
+  <data name="design.layers.duplicate" xml:space="preserve"><value>Duplicar</value></data>
+  <data name="design.layers.remove" xml:space="preserve"><value>Remover</value></data>
+  <data name="design.layers.visibility" xml:space="preserve"><value>Mostrar ou ocultar</value></data>
+  <data name="design.layers.relink" xml:space="preserve"><value>Revincular</value></data>
+  <data name="design.layers.relinkTitle" xml:space="preserve"><value>Escolha a imagem desta camada</value></data>
+  <data name="design.props.title" xml:space="preserve"><value>Camada selecionada</value></data>
+  <data name="design.props.name" xml:space="preserve"><value>Nome</value></data>
+  <data name="design.props.x" xml:space="preserve"><value>Horizontal</value></data>
+  <data name="design.props.y" xml:space="preserve"><value>Vertical</value></data>
+  <data name="design.props.scale" xml:space="preserve"><value>Escala</value></data>
+  <data name="design.props.rotation" xml:space="preserve"><value>Rotação</value></data>
+  <data name="design.props.opacity" xml:space="preserve"><value>Opacidade</value></data>
+  <data name="design.props.reset" xml:space="preserve"><value>Redefinir posição</value></data>
+  <data name="design.props.none" xml:space="preserve"><value>Selecione uma camada para editar a posição.</value></data>
+  <data name="design.props.image" xml:space="preserve"><value>Arquivo de imagem</value></data>
+  <data name="design.tone.title" xml:space="preserve"><value>Tom</value></data>
+  <data name="design.tone.description" xml:space="preserve"><value>Como os níveis de cinza da arte viram os níveis que o disco consegue gravar. Vale para o design inteiro.</value></data>
+  <data name="design.tone.dither" xml:space="preserve"><value>Intensidade do pontilhado</value></data>
+  <data name="design.tone.brightness" xml:space="preserve"><value>Brilho</value></data>
+  <data name="design.tone.levels" xml:space="preserve"><value>Níveis graváveis</value></data>
+  <data name="design.tone.twoLevels" xml:space="preserve"><value>Dois (preto e branco)</value></data>
+  <data name="design.tone.fourLevels" xml:space="preserve"><value>Quatro (só CD)</value></data>
+  <data name="design.tone.levelsHintCd" xml:space="preserve"><value>Quatro níveis acrescentam dois tons intermediários; exigem um gravador de CD que os reproduza com confiabilidade.</value></data>
+  <data name="design.tone.levelsHintOther" xml:space="preserve"><value>DVD e Blu-ray gravam dois níveis.</value></data>
+  <data name="design.tone.srgb" xml:space="preserve"><value>Linearizar o sRGB antes do mapeamento</value></data>
+  <data name="design.tone.reset" xml:space="preserve"><value>Voltar ao padrão para fotos</value></data>
+  <data name="design.tone.previewNote" xml:space="preserve"><value>Densidade em preto e branco como a geração grava; a granulação é indicativa.</value></data>
+  <data name="design.files.title" xml:space="preserve"><value>Arquivos do disco</value></data>
+  <data name="design.files.description" xml:space="preserve"><value>Os arquivos desta pasta são gravados no sistema de arquivos do disco (ISO 9660/Joliet ou UDF) como dados. Eles não são desenhados na arte.</value></data>
+  <data name="design.files.empty" xml:space="preserve"><value>Nenhuma pasta selecionada. O disco leva apenas a arte.</value></data>
+  <data name="design.files.choose" xml:space="preserve"><value>Escolher pasta</value></data>
+  <data name="design.files.clear" xml:space="preserve"><value>Remover pasta</value></data>
+  <data name="design.files.open" xml:space="preserve"><value>Abrir pasta</value></data>
+  <data name="design.files.pickerTitle" xml:space="preserve"><value>Escolha a pasta a gravar no disco</value></data>
+  <data name="design.files.counting" xml:space="preserve"><value>Contando arquivos…</value></data>
+  <data name="design.files.missing" xml:space="preserve"><value>Esta pasta não existe mais. Escolha-a novamente ou remova-a.</value></data>
+  <data name="design.files.summary" xml:space="preserve"><value>{0:N0} arquivos · {1}</value></data>
+  <data name="design.files.summaryPartial" xml:space="preserve"><value>Mais de {0:N0} arquivos · {1} contados até agora</value></data>
+  <data name="design.files.note" xml:space="preserve"><value>As camadas de imagem ficam na aba Camadas; esta pasta só acrescenta arquivos de dados ao disco.</value></data>
+  <data name="history.label.layer.relink" xml:space="preserve"><value>Revincular imagem da camada</value></data>
+  <data name="design.page.title" xml:space="preserve"><value>Design</value></data>
+  <data name="design.page.description" xml:space="preserve"><value>Posicione e transforme as camadas de imagem no disco. Toda alteração pode ser desfeita.</value></data>
+  <data name="export.page.title" xml:space="preserve"><value>Exportar</value></data>
+  <data name="export.page.description" xml:space="preserve"><value>Revise exatamente o que será gravado antes de gerar a imagem do disco.</value></data>
+  <data name="export.plan.title" xml:space="preserve"><value>O que será gerado</value></data>
+  <data name="export.plan.description" xml:space="preserve"><value>Planejado a partir do projeto atual. Tamanhos e posições não dependem dos pixels da imagem; a execução em si usa a composição completa de 8192 px.</value></data>
+  <data name="export.planning" xml:space="preserve"><value>Planejando…</value></data>
+  <data name="export.row.source" xml:space="preserve"><value>Design</value></data>
+  <data name="export.row.media" xml:space="preserve"><value>Disco</value></data>
+  <data name="export.row.format" xml:space="preserve"><value>Formato</value></data>
+  <data name="export.row.files" xml:space="preserve"><value>Arquivos de dados</value></data>
+  <data name="export.row.drawing" xml:space="preserve"><value>Área da imagem</value></data>
+  <data name="export.row.tone" xml:space="preserve"><value>Tom</value></data>
+  <data name="export.row.track" xml:space="preserve"><value>Faixa de áudio</value></data>
+  <data name="export.row.size" xml:space="preserve"><value>Tamanho</value></data>
+  <data name="export.value.source" xml:space="preserve"><value>{0} de {1} camadas visíveis desenhadas</value></data>
+  <data name="export.value.media" xml:space="preserve"><value>{0}, {1:0.##}–{2:0.##} mm, {3:N0} setores</value></data>
+  <data name="export.family.cd" xml:space="preserve"><value>CD</value></data>
+  <data name="export.family.dvd" xml:space="preserve"><value>DVD</value></data>
+  <data name="export.family.bd" xml:space="preserve"><value>Blu-ray</value></data>
+  <data name="export.value.format.cdWave" xml:space="preserve"><value>Áudio de CD (CD-DA) como arquivo WAVE</value></data>
+  <data name="export.value.format.cdRaw" xml:space="preserve"><value>Áudio de CD (CD-DA) como amostras raw big-endian</value></data>
+  <data name="export.value.format.iso" xml:space="preserve"><value>Imagem de dados ISO 9660 + Joliet</value></data>
+  <data name="export.value.format.udf" xml:space="preserve"><value>Imagem de dados UDF 2.01</value></data>
+  <data name="export.value.format.imageOnly" xml:space="preserve"><value>Imagem de disco sem sistema de arquivos</value></data>
+  <data name="export.value.files.none" xml:space="preserve"><value>Nenhum, só a imagem</value></data>
+  <data name="export.value.files.inner" xml:space="preserve"><value>{0:N0} arquivos, {1}, no anel interno</value></data>
+  <data name="export.value.files.outer" xml:space="preserve"><value>{0:N0} arquivos, {1}, no anel externo</value></data>
+  <data name="export.value.drawing" xml:space="preserve"><value>Setores {0:N0}–{1:N0} ({2:0}% do disco)</value></data>
+  <data name="export.value.tone" xml:space="preserve"><value>{0:0}% de pontilhado, {1} níveis</value></data>
+  <data name="export.value.tone.srgb" xml:space="preserve"><value>, sRGB linearizado</value></data>
+  <data name="export.value.track" xml:space="preserve"><value>Intercalação {0} · cue sheet {1}</value></data>
+  <data name="export.value.on" xml:space="preserve"><value>ligada</value></data>
+  <data name="export.value.off" xml:space="preserve"><value>desligada</value></data>
+  <data name="export.value.yes" xml:space="preserve"><value>sim</value></data>
+  <data name="export.value.no" xml:space="preserve"><value>não</value></data>
+  <data name="export.value.size" xml:space="preserve"><value>{0} ({1:N0} bytes)</value></data>
+  <data name="export.destination.title" xml:space="preserve"><value>Destino</value></data>
+  <data name="export.destination.browse" xml:space="preserve"><value>Escolher…</value></data>
+  <data name="export.destination.pickerTitle" xml:space="preserve"><value>Escolha onde salvar a imagem do disco</value></data>
+  <data name="export.format.title" xml:space="preserve"><value>Arquivo de áudio</value></data>
+  <data name="export.format.wave" xml:space="preserve"><value>WAVE (.wav)</value></data>
+  <data name="export.format.raw" xml:space="preserve"><value>Raw (.raw)</value></data>
+  <data name="export.format.hint" xml:space="preserve"><value>WAVE toca em ferramentas de áudio e pode levar um cue sheet; raw são amostras big-endian puras para ferramentas de gravação.</value></data>
+  <data name="export.space" xml:space="preserve"><value>Precisa de {0}; {1} livres neste disco</value></data>
+  <data name="export.space.unknown" xml:space="preserve"><value>Precisa de {0}; não foi possível ler o espaço livre</value></data>
+  <data name="export.fixExtension" xml:space="preserve"><value>Usar {0}</value></data>
+  <data name="export.problems.title" xml:space="preserve"><value>Corrija antes de gerar</value></data>
+  <data name="export.notes.title" xml:space="preserve"><value>Bom saber</value></data>
+  <data name="export.status.ready" xml:space="preserve"><value>Pronto para gerar</value></data>
+  <data name="export.status.blocked" xml:space="preserve"><value>Ainda não está pronto</value></data>
+  <data name="export.note.exists" xml:space="preserve"><value>Já existe um arquivo neste destino. Você será consultado antes de ele ser substituído</value></data>
+  <data name="export.note.existsCompanions" xml:space="preserve"><value> (junto com {0})</value></data>
+  <data name="export.note.nothingDrawn" xml:space="preserve"><value>Nenhuma camada visível pode ser desenhada, então a área da imagem ficará em branco.</value></data>
+  <data name="export.note.layerNotDrawn" xml:space="preserve"><value>A camada "{0}" não pode ser desenhada e vai faltar na imagem.</value></data>
+  <data name="export.problem.unknown" xml:space="preserve"><value>Não foi possível fazer o plano ({0}).</value></data>
+  <data name="export.problem.unexpected" xml:space="preserve"><value>Não foi possível fazer o plano: {0}</value></data>
+  <data name="export.problem.generation.output.required" xml:space="preserve"><value>Escolha onde salvar a imagem do disco.</value></data>
+  <data name="export.problem.generation.output.extension" xml:space="preserve"><value>O nome do arquivo tem a extensão errada para este formato.</value></data>
+  <data name="export.problem.generation.output.overwrites_source" xml:space="preserve"><value>O destino sobrescreveria a imagem de origem do design.</value></data>
+  <data name="export.problem.generation.output.inside_source_directory" xml:space="preserve"><value>O destino está dentro da pasta de dados gravada no disco. Escolha uma pasta fora dela.</value></data>
+  <data name="export.problem.generation.output.name_too_long" xml:space="preserve"><value>O nome do arquivo fica longo demais quando os arquivos auxiliares acrescentam seus sufixos. Escolha um nome mais curto.</value></data>
+  <data name="export.problem.generation.output.is_directory" xml:space="preserve"><value>O destino é uma pasta. Escolha um nome de arquivo.</value></data>
+  <data name="export.problem.generation.output.directory_unreachable" xml:space="preserve"><value>A pasta de destino não pode ser acessada.</value></data>
+  <data name="export.problem.generation.output.not_writable" xml:space="preserve"><value>Não é possível gravar nesta pasta. Escolha outra pasta ou verifique as permissões.</value></data>
+  <data name="export.problem.generation.output.insufficient_space" xml:space="preserve"><value>Espaço livre insuficiente: precisa de {0}, há {1} livres. Libere espaço ou escolha outro disco.</value></data>
+  <data name="export.problem.generation.source.required" xml:space="preserve"><value>O design não tem imagem de origem.</value></data>
+  <data name="export.problem.generation.source.not_found" xml:space="preserve"><value>A imagem de origem do design não foi encontrada.</value></data>
+  <data name="export.problem.generation.source.invalid_image" xml:space="preserve"><value>Não foi possível ler a imagem de origem do design.</value></data>
+  <data name="export.problem.generation.files.directory_not_found" xml:space="preserve"><value>A pasta de dados não foi encontrada. Escolha-a novamente na página Design.</value></data>
+  <data name="export.problem.generation.files.outer_requires_directory" xml:space="preserve"><value>Arquivos no anel externo precisam de uma pasta de dados.</value></data>
+  <data name="export.problem.generation.cd.format_data_mismatch" xml:space="preserve"><value>Um CD com arquivos de dados é gravado como imagem ISO, não como áudio.</value></data>
+  <data name="export.problem.generation.cd.wave_too_large" xml:space="preserve"><value>Este CD é longo demais para um arquivo WAVE. Escolha o formato raw.</value></data>
+  <data name="export.problem.generation.tone.binary_required" xml:space="preserve"><value>Este tipo de disco grava apenas dois níveis. Ajuste o tom para dois níveis.</value></data>
+  <data name="export.problem.generation.volume_label.required" xml:space="preserve"><value>O disco precisa de um rótulo de volume. Defina um nas Configurações do projeto.</value></data>
+  <data name="export.problem.generation.plan.invalid" xml:space="preserve"><value>As configurações de disco do projeto não podem ser planejadas. Verifique-as nas Configurações do projeto.</value></data>
+  <data name="export.problem.generation.plan.unsupported" xml:space="preserve"><value>Esta combinação de disco e opções não é suportada.</value></data>
+  <data name="export.problem.generation.request.unsupported" xml:space="preserve"><value>Este tipo de disco ainda não pode ser gerado.</value></data>
+  <data name="history.label.output.set" xml:space="preserve"><value>Alterar arquivo de saída</value></data>
+  <data name="export.generate" xml:space="preserve"><value>Gerar imagem do disco</value></data>
+  <data name="export.verifyHash" xml:space="preserve"><value>Ler o arquivo de novo para verificá-lo (mais lento, dobra a leitura)</value></data>
+  <data name="export.replace.title" xml:space="preserve"><value>Substituir o arquivo existente?</value></data>
+  <data name="export.replace.text" xml:space="preserve"><value>{0} e seus arquivos auxiliares serão substituídos quando a nova imagem estiver completa e verificada. Até lá, os arquivos atuais ficam como estão.</value></data>
+  <data name="export.replace.confirm" xml:space="preserve"><value>Substituir</value></data>
+  <data name="export.replace.keep" xml:space="preserve"><value>Manter o arquivo existente</value></data>
+  <data name="export.run.cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="export.job.name" xml:space="preserve"><value>Exportar {0}</value></data>
+  <data name="export.stage.Composing" xml:space="preserve"><value>Compondo o design em 8192 px</value></data>
+  <data name="export.stage.Planning" xml:space="preserve"><value>Planejando o layout do disco</value></data>
+  <data name="export.stage.Writing" xml:space="preserve"><value>Gravando a imagem do disco</value></data>
+  <data name="export.stage.Sidecars" xml:space="preserve"><value>Gravando os arquivos auxiliares</value></data>
+  <data name="export.stage.Validating" xml:space="preserve"><value>Verificando a imagem</value></data>
+  <data name="export.stage.Publishing" xml:space="preserve"><value>Publicando</value></data>
+  <data name="export.stage.canceling" xml:space="preserve"><value>Cancelando…</value></data>
+  <data name="export.progress" xml:space="preserve"><value>{0} de {1} · {2}/s · {3} decorridos · faltam cerca de {4}</value></data>
+  <data name="export.progress.noEta" xml:space="preserve"><value>{0} de {1} · {3} decorridos</value></data>
+  <data name="export.progress.elapsed" xml:space="preserve"><value>{0} decorridos</value></data>
+  <data name="export.result.succeededTitle" xml:space="preserve"><value>Imagem do disco pronta</value></data>
+  <data name="export.result.succeededText" xml:space="preserve"><value>{0} gravado e verificado em {1}. SHA-256 {2}…</value></data>
+  <data name="export.result.canceledTitle" xml:space="preserve"><value>Exportação cancelada</value></data>
+  <data name="export.result.canceledText" xml:space="preserve"><value>Nada foi publicado. Um arquivo existente no destino foi mantido como estava.</value></data>
+  <data name="export.result.failedTitle" xml:space="preserve"><value>A exportação falhou</value></data>
+  <data name="export.result.companion" xml:space="preserve"><value>Publicado com {0}</value></data>
+  <data name="export.result.openFolder" xml:space="preserve"><value>Abrir pasta</value></data>
+  <data name="export.result.copyPath" xml:space="preserve"><value>Copiar caminho</value></data>
+  <data name="export.result.openInPreview" xml:space="preserve"><value>Abrir na Prévia</value></data>
+  <data name="export.result.goToBurn" xml:space="preserve"><value>Continuar para Gravar</value></data>
+  <data name="export.result.done" xml:space="preserve"><value>Concluir</value></data>
+  <data name="export.result.pathCopied" xml:space="preserve"><value>Caminho copiado para a área de transferência.</value></data>
+  <data name="export.result.openFolderFailed" xml:space="preserve"><value>Não foi possível abrir a pasta.</value></data>
+  <data name="export.check.passed" xml:space="preserve"><value>✓ {0}</value></data>
+  <data name="export.check.size" xml:space="preserve"><value>O tamanho confere com o plano</value></data>
+  <data name="export.check.raw.frames" xml:space="preserve"><value>Quadros de áudio de CD inteiros</value></data>
+  <data name="export.check.wave.header" xml:space="preserve"><value>Cabeçalho WAVE (44,1 kHz, 16 bits estéreo)</value></data>
+  <data name="export.check.iso9660.primary" xml:space="preserve"><value>Descritor primário ISO 9660</value></data>
+  <data name="export.check.iso9660.joliet" xml:space="preserve"><value>Nomes Joliet</value></data>
+  <data name="export.check.iso9660.terminator" xml:space="preserve"><value>Terminador do conjunto de descritores</value></data>
+  <data name="export.check.udf.recognition" xml:space="preserve"><value>Reconhecimento de volume UDF</value></data>
+  <data name="export.check.sidecar" xml:space="preserve"><value>O arquivo auxiliar descreve esta imagem</value></data>
+  <data name="export.check.hash.artifact" xml:space="preserve"><value>A releitura da imagem confere com o hash</value></data>
+  <data name="export.check.hash.metadata" xml:space="preserve"><value>A releitura do arquivo auxiliar confere com o hash</value></data>
+  <data name="export.check.hash.cue" xml:space="preserve"><value>A releitura do cue sheet confere com o hash</value></data>
+  <data name="export.check.hash.manifest" xml:space="preserve"><value>A releitura do manifesto confere com o hash</value></data>
+  <data name="export.failure.sourceChanged" xml:space="preserve"><value>Arquivos da pasta de dados mudaram depois que o plano foi feito. Revise o plano e gere novamente.</value></data>
+  <data name="export.failure.validation" xml:space="preserve"><value>A imagem não passou numa verificação ({0}), então não foi publicada.</value></data>
+  <data name="export.failure.permission" xml:space="preserve"><value>Não é possível gravar no destino. Escolha outra pasta ou verifique as permissões.</value></data>
+  <data name="export.failure.io" xml:space="preserve"><value>A gravação falhou: {0}</value></data>
+  <data name="export.failure.unexpected" xml:space="preserve"><value>A exportação parou inesperadamente: {0}</value></data>
+  <data name="preview.page.title" xml:space="preserve"><value>Prévia</value></data>
+  <data name="preview.page.description" xml:space="preserve"><value>Veja como o design cai na trilha do disco, ou leia de volta um arquivo gerado antes de gravá-lo.</value></data>
+  <data name="preview.mode.title" xml:space="preserve"><value>Mostrar</value></data>
+  <data name="preview.mode.projection" xml:space="preserve"><value>Projeção</value></data>
+  <data name="preview.mode.artifact" xml:space="preserve"><value>Arquivo gerado</value></data>
+  <data name="preview.source.projection" xml:space="preserve"><value>Como o design atual é gravado no disco, pela geometria do motor. Nada é gerado.</value></data>
+  <data name="preview.source.artifact" xml:space="preserve"><value>Lê de volta o arquivo gerado: {0}</value></data>
+  <data name="preview.source.noOutput" xml:space="preserve"><value>O projeto ainda não tem arquivo de saída. Defina um nas Configurações do projeto.</value></data>
+  <data name="preview.export" xml:space="preserve"><value>Exportar PNG</value></data>
+  <data name="preview.export.pickerTitle" xml:space="preserve"><value>Exportar prévia como PNG</value></data>
+  <data name="preview.export.done" xml:space="preserve"><value>{0} salvo</value></data>
+  <data name="preview.export.failed" xml:space="preserve"><value>Não foi possível salvar o PNG: {0}</value></data>
+  <data name="preview.copyDiagnostics" xml:space="preserve"><value>Copiar detalhes</value></data>
+  <data name="preview.copyDiagnostics.done" xml:space="preserve"><value>Detalhes da prévia copiados para a área de transferência.</value></data>
+  <data name="preview.costWarning" xml:space="preserve"><value>Esta resolução exige uma grande parte da memória deste computador. Prefira um tamanho menor ou mantenha a origem de rascunho ligada.</value></data>
+  <data name="preview.resolution" xml:space="preserve"><value>Resolução</value></data>
+  <data name="preview.size" xml:space="preserve"><value>{0} px</value></data>
+  <data name="preview.size.default" xml:space="preserve"><value>{0} px (padrão)</value></data>
+  <data name="preview.draft" xml:space="preserve"><value>Origem de rascunho (4096 px)</value></data>
+  <data name="preview.draftHint" xml:space="preserve"><value>Usa um quarto da memória. Desligue para projetar a origem completa de 8192 px que a geração lê.</value></data>
+  <data name="preview.cost" xml:space="preserve"><value>Cerca de {0:0.0} s e {1:0} MiB</value></data>
+  <data name="preview.overlays.title" xml:space="preserve"><value>Sobreposições</value></data>
+  <data name="preview.overlays.fileSystem" xml:space="preserve"><value>Área do sistema de arquivos</value></data>
+  <data name="preview.overlays.usefulRing" xml:space="preserve"><value>Bordas do anel gravado</value></data>
+  <data name="preview.warnings.title" xml:space="preserve"><value>Observações</value></data>
+  <data name="preview.parameters.title" xml:space="preserve"><value>Parâmetros usados</value></data>
+  <data name="preview.refresh" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="preview.rendering" xml:space="preserve"><value>Renderizando…</value></data>
+  <data name="preview.summary.projection" xml:space="preserve"><value>Projeção · {0} px · {1:0.0} s</value></data>
+  <data name="preview.summary.artifact" xml:space="preserve"><value>Arquivo gerado · {0} px · {1:0.0} s</value></data>
+  <data name="preview.confidence.exact" xml:space="preserve"><value>Exata</value></data>
+  <data name="preview.confidence.approximate" xml:space="preserve"><value>Aproximada</value></data>
+  <data name="preview.warning.LayersNotPainted" xml:space="preserve"><value>Algumas camadas não puderam ser pintadas</value></data>
+  <data name="preview.warning.MeasuredGeometryAssumed" xml:space="preserve"><value>Lido com a geometria gerada; nenhuma calibração foi aplicada ainda</value></data>
+  <data name="preview.warning.DraftSource" xml:space="preserve"><value>Origem de rascunho: próxima da geração, mas não idêntica pixel a pixel</value></data>
+  <data name="preview.warning.SidecarMissing" xml:space="preserve"><value>Não há arquivo auxiliar junto do arquivo, então a geometria e o intervalo vêm do projeto</value></data>
+  <data name="preview.warning.SidecarMismatch" xml:space="preserve"><value>O arquivo auxiliar não descreve este arquivo, então a geometria e o intervalo vêm do projeto</value></data>
+  <data name="preview.warning.ArtifactDiffersFromProject" xml:space="preserve"><value>O arquivo foi gerado com configurações diferentes das que o projeto tem agora</value></data>
+  <data name="preview.failure.Unsupported" xml:space="preserve"><value>Esta prévia não está disponível para este tipo de disco.</value></data>
+  <data name="preview.failure.NothingToProject" xml:space="preserve"><value>Adicione uma camada de imagem visível para projetar o design.</value></data>
+  <data name="preview.failure.InvalidParameters" xml:space="preserve"><value>Os parâmetros do disco estão fora do intervalo para uma prévia.</value></data>
+  <data name="preview.failure.DataLayoutFailed" xml:space="preserve"><value>Não foi possível dispor a pasta de dados no disco.</value></data>
+  <data name="preview.failure.ArtifactMissing" xml:space="preserve"><value>Nenhum arquivo gerado foi encontrado. Gere o disco primeiro ou verifique o caminho de saída.</value></data>
+  <data name="preview.failure.ArtifactUnreadable" xml:space="preserve"><value>Não foi possível ler o arquivo gerado como este tipo de disco.</value></data>
+  <data name="preview.failure.unexpected" xml:space="preserve"><value>Não foi possível renderizar a prévia.</value></data>
+  <data name="design.canvas.tone" xml:space="preserve"><value>Tom</value></data>
+  <data name="design.canvas.toneTip" xml:space="preserve"><value>Veja o design com o tom aplicado. As camadas voltam enquanto você as arrasta.</value></data>
+  <data name="design.tone.before" xml:space="preserve"><value>Antes</value></data>
+  <data name="design.tone.after" xml:space="preserve"><value>Depois</value></data>
+  <data name="design.preview.title" xml:space="preserve"><value>Prévia da composição</value></data>
+  <data name="design.preview.description" xml:space="preserve"><value>As camadas do projeto compostas exatamente como as miniaturas e a geração do disco as usam. Os anéis marcam a borda externa e o furo central do disco.</value></data>
+  <data name="design.preview.rendering" xml:space="preserve"><value>Compondo…</value></data>
+  <data name="design.preview.summary" xml:space="preserve"><value>{0} de {1} camadas visíveis compostas em {2} × {2} px</value></data>
+  <data name="design.preview.noLayers.title" xml:space="preserve"><value>Nenhuma camada de imagem ainda</value></data>
+  <data name="design.preview.noLayers.description" xml:space="preserve"><value>Este projeto não tem camadas de design. O disco composto aparece aqui quando houver camadas.</value></data>
+  <data name="design.preview.error" xml:space="preserve"><value>Não foi possível compor a prévia.</value></data>
+  <data name="design.preview.issue.missing" xml:space="preserve"><value>{0}: imagem não encontrada</value></data>
+  <data name="design.preview.issue.unreadable" xml:space="preserve"><value>{0}: não foi possível ler a imagem</value></data>
+  <data name="design.preview.issue.tooLarge" xml:space="preserve"><value>{0}: a imagem excede o limite de tamanho</value></data>
+  <data name="field.range" xml:space="preserve"><value>Informe um número de {0} a {1}.</value></data>
+  <data name="field.rejected" xml:space="preserve"><value>Este valor não pode ser aplicado ao projeto.</value></data>
+  <data name="history.undo" xml:space="preserve"><value>Desfazer</value></data>
+  <data name="history.redo" xml:space="preserve"><value>Refazer</value></data>
+  <data name="history.undoTip" xml:space="preserve"><value>Desfazer {0} (Ctrl+Z)</value></data>
+  <data name="history.redoTip" xml:space="preserve"><value>Refazer {0} (Ctrl+Shift+Z)</value></data>
+  <data name="history.undone" xml:space="preserve"><value>{0} desfeito.</value></data>
+  <data name="history.redone" xml:space="preserve"><value>{0} refeito.</value></data>
+  <data name="history.label.layers.add" xml:space="preserve"><value>Adicionar camadas</value></data>
+  <data name="history.label.layers.remove" xml:space="preserve"><value>Remover camadas</value></data>
+  <data name="history.label.layer.move" xml:space="preserve"><value>Reordenar camada</value></data>
+  <data name="history.label.layer.rename" xml:space="preserve"><value>Renomear camada</value></data>
+  <data name="history.label.layer.duplicate" xml:space="preserve"><value>Duplicar camada</value></data>
+  <data name="history.label.layer.visibility" xml:space="preserve"><value>Visibilidade da camada</value></data>
+  <data name="history.label.layer.transform" xml:space="preserve"><value>Mover ou transformar camada</value></data>
+  <data name="history.label.layer.opacity" xml:space="preserve"><value>Opacidade da camada</value></data>
+  <data name="history.label.tone.set" xml:space="preserve"><value>Tom</value></data>
+  <data name="history.label.data.set" xml:space="preserve"><value>Pasta de arquivos do disco</value></data>
+  <data name="history.label.project.settings" xml:space="preserve"><value>Configurações do projeto</value></data>
+  <data name="project.action.save" xml:space="preserve"><value>Salvar</value></data>
+  <data name="project.action.saveAs" xml:space="preserve"><value>Salvar como</value></data>
+  <data name="project.action.close" xml:space="preserve"><value>Fechar projeto</value></data>
+  <data name="project.file.label" xml:space="preserve"><value>Projeto atual</value></data>
+  <data name="project.dirty" xml:space="preserve"><value>Alterações não salvas</value></data>
+  <data name="project.status.opened" xml:space="preserve"><value>{0} está aberto e pronto para o design.</value></data>
+  <data name="project.status.saved" xml:space="preserve"><value>{0} foi salvo.</value></data>
+  <data name="project.status.savedAs" xml:space="preserve"><value>O projeto foi salvo no novo local.</value></data>
+  <data name="project.status.closed" xml:space="preserve"><value>{0} foi fechado.</value></data>
+  <data name="project.error.operationCanceled" xml:space="preserve"><value>A operação do projeto foi cancelada. O projeto atual foi mantido sem alterações.</value></data>
+  <data name="project.error.closeFailed" xml:space="preserve"><value>Não foi possível fechar o projeto. Resolva a alteração pendente e tente novamente.</value></data>
+  <data name="saveProject.error.permissionDenied" xml:space="preserve"><value>Não foi possível salvar o projeto porque o acesso ao destino foi negado.</value></data>
+  <data name="saveProject.error.invalidProject" xml:space="preserve"><value>O projeto contém dados inválidos e ainda não pode ser salvo.</value></data>
+  <data name="saveProject.error.writeFailed" xml:space="preserve"><value>Não foi possível salvar o projeto. Verifique a pasta de destino e o espaço disponível.</value></data>
+  <data name="settings.placeholder.title" xml:space="preserve"><value>Configurações</value></data>
+  <data name="settings.placeholder.description" xml:space="preserve"><value>Informações do aplicativo e diagnóstico para suporte.</value></data>
+  <data name="settings.preferences.note" xml:space="preserve"><value>Mais preferências do aplicativo aparecerão aqui numa atualização futura.</value></data>
+  <data name="workspace.placeholder.title" xml:space="preserve"><value>Etapa do espaço de trabalho</value></data>
+  <data name="workspace.placeholder.description" xml:space="preserve"><value>Esta etapa chega numa atualização futura. Seu projeto continua aberto enquanto isso.</value></data>
+  <data name="job.started" xml:space="preserve"><value>Em execução</value></data>
+  <data name="job.succeeded" xml:space="preserve"><value>Concluída</value></data>
+  <data name="job.canceled" xml:space="preserve"><value>Cancelada</value></data>
+  <data name="job.failed" xml:space="preserve"><value>Falhou</value></data>
+  <data name="jobDock.title" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="jobDock.empty" xml:space="preserve"><value>Nenhuma atividade de tarefas ainda.</value></data>
+  <data name="jobDock.cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="jobDock.clear" xml:space="preserve"><value>Limpar concluídas</value></data>
+  <data name="jobDock.details" xml:space="preserve"><value>Detalhes da tarefa</value></data>
+  <data name="toast.jobStarted" xml:space="preserve"><value>Tarefa iniciada</value></data>
+  <data name="toast.jobCompleted" xml:space="preserve"><value>Tarefa concluída</value></data>
+  <data name="toast.jobCanceled" xml:space="preserve"><value>Tarefa cancelada</value></data>
+  <data name="toast.jobFailed" xml:space="preserve"><value>A tarefa falhou</value></data>
+  <data name="navigation.calibration" xml:space="preserve"><value>Calibração</value></data>
+  <data name="calibration.page.title" xml:space="preserve"><value>Calibração</value></data>
+  <data name="calibration.page.description" xml:space="preserve"><value>Grave um alvo conhecido, fotografe o disco e meça onde o gravador realmente gravou.</value></data>
+  <data name="calibration.step.target" xml:space="preserve"><value>1  Alvo</value></data>
+  <data name="calibration.step.photo" xml:space="preserve"><value>2  Foto</value></data>
+  <data name="calibration.step.curve" xml:space="preserve"><value>3  Curva</value></data>
+  <data name="calibration.step.later" xml:space="preserve"><value>Cada etapa abre quando a anterior estiver concluída.</value></data>
+  <data name="calibration.target.title" xml:space="preserve"><value>Alvo de calibração</value></data>
+  <data name="calibration.target.description" xml:space="preserve"><value>Um padrão fixo desenhado com os parâmetros de disco abaixo. Grave-o e depois compare a foto do disco gravado com a previsão.</value></data>
+  <data name="calibration.media.label" xml:space="preserve"><value>Disco</value></data>
+  <data name="calibration.source.label" xml:space="preserve"><value>Parâmetros de</value></data>
+  <data name="calibration.source.linked" xml:space="preserve"><value>Sessão vinculada ({0})</value></data>
+  <data name="calibration.source.linked.description" xml:space="preserve"><value>O alvo já vinculado a este projeto; gerar de novo reproduz o mesmo arquivo.</value></data>
+  <data name="calibration.source.project" xml:space="preserve"><value>O disco deste projeto</value></data>
+  <data name="calibration.source.project.description" xml:space="preserve"><value>Os raios, setores e termos de trilha das Configurações do projeto.</value></data>
+  <data name="calibration.source.standard.cd" xml:space="preserve"><value>CD padrão (80 min)</value></data>
+  <data name="calibration.source.standard.dvd" xml:space="preserve"><value>DVD-5 padrão (120 mm)</value></data>
+  <data name="calibration.source.standard.bd" xml:space="preserve"><value>BD-R padrão (25 GB)</value></data>
+  <data name="calibration.source.standard.description" xml:space="preserve"><value>Geometria nominal do catálogo embutido.</value></data>
+  <data name="calibration.preview.hint" xml:space="preserve"><value>Visto de cima, como os parâmetros de geração o posicionam.</value></data>
+  <data name="calibration.row.target" xml:space="preserve"><value>Alvo</value></data>
+  <data name="calibration.row.radii" xml:space="preserve"><value>Raios</value></data>
+  <data name="calibration.row.sectors" xml:space="preserve"><value>Setores</value></data>
+  <data name="calibration.row.pitch" xml:space="preserve"><value>Termos de trilha</value></data>
+  <data name="calibration.row.interleave" xml:space="preserve"><value>Intercalação</value></data>
+  <data name="calibration.row.mapping" xml:space="preserve"><value>Mapeamento</value></data>
+  <data name="calibration.row.track" xml:space="preserve"><value>Comprimento da trilha</value></data>
+  <data name="calibration.row.size" xml:space="preserve"><value>Tamanho</value></data>
+  <data name="calibration.value.radii" xml:space="preserve"><value>{0:0.###} – {1:0.###} mm</value></data>
+  <data name="calibration.value.pitch" xml:space="preserve"><value>linear {0:G6} · quadrático {1:G6} · cúbico {2:G6}</value></data>
+  <data name="calibration.value.track" xml:space="preserve"><value>{0:N1} m</value></data>
+  <data name="calibration.value.on" xml:space="preserve"><value>Ligada</value></data>
+  <data name="calibration.value.off" xml:space="preserve"><value>Desligada</value></data>
+  <data name="calibration.value.normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="calibration.value.inverted" xml:space="preserve"><value>Invertido</value></data>
+  <data name="calibration.destination.pickerTitle" xml:space="preserve"><value>Salvar o alvo de calibração</value></data>
+  <data name="calibration.status.noSource" xml:space="preserve"><value>Escolha de onde vêm os parâmetros.</value></data>
+  <data name="calibration.status.ready" xml:space="preserve"><value>Pronto para gerar o alvo</value></data>
+  <data name="calibration.status.readyReplace" xml:space="preserve"><value>Pronto; o alvo existente será substituído depois que você confirmar</value></data>
+  <data name="calibration.problem.invalidGeometry" xml:space="preserve"><value>Estes parâmetros não conseguem desenhar um alvo de calibração. Verifique os raios e os setores.</value></data>
+  <data name="calibration.generate" xml:space="preserve"><value>Gerar alvo</value></data>
+  <data name="calibration.job.name" xml:space="preserve"><value>Alvo de calibração {0}</value></data>
+  <data name="calibration.result.succeededTitle" xml:space="preserve"><value>Alvo gerado</value></data>
+  <data name="calibration.result.succeededText" xml:space="preserve"><value>{0} em {1}. A sessão {2} foi salva ao lado e vinculada ao projeto.</value></data>
+  <data name="calibration.result.canceledText" xml:space="preserve"><value>Nada foi gravado e o projeto não mudou.</value></data>
+  <data name="calibration.failure.busy" xml:space="preserve"><value>Outra tarefa está em execução. Tente novamente quando ela terminar.</value></data>
+  <data name="calibration.session.title" xml:space="preserve"><value>Sessão do projeto</value></data>
+  <data name="calibration.session.none" xml:space="preserve"><value>Nenhuma sessão de calibração está vinculada a este projeto ainda.</value></data>
+  <data name="calibration.session.summary" xml:space="preserve"><value>{0} alvo {1} · {2}</value></data>
+  <data name="calibration.session.stage.target" xml:space="preserve"><value>alvo gerado, ainda sem foto</value></data>
+  <data name="calibration.session.stage.photo" xml:space="preserve"><value>foto importada, retificação não confirmada</value></data>
+  <data name="calibration.session.stage.curve" xml:space="preserve"><value>foto retificada, {0} pontos de curva</value></data>
+  <data name="calibration.session.open" xml:space="preserve"><value>Abrir sessão…</value></data>
+  <data name="calibration.session.unlink" xml:space="preserve"><value>Desvincular</value></data>
+  <data name="calibration.session.pickerTitle" xml:space="preserve"><value>Abrir uma sessão de calibração</value></data>
+  <data name="calibration.error.calibration.session.notFound" xml:space="preserve"><value>O arquivo da sessão vinculada não existe mais.</value></data>
+  <data name="calibration.error.calibration.session.tooLarge" xml:space="preserve"><value>O arquivo é grande demais para ser uma sessão de calibração.</value></data>
+  <data name="calibration.error.calibration.session.unreadable" xml:space="preserve"><value>Não foi possível ler o arquivo da sessão.</value></data>
+  <data name="calibration.error.calibration.session.corrupt" xml:space="preserve"><value>O arquivo está danificado ou não é uma sessão de calibração.</value></data>
+  <data name="calibration.error.calibration.session.unsupportedVersion" xml:space="preserve"><value>A sessão foi criada por uma versão do aplicativo que esta não consegue ler.</value></data>
+  <data name="calibration.error.calibration.session.invalid" xml:space="preserve"><value>A sessão não corresponde ao próprio alvo e não foi carregada.</value></data>
+  <data name="calibration.error.unknown" xml:space="preserve"><value>Não foi possível carregar a sessão ({0}).</value></data>
+  <data name="history.label.calibration.session" xml:space="preserve"><value>Sessão de calibração</value></data>
+  <data name="export.problem.generation.calibration.session_invalid" xml:space="preserve"><value>A sessão de calibração não é válida.</value></data>
+  <data name="export.problem.generation.calibration.cd_format" xml:space="preserve"><value>Um alvo de CD é gravado como áudio WAVE ou raw.</value></data>
+  <data name="calibration.photo.title" xml:space="preserve"><value>Foto do disco gravado</value></data>
+  <data name="calibration.photo.description" xml:space="preserve"><value>Fotografe o lado gravado de frente, com luz uniforme e o disco inteiro no quadro. Depois coloque as alças azuis na borda física externa do disco e as âmbar na borda do furo central.</value></data>
+  <data name="calibration.photo.import" xml:space="preserve"><value>Importar foto…</value></data>
+  <data name="calibration.photo.pickerTitle" xml:space="preserve"><value>Importar a foto do disco gravado</value></data>
+  <data name="calibration.photo.reading" xml:space="preserve"><value>Lendo a foto…</value></data>
+  <data name="calibration.photo.restoring" xml:space="preserve"><value>Restaurando a foto da sessão…</value></data>
+  <data name="calibration.photo.rectifying" xml:space="preserve"><value>Ajustando as bordas e retificando…</value></data>
+  <data name="calibration.photo.info" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="calibration.photo.info.reduced" xml:space="preserve"><value>{0} × {1} px, trabalhada em {2} × {3} px</value></data>
+  <data name="calibration.photo.discSize" xml:space="preserve"><value>Tamanho do disco</value></data>
+  <data name="calibration.photo.disc12" xml:space="preserve"><value>12 cm</value></data>
+  <data name="calibration.photo.disc8" xml:space="preserve"><value>8 cm</value></data>
+  <data name="calibration.photo.orientation" xml:space="preserve"><value>Orientação</value></data>
+  <data name="calibration.photo.mirror" xml:space="preserve"><value>Espelhar</value></data>
+  <data name="calibration.photo.rotate" xml:space="preserve"><value>Girar 90°</value></data>
+  <data name="calibration.photo.fit" xml:space="preserve"><value>Enquadrar</value></data>
+  <data name="calibration.photo.rectify" xml:space="preserve"><value>Retificar</value></data>
+  <data name="calibration.photo.rectifyFailed" xml:space="preserve"><value>Estas bordas não descrevem um disco visto em perspectiva. Verifique se cada alça está na borda certa.</value></data>
+  <data name="calibration.photo.rectification" xml:space="preserve"><value>Borda externa com desvio de {0:0.0} px · furo com desvio de {1:0.0} px</value></data>
+  <data name="calibration.photo.showPhoto" xml:space="preserve"><value>Editar bordas</value></data>
+  <data name="calibration.photo.showRectified" xml:space="preserve"><value>Vista retificada</value></data>
+  <data name="calibration.photo.confirm" xml:space="preserve"><value>Está certo — confirmar</value></data>
+  <data name="calibration.photo.reopen" xml:space="preserve"><value>Alterar as bordas</value></data>
+  <data name="calibration.photo.save" xml:space="preserve"><value>Salvar sessão</value></data>
+  <data name="calibration.photo.confirmed" xml:space="preserve"><value>Retificação confirmada e salva. Continue na etapa 3 para traçar a curva.</value></data>
+  <data name="calibration.photo.unsaved" xml:space="preserve"><value>Alterações não salvas (guardadas como rascunho de recuperação)</value></data>
+  <data name="calibration.photo.savedIn" xml:space="preserve"><value>Salva em {0}</value></data>
+  <data name="calibration.photo.needsSession" xml:space="preserve"><value>Gere um alvo ou abra uma sessão primeiro: a foto é salva na sessão vinculada ao projeto.</value></data>
+  <data name="calibration.photo.canvas.empty" xml:space="preserve"><value>Importe uma foto do disco gravado para posicionar as bordas.</value></data>
+  <data name="calibration.photo.canvas.rectified" xml:space="preserve"><value>Retificada · o disco deve parecer redondo e centralizado nas guias</value></data>
+  <data name="calibration.photo.hint.edit" xml:space="preserve"><value>Arraste as alças até as bordas reais. Ctrl + roda dá zoom, arraste o espaço vazio para mover a vista, clique duplo para enquadrar.</value></data>
+  <data name="calibration.photo.hint.outer" xml:space="preserve"><value>Borda externa: a borda física do disco, não a borda da área gravada. As setas a movem 1 px (Shift: 10).</value></data>
+  <data name="calibration.photo.hint.hole" xml:space="preserve"><value>Borda do furo: a borda física do furo central, não o anel de plástico transparente. As setas a movem 1 px (Shift: 10).</value></data>
+  <data name="calibration.photo.hint.locked" xml:space="preserve"><value>As bordas ficam travadas enquanto a retificação está confirmada. Escolha "Alterar as bordas" para editá-las.</value></data>
+  <data name="calibration.photo.hint.rectified" xml:space="preserve"><value>Confira o disco retificado: as duas guias devem seguir as bordas reais em toda a volta.</value></data>
+  <data name="calibration.recovery.text" xml:space="preserve"><value>Foi encontrado trabalho de foto não salvo de {0} ({1} pontos de curva).</value></data>
+  <data name="calibration.recovery.restore" xml:space="preserve"><value>Restaurar</value></data>
+  <data name="calibration.recovery.discard" xml:space="preserve"><value>Descartar</value></data>
+  <data name="calibration.error.calibration.photo.notFound" xml:space="preserve"><value>O arquivo da foto não existe.</value></data>
+  <data name="calibration.error.calibration.photo.tooSmall" xml:space="preserve"><value>A foto é pequena demais para posicionar as bordas.</value></data>
+  <data name="calibration.error.calibration.photo.tooLarge" xml:space="preserve"><value>A foto é grande demais (mais de 256 MiB ou 64 megapixels).</value></data>
+  <data name="calibration.error.calibration.photo.unreadable" xml:space="preserve"><value>Não foi possível ler a foto. Use JPEG, PNG, BMP ou GIF.</value></data>
+  <data name="calibration.error.calibration.photo.degenerate" xml:space="preserve"><value>A perspectiva ajustada se degenera dentro do disco. Verifique as alças.</value></data>
+  <data name="calibration.error.calibration.session.photoUnreadable" xml:space="preserve"><value>Não foi possível ler a foto guardada na sessão.</value></data>
+  <data name="calibration.error.calibration.session.photoSize" xml:space="preserve"><value>A foto guardada na sessão tem um tamanho inválido.</value></data>
+  <data name="calibration.error.calibration.session.boundaryOutside" xml:space="preserve"><value>As bordas da sessão ficam fora da foto.</value></data>
+  <data name="calibration.error.calibration.recovery.missing" xml:space="preserve"><value>O rascunho de recuperação não existe mais.</value></data>
+  <data name="calibration.error.calibration.recovery.mismatch" xml:space="preserve"><value>O rascunho de recuperação está danificado e não foi restaurado.</value></data>
+  <data name="calibration.curve.title" xml:space="preserve"><value>Traçar a curva</value></data>
+  <data name="calibration.curve.description" xml:space="preserve"><value>Clique ao longo de uma linha visível do padrão gravado, de dentro para fora, na foto retificada. Depois resolva e compare a previsão laranja com os seus pontos.</value></data>
+  <data name="calibration.curve.canvas.caption" xml:space="preserve"><value>Retificada · clique para adicionar pontos ao longo de uma linha</value></data>
+  <data name="calibration.curve.hint.add" xml:space="preserve"><value>Clique na linha para adicionar um ponto; arraste um ponto para movê-lo. Espaço + arrastar ou o botão do meio movem a vista, Ctrl + roda dá zoom.</value></data>
+  <data name="calibration.curve.hint.selected" xml:space="preserve"><value>Ponto {0} selecionado: arraste-o, ajuste com as setas (0,02 mm, Shift: 0,2 mm) ou pressione Delete.</value></data>
+  <data name="calibration.curve.hint.offDisc" xml:space="preserve"><value>Esse ponto está fora do disco (dentro do furo central ou além da borda externa); os pontos da curva precisam estar no disco.</value></data>
+  <data name="calibration.curve.hint.full" xml:space="preserve"><value>A sessão já tem o máximo de pontos de curva que consegue guardar.</value></data>
+  <data name="calibration.curve.hint.locked" xml:space="preserve"><value>Confirme a retificação na etapa Foto antes de traçar.</value></data>
+  <data name="calibration.curve.points" xml:space="preserve"><value>{0} pontos</value></data>
+  <data name="calibration.curve.range" xml:space="preserve"><value>Intervalo de busca</value></data>
+  <data name="calibration.curve.range.auto" xml:space="preserve"><value>Automático (recomendado)</value></data>
+  <data name="calibration.curve.fitPitch" xml:space="preserve"><value>Ajustar também os termos de trilha do DVD</value></data>
+  <data name="calibration.curve.solve" xml:space="preserve"><value>Resolver</value></data>
+  <data name="calibration.curve.clear" xml:space="preserve"><value>Limpar pontos</value></data>
+  <data name="calibration.curve.removePoint" xml:space="preserve"><value>Remover ponto</value></data>
+  <data name="calibration.curve.fitting" xml:space="preserve"><value>Resolvendo…</value></data>
+  <data name="calibration.curve.fittingBox" xml:space="preserve"><value>Resolvendo · caixa de busca {0} de {1} (±{2:0.###} mm)</value></data>
+  <data name="calibration.curve.candidates" xml:space="preserve"><value>Candidatos</value></data>
+  <data name="calibration.curve.candidate" xml:space="preserve"><value>Candidato {0}</value></data>
+  <data name="calibration.curve.candidateDetail" xml:space="preserve"><value>média {0:0.###} mm · máx {1:0.###} mm · {2} fora</value></data>
+  <data name="calibration.curve.badge.ok" xml:space="preserve"><value>Dentro dos limites</value></data>
+  <data name="calibration.curve.badge.rejected" xml:space="preserve"><value>Longe demais</value></data>
+  <data name="calibration.curve.failed" xml:space="preserve"><value>Nenhuma solução se ajusta a estes pontos. Veja as observações abaixo.</value></data>
+  <data name="calibration.curve.noCandidate" xml:space="preserve"><value>Nenhum candidato para aplicar.</value></data>
+  <data name="calibration.curve.accepted" xml:space="preserve"><value>Média {0:0.###} mm, máx {1:0.###} mm: dentro dos limites ({2} / {3} mm). Confira se a curva laranja segue os pontos antes de aplicar.</value></data>
+  <data name="calibration.curve.rejected" xml:space="preserve"><value>Média {0:0.###} mm, máx {1:0.###} mm: além dos limites ({2} / {3} mm), então este resultado não pode ser aplicado. Corrija os pontos cruzados ou adicione mais.</value></data>
+  <data name="calibration.curve.expanded" xml:space="preserve"><value>A caixa de busca foi ampliada para ±{0:0.###} mm.</value></data>
+  <data name="calibration.curve.outliers" xml:space="preserve"><value>Pontos a mais de {1:0.##} mm da curva: {0} (desenhados como cruzes).</value></data>
+  <data name="calibration.curve.confirm" xml:space="preserve"><value>A curva laranja segue os meus pontos ao longo de toda a linha</value></data>
+  <data name="calibration.row.inner" xml:space="preserve"><value>Raio interno</value></data>
+  <data name="calibration.row.outer" xml:space="preserve"><value>Raio externo</value></data>
+  <data name="calibration.row.rotation" xml:space="preserve"><value>Rotação</value></data>
+  <data name="calibration.row.residual" xml:space="preserve"><value>Resíduo</value></data>
+  <data name="calibration.value.delta" xml:space="preserve"><value>{0:0.####} mm ({1:+0.####;-0.####;0} mm)</value></data>
+  <data name="calibration.apply" xml:space="preserve"><value>Aplicar ao projeto</value></data>
+  <data name="calibration.apply.done" xml:space="preserve"><value>Aplicado: o projeto agora gera com a geometria medida e a Prévia lê com ela. Desfazer (Ctrl+Z) reverte os dois.</value></data>
+  <data name="calibration.apply.failed" xml:space="preserve"><value>Não foi possível aplicar a calibração ({0}).</value></data>
+  <data name="calibration.apply.needsFit" xml:space="preserve"><value>Trace pelo menos 6 pontos e resolva primeiro.</value></data>
+  <data name="calibration.apply.noResult" xml:space="preserve"><value>Não há resultado para aplicar.</value></data>
+  <data name="calibration.apply.residual" xml:space="preserve"><value>O candidato selecionado está além dos limites de resíduo.</value></data>
+  <data name="calibration.apply.predicting" xml:space="preserve"><value>Desenhando a curva prevista…</value></data>
+  <data name="calibration.apply.confirm" xml:space="preserve"><value>Confirme que a curva laranja segue os seus pontos.</value></data>
+  <data name="calibration.apply.family" xml:space="preserve"><value>Este alvo mediu uma família de disco diferente da do projeto; salve-o como predefinição.</value></data>
+  <data name="calibration.apply.stale" xml:space="preserve"><value>Os pontos mudaram; resolva novamente.</value></data>
+  <data name="calibration.error.calibration.apply.familyMismatch" xml:space="preserve"><value>A calibração mediu uma família de disco diferente da do projeto.</value></data>
+  <data name="calibration.measurement.title" xml:space="preserve"><value>Medição do projeto</value></data>
+  <data name="calibration.measurement.none" xml:space="preserve"><value>Nenhuma medição aplicada. A Prévia lê os discos com a geometria de geração.</value></data>
+  <data name="calibration.measurement.text" xml:space="preserve"><value>{0:0.####} – {1:0.####} mm do alvo {2}, {3}, resíduo médio de {4:0.###} mm. A Prévia lê os discos com ela.</value></data>
+  <data name="calibration.measurement.clear" xml:space="preserve"><value>Esquecer medição</value></data>
+  <data name="calibration.preset.label" xml:space="preserve"><value>Salvar como predefinição</value></data>
+  <data name="calibration.preset.watermark" xml:space="preserve"><value>Nome da predefinição, p. ex. Meu gravador + DVD-R da marca</value></data>
+  <data name="calibration.preset.save" xml:space="preserve"><value>Salvar predefinição</value></data>
+  <data name="calibration.preset.description" xml:space="preserve"><value>Calibrada com o alvo {0} em {1}, resíduo médio de {2:0.###} mm</value></data>
+  <data name="calibration.preset.saved" xml:space="preserve"><value>Predefinição "{0}" salva; novos projetos podem começar a partir dela.</value></data>
+  <data name="calibration.preset.notReady" xml:space="preserve"><value>Exige as mesmas verificações de Aplicar: um candidato aceito e uma curva confirmada.</value></data>
+  <data name="calibration.preset.nameRequired" xml:space="preserve"><value>Dê um nome à predefinição (até 80 caracteres).</value></data>
+  <data name="calibration.preset.failed" xml:space="preserve"><value>Não foi possível salvar a predefinição ({0}).</value></data>
+  <data name="calibration.report.export" xml:space="preserve"><value>Exportar relatório…</value></data>
+  <data name="calibration.report.personal" xml:space="preserve"><value>Incluir a foto e os caminhos de arquivo</value></data>
+  <data name="calibration.report.pickerTitle" xml:space="preserve"><value>Salvar o relatório de calibração</value></data>
+  <data name="calibration.report.saved" xml:space="preserve"><value>Relatório salvo como {0}</value></data>
+  <data name="history.label.calibration.apply" xml:space="preserve"><value>Aplicar calibração</value></data>
+  <data name="history.label.calibration.measurement.clear" xml:space="preserve"><value>Esquecer medição</value></data>
+  <data name="calibration.warning.tooFewPoints" xml:space="preserve"><value>Trace pelo menos 6 pontos ao longo de uma linha, de dentro para fora, cobrindo posições interna, média e externa.</value></data>
+  <data name="calibration.warning.narrowCoverage" xml:space="preserve"><value>Os pontos cobrem uma faixa estreita demais para separar os dois raios; adicione pontos mais para dentro e mais para fora.</value></data>
+  <data name="calibration.warning.narrowBand" xml:space="preserve"><value>A faixa traçada é estreita, então os parâmetros podem se compensar; adicione pontos mais para dentro e para fora.</value></data>
+  <data name="calibration.warning.turnsBack" xml:space="preserve"><value>A curva claramente volta para dentro; trace de dentro para fora ao longo de uma única linha.</value></data>
+  <data name="calibration.warning.halfTurnGap" xml:space="preserve"><value>Dois pontos vizinhos estão quase meia volta afastados, então não dá para descartar uma volta perdida; adicione pontos entre eles ao longo da linha.</value></data>
+  <data name="calibration.warning.halfTurnRisk" xml:space="preserve"><value>Alguns pontos vizinhos estão quase meia volta afastados; adicione pontos e confira novamente.</value></data>
+  <data name="calibration.warning.thinned" xml:space="preserve"><value>Muitos pontos: o ajuste usou um subconjunto reduzido de forma uniforme; a ordem completa ainda foi usada para seguir a linha.</value></data>
+  <data name="calibration.warning.noValidModel" xml:space="preserve"><value>Nenhuma curva válida no intervalo de busca cobre todos os pontos; verifique a escala da foto, o centro ou o intervalo de busca.</value></data>
+  <data name="calibration.warning.beyondBand" xml:space="preserve"><value>Alguns pontos ficam fora da faixa do padrão neste modelo e foram mantidos como uma linha contínua; verifique a escala, o centro e os pontos das pontas.</value></data>
+  <data name="calibration.warning.largeResidual" xml:space="preserve"><value>A curva está longe dos pontos; verifique a retificação, os pontos e se eles seguem uma única linha.</value></data>
+  <data name="calibration.warning.searchBoundary" xml:space="preserve"><value>O melhor resultado está perto da borda do intervalo de busca; amplie-o e adicione pontos para conferir.</value></data>
+  <data name="calibration.warning.similarConstraints" xml:space="preserve"><value>Os pontos restringem os dois raios de forma parecida, então um resíduo baixo ainda não prova um resultado único; trace uma faixa mais larga.</value></data>
+  <data name="calibration.warning.nearCandidates" xml:space="preserve"><value>Alguns candidatos têm formato quase igual; compare a curva inteira antes de aplicar.</value></data>
+  <data name="calibration.warning.limitedSearch" xml:space="preserve"><value>A busca ampla usou um número limitado de pontos de partida; a lista pode não conter todos os resultados possíveis.</value></data>
+  <data name="calibration.warning.unwrapAssumption" xml:space="preserve"><value>Seguir a linha supõe que nenhuma volta completa se perde entre pontos vizinhos; compare a curva inteira e adicione pontos onde ela dobra.</value></data>
+  <data name="calibration.warning.pitchNeedsPoints" xml:space="preserve"><value>Ajustar os termos de trilha do DVD exige pelo menos 12 pontos em raios diferentes cobrindo 60% do desenho; só os raios foram ajustados.</value></data>
+  <data name="calibration.warning.pitchFitted" xml:space="preserve"><value>Os termos de trilha do DVD foram ajustados; eles e os raios podem se compensar, então confira toda a curva prevista antes de aplicar.</value></data>
+  <data name="calibration.warning.pitchNoGain" xml:space="preserve"><value>Ajustar os termos de trilha não trouxe melhora estável; os termos originais foram mantidos.</value></data>
+  <data name="calibration.warning.pitchUnstable" xml:space="preserve"><value>Estes pontos não conseguem separar os três termos de trilha dos raios; os termos originais foram mantidos. Trace uma faixa mais larga com mais precisão.</value></data>
+  <data name="calibration.warning.pitchBoundary" xml:space="preserve"><value>Um termo de trilha está perto da borda do seu intervalo de busca; verifique os pontos.</value></data>
+  <data name="calibration.warning.turnTooLarge" xml:space="preserve"><value>Pontos vizinhos giram afastados demais; adicione pontos entre eles.</value></data>
+  <data name="calibration.warning.other" xml:space="preserve"><value>Observação do ajuste: {0}</value></data>
+  <data name="burn.page.title" xml:space="preserve"><value>Gravar</value></data>
+  <data name="burn.page.description" xml:space="preserve"><value>Grave a imagem exportada num disco, só em gravadores e discos comprovadamente capazes.</value></data>
+  <data name="burn.source.title" xml:space="preserve"><value>O que gravar</value></data>
+  <data name="burn.source.project" xml:space="preserve"><value>A imagem deste projeto</value></data>
+  <data name="burn.source.calibration" xml:space="preserve"><value>Alvo de calibração</value></data>
+  <data name="burn.validation.title" xml:space="preserve"><value>Registrar este teste de hardware</value></data>
+  <data name="burn.validation.text" xml:space="preserve"><value>Este modo está habilitado só para teste neste gravador e tipo de disco. Confira o disco (ele é lido de volta e o desenho parece certo) e registre o resultado. Um resultado aprovado habilita o modo aqui de vez.</value></data>
+  <data name="burn.validation.brand" xml:space="preserve"><value>Marca e tipo do disco</value></data>
+  <data name="burn.validation.notes" xml:space="preserve"><value>O que você observou</value></data>
+  <data name="burn.validation.passed" xml:space="preserve"><value>Aprovado</value></data>
+  <data name="burn.validation.failed" xml:space="preserve"><value>Reprovado</value></data>
+  <data name="burn.validation.recordedPassed" xml:space="preserve"><value>Registrado como aprovado: o modo agora está habilitado para este gravador e tipo de disco.</value></data>
+  <data name="burn.validation.recordedFailed" xml:space="preserve"><value>Registrado como reprovado: o modo continua desabilitado.</value></data>
+  <data name="burn.source.generated" xml:space="preserve"><value>Gerar e gravar (sem arquivo de imagem)</value></data>
+  <data name="burn.source.generatedText" xml:space="preserve"><value>Gerada a partir do projeto enquanto é gravada</value></data>
+  <data name="burn.problem.planning" xml:space="preserve"><value>Planejando a imagem…</value></data>
+  <data name="burn.problem.planFailed" xml:space="preserve"><value>O projeto não pode ser gerado como está.</value></data>
+  <data name="burn.problem.nothingDrawn" xml:space="preserve"><value>Nada do design seria desenhado no disco.</value></data>
+  <data name="burn.value.generated" xml:space="preserve"><value>Gerada durante a gravação · {0}</value></data>
+  <data name="burn.confirm.generated" xml:space="preserve"><value>A imagem é gerada enquanto o disco é gravado. Um computador lento pode deixar o gravador sem dados (a maioria dos gravadores se protege disso); exportar antes e gravar o arquivo evita esse risco.</value></data>
+  <data name="burn.stage.composing" xml:space="preserve"><value>Compondo o design em 8192 px</value></data>
+  <data name="burn.source.text" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
+  <data name="burn.devices.title" xml:space="preserve"><value>Gravadores</value></data>
+  <data name="burn.backend" xml:space="preserve"><value>Backend: {0}</value></data>
+  <data name="burn.backend.unavailable" xml:space="preserve"><value>A gravação ainda não está disponível no Linux: ela só é habilitada depois que cada modo é validado em gravadores reais. Enquanto isso, exporte a imagem e grave-a com outra ferramenta.</value></data>
+  <data name="burn.refresh" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="burn.modes.title" xml:space="preserve"><value>O que este gravador pode gravar agora</value></data>
+  <data name="burn.mode.available" xml:space="preserve"><value>Disponível</value></data>
+  <data name="burn.speed" xml:space="preserve"><value>Velocidade</value></data>
+  <data name="burn.speed.max" xml:space="preserve"><value>Máxima que o disco permite</value></data>
+  <data name="burn.speed.value" xml:space="preserve"><value>{0:0.#}× · {1:0.#} MB/s</value></data>
+  <data name="burn.exportInstead" xml:space="preserve"><value>Exportar em vez disso</value></data>
+  <data name="burn.review" xml:space="preserve"><value>Revisar e gravar…</value></data>
+  <data name="burn.status.ready" xml:space="preserve"><value>Pronto para revisar a gravação</value></data>
+  <data name="burn.status.blocked" xml:space="preserve"><value>Não está pronto para gravar</value></data>
+  <data name="burn.confirm.title" xml:space="preserve"><value>Gravar este disco?</value></data>
+  <data name="burn.confirm.irreversible" xml:space="preserve"><value>A gravação não pode ser desfeita: um disco gravável uma vez não pode ser usado de novo, mesmo que a gravação falhe ou seja cancelada.</value></data>
+  <data name="burn.confirm.bluray" xml:space="preserve"><value>BD-R: uma gravação que falha ou é interrompida costuma deixar o disco inutilizável; gravadores podem remapear setores, e uma gravação não pode ser retomada.</value></data>
+  <data name="burn.confirm.acknowledge" xml:space="preserve"><value>Entendo que este disco será gravado e não poderá ser reutilizado</value></data>
+  <data name="burn.confirm.back" xml:space="preserve"><value>Voltar</value></data>
+  <data name="burn.confirm.invalidated" xml:space="preserve"><value>O disco, o gravador ou a imagem mudou desde a revisão. Revise a gravação novamente.</value></data>
+  <data name="burn.burn" xml:space="preserve"><value>Gravar</value></data>
+  <data name="burn.job.name" xml:space="preserve"><value>Gravar {0}</value></data>
+  <data name="burn.row.mode" xml:space="preserve"><value>Modo</value></data>
+  <data name="burn.row.device" xml:space="preserve"><value>Gravador</value></data>
+  <data name="burn.row.disc" xml:space="preserve"><value>Disco</value></data>
+  <data name="burn.row.capacity" xml:space="preserve"><value>Espaço</value></data>
+  <data name="burn.row.speed" xml:space="preserve"><value>Velocidade</value></data>
+  <data name="burn.row.source" xml:space="preserve"><value>Imagem</value></data>
+  <data name="burn.value.capacity" xml:space="preserve"><value>{0} de {1} ({2:0.#}%)</value></data>
+  <data name="burn.value.source" xml:space="preserve"><value>{0} · SHA-256 {1}…</value></data>
+  <data name="burn.value.noManifest" xml:space="preserve"><value>sem manifesto</value></data>
+  <data name="burn.media.none" xml:space="preserve"><value>Sem disco</value></data>
+  <data name="burn.media.blank" xml:space="preserve"><value>vazio</value></data>
+  <data name="burn.media.used" xml:space="preserve"><value>gravado</value></data>
+  <data name="burn.media.text" xml:space="preserve"><value>{0}, {1}, {2} livres</value></data>
+  <data name="burn.access.permissiondenied" xml:space="preserve"><value>Não pode ser aberto por este usuário</value></data>
+  <data name="burn.access.busy" xml:space="preserve"><value>Em uso por outro programa</value></data>
+  <data name="burn.access.missing" xml:space="preserve"><value>Desconectado</value></data>
+  <data name="burn.access.ready" xml:space="preserve"><value>Pronto</value></data>
+  <data name="burn.profile.Unknown" xml:space="preserve"><value>Disco desconhecido</value></data>
+  <data name="burn.profile.CdRom" xml:space="preserve"><value>CD-ROM</value></data>
+  <data name="burn.profile.CdR" xml:space="preserve"><value>CD-R</value></data>
+  <data name="burn.profile.CdRw" xml:space="preserve"><value>CD-RW</value></data>
+  <data name="burn.profile.DvdRom" xml:space="preserve"><value>DVD-ROM</value></data>
+  <data name="burn.profile.DvdMinusR" xml:space="preserve"><value>DVD-R</value></data>
+  <data name="burn.profile.DvdMinusRw" xml:space="preserve"><value>DVD-RW</value></data>
+  <data name="burn.profile.DvdPlusR" xml:space="preserve"><value>DVD+R</value></data>
+  <data name="burn.profile.DvdPlusRw" xml:space="preserve"><value>DVD+RW</value></data>
+  <data name="burn.profile.DvdMinusRDualLayer" xml:space="preserve"><value>DVD-R DL</value></data>
+  <data name="burn.profile.DvdPlusRDualLayer" xml:space="preserve"><value>DVD+R DL</value></data>
+  <data name="burn.profile.BdRom" xml:space="preserve"><value>BD-ROM</value></data>
+  <data name="burn.profile.BdR" xml:space="preserve"><value>BD-R</value></data>
+  <data name="burn.profile.BdRe" xml:space="preserve"><value>BD-RE</value></data>
+  <data name="burn.modeName.CdAudio" xml:space="preserve"><value>Áudio de CD (disc-at-once)</value></data>
+  <data name="burn.modeName.CdData" xml:space="preserve"><value>Dados em CD</value></data>
+  <data name="burn.modeName.DvdData" xml:space="preserve"><value>DVD</value></data>
+  <data name="burn.modeName.BluRayData" xml:space="preserve"><value>Blu-ray (sequencial)</value></data>
+  <data name="burn.reason.None" xml:space="preserve"><value>Disponível</value></data>
+  <data name="burn.reason.BackendUnavailable" xml:space="preserve"><value>Nenhum backend de gravação neste sistema</value></data>
+  <data name="burn.reason.PermissionDenied" xml:space="preserve"><value>Este usuário não consegue abrir o gravador</value></data>
+  <data name="burn.reason.DeviceBusy" xml:space="preserve"><value>O gravador está em uso</value></data>
+  <data name="burn.reason.DeviceCannotWrite" xml:space="preserve"><value>O gravador não consegue gravar isto</value></data>
+  <data name="burn.reason.NoMedia" xml:space="preserve"><value>Nenhum disco no gravador</value></data>
+  <data name="burn.reason.MediaNotWritable" xml:space="preserve"><value>O disco não pode ser gravado</value></data>
+  <data name="burn.reason.MediaNotBlank" xml:space="preserve"><value>O disco não está vazio</value></data>
+  <data name="burn.reason.MediaIncompatible" xml:space="preserve"><value>Exige outro tipo de disco</value></data>
+  <data name="burn.reason.NotValidated" xml:space="preserve"><value>Ainda não validado em hardware real</value></data>
+  <data name="burn.problem.noSource" xml:space="preserve"><value>Exporte o projeto primeiro: não há imagem para gravar.</value></data>
+  <data name="burn.problem.sourceMissing" xml:space="preserve"><value>O arquivo de imagem não está lá. Exporte-o primeiro.</value></data>
+  <data name="burn.problem.sourceFormat" xml:space="preserve"><value>Este arquivo não pode ser gravado como está.</value></data>
+  <data name="burn.problem.sourceChanged" xml:space="preserve"><value>A imagem não corresponde mais ao tamanho do manifesto. Exporte-a novamente.</value></data>
+  <data name="burn.problem.noDevice" xml:space="preserve"><value>Nenhum gravador encontrado.</value></data>
+  <data name="burn.problem.mode" xml:space="preserve"><value>{0}: {1}.</value></data>
+  <data name="burn.problem.permissionHelp" xml:space="preserve"><value>Adicione seu usuário ao grupo dono do gravador (geralmente "cdrom" ou "optical") e entre novamente na sessão. O aplicativo nunca pede root.</value></data>
+  <data name="burn.problem.notValidated" xml:space="preserve"><value>Cada modo de gravação só é habilitado depois de um teste registrado em gravadores e discos reais. Até lá, exporte a imagem e grave-a com outra ferramenta.</value></data>
+  <data name="burn.problem.capacity" xml:space="preserve"><value>A imagem ({0}) não cabe no disco ({1} livres).</value></data>
+  <data name="burn.stage.prepare" xml:space="preserve"><value>Verificando o gravador</value></data>
+  <data name="burn.stage.media" xml:space="preserve"><value>Verificando o disco novamente</value></data>
+  <data name="burn.stage.buffer" xml:space="preserve"><value>Enchendo o buffer</value></data>
+  <data name="burn.stage.write" xml:space="preserve"><value>Gravando</value></data>
+  <data name="burn.stage.finalize" xml:space="preserve"><value>Fechando o disco</value></data>
+  <data name="burn.stage.cleanup" xml:space="preserve"><value>Fechando a sessão</value></data>
+  <data name="burn.stage.eject" xml:space="preserve"><value>Ejetando</value></data>
+  <data name="burn.stage.unknown" xml:space="preserve"><value>Trabalhando</value></data>
+  <data name="burn.progress" xml:space="preserve"><value>{0} de {1} · {2}/s</value></data>
+  <data name="burn.result.succeededTitle" xml:space="preserve"><value>Disco gravado</value></data>
+  <data name="burn.result.succeededText" xml:space="preserve"><value>{0} gravado em {1} no {2}.</value></data>
+  <data name="burn.result.failedTitle" xml:space="preserve"><value>A gravação falhou</value></data>
+  <data name="burn.result.canceledText" xml:space="preserve"><value>A gravação foi cancelada. Um disco gravável uma vez que já estava sendo gravado costuma ser perdido.</value></data>
+  <data name="burn.result.cleanupFailed" xml:space="preserve"><value>Não foi possível fechar a sessão: talvez seja preciso reconectar o gravador, e o disco não pode ser usado.</value></data>
+  <data name="burn.error.BackendUnavailable" xml:space="preserve"><value>Nenhum backend de gravação está disponível.</value></data>
+  <data name="burn.error.DeviceNotFound" xml:space="preserve"><value>O gravador não está mais conectado.</value></data>
+  <data name="burn.error.DeviceBusy" xml:space="preserve"><value>O gravador está em uso por outro programa.</value></data>
+  <data name="burn.error.PermissionDenied" xml:space="preserve"><value>Este usuário não consegue abrir o gravador.</value></data>
+  <data name="burn.error.NoMedia" xml:space="preserve"><value>Não há disco no gravador.</value></data>
+  <data name="burn.error.MediaNotBlank" xml:space="preserve"><value>O disco não está vazio.</value></data>
+  <data name="burn.error.MediaIncompatible" xml:space="preserve"><value>Este disco não comporta esta imagem.</value></data>
+  <data name="burn.error.InsufficientCapacity" xml:space="preserve"><value>A imagem é maior que o disco.</value></data>
+  <data name="burn.error.MediaChanged" xml:space="preserve"><value>O disco não é o que você confirmou. Nada foi gravado; revise a gravação novamente.</value></data>
+  <data name="burn.error.BufferUnderrun" xml:space="preserve"><value>O gravador ficou sem dados durante a gravação; o disco costuma ser perdido.</value></data>
+  <data name="burn.error.SourceFailed" xml:space="preserve"><value>Não foi possível ler a imagem até o fim.</value></data>
+  <data name="burn.error.WriteFailed" xml:space="preserve"><value>O gravador informou um erro de gravação.</value></data>
+  <data name="burn.error.Unsupported" xml:space="preserve"><value>O gravador não consegue gravar neste modo.</value></data>
+  <data name="preferences.title" xml:space="preserve"><value>Preferências</value></data>
+  <data name="preferences.description" xml:space="preserve"><value>Salvas assim que você as altera.</value></data>
+  <data name="preferences.theme" xml:space="preserve"><value>Tema</value></data>
+  <data name="preferences.theme.system" xml:space="preserve"><value>Sistema</value></data>
+  <data name="preferences.theme.light" xml:space="preserve"><value>Claro</value></data>
+  <data name="preferences.theme.dark" xml:space="preserve"><value>Escuro</value></data>
+  <data name="preferences.projects" xml:space="preserve"><value>Novos projetos vão para</value></data>
+  <data name="preferences.projects.pickerTitle" xml:space="preserve"><value>Escolha a pasta padrão para novos projetos</value></data>
+  <data name="preferences.choose" xml:space="preserve"><value>Escolher…</value></data>
+  <data name="preferences.reset" xml:space="preserve"><value>Usar o padrão</value></data>
+  <data name="preferences.cache" xml:space="preserve"><value>Cache</value></data>
+  <data name="preferences.cache.size" xml:space="preserve"><value>{0} em {1}. As prévias e exportações reconstroem o que precisarem.</value></data>
+  <data name="preferences.cache.refresh" xml:space="preserve"><value>Medir novamente</value></data>
+  <data name="preferences.cache.clear" xml:space="preserve"><value>Limpar cache</value></data>
+  <data name="preferences.cache.busy" xml:space="preserve"><value>Uma tarefa ou uma prévia está usando o cache agora. Tente novamente quando ela terminar.</value></data>
+  <data name="preferences.cache.cleared" xml:space="preserve"><value>Cache limpo.</value></data>
+  <data name="preferences.saveFailed" xml:space="preserve"><value>Não foi possível salvar a preferência ({0}).</value></data>
+  <data name="prompt.shutdown.title" xml:space="preserve"><value>Parar o trabalho em andamento?</value></data>
+  <data name="prompt.shutdown.message" xml:space="preserve"><value>O aplicativo tem trabalho em andamento. Fechar vai cancelá-lo e aguardar a limpeza.</value></data>
+  <data name="prompt.unsaved.title" xml:space="preserve"><value>Salvar as alterações do projeto?</value></data>
+  <data name="prompt.unsaved.message" xml:space="preserve"><value>O projeto tem alterações não salvas.</value></data>
+  <data name="prompt.continue" xml:space="preserve"><value>Continuar</value></data>
+  <data name="prompt.save" xml:space="preserve"><value>Salvar</value></data>
+  <data name="prompt.discard" xml:space="preserve"><value>Descartar</value></data>
+  <data name="prompt.cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="dialog.close" xml:space="preserve"><value>Fechar</value></data>
+  <data name="prompt.ok" xml:space="preserve"><value>OK</value></data>
+  <data name="shutdown.timeout.title" xml:space="preserve"><value>A limpeza ainda está em andamento</value></data>
+  <data name="shutdown.timeout.message" xml:space="preserve"><value>O aplicativo não conseguiu concluir a limpeza das tarefas em 10 segundos. Tente fechar de novo depois que a tarefa parar.</value></data>
+  <data name="preferences.language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="preferences.language.system" xml:space="preserve"><value>Sistema ({0})</value></data>
+  <data name="preferences.language.english" xml:space="preserve"><value>English</value></data>
+  <data name="preferences.language.portuguese" xml:space="preserve"><value>Português (Brasil)</value></data>
+  <data name="preferences.language.restartHint" xml:space="preserve"><value>O novo idioma passa a valer quando o aplicativo reiniciar.</value></data>
+  <data name="preferences.language.restart" xml:space="preserve"><value>Reiniciar agora</value></data>
+  <data name="shell.subtitle" xml:space="preserve"><value>Espaço de trabalho para desktop Linux</value></data>
+  <data name="shell.badge" xml:space="preserve"><value>LINUX</value></data>
+  <data name="shell.sidebar.toggle" xml:space="preserve"><value>Mostrar ou ocultar a barra lateral</value></data>
+  <data name="shell.sidebar.expand" xml:space="preserve"><value>Expandir a barra lateral</value></data>
+  <data name="shell.sidebar.collapse" xml:space="preserve"><value>Recolher a barra lateral</value></data>
+  <data name="projectSettings.preset.customBadge" xml:space="preserve"><value>PERSONALIZADA</value></data>
+  <data name="fileType.images" xml:space="preserve"><value>Imagens</value></data>
+  <data name="fileType.photo" xml:space="preserve"><value>Foto</value></data>
+  <data name="fileType.calibrationSession" xml:space="preserve"><value>Sessão de calibração</value></data>
+  <data name="recent.dateFormat" xml:space="preserve"><value>d 'de' MMM 'de' yyyy · HH:mm</value></data>
+</root>

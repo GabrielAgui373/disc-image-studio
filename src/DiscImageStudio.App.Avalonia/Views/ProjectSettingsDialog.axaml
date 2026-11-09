@@ -55,7 +55,7 @@
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
                                                 <Border Classes="media-template-badge" IsVisible="{Binding IsUserPreset}">
-                                                    <TextBlock Text="CUSTOM" Classes="media-template-badge-text" />
+                                                    <TextBlock Text="{Binding $parent[ComboBox].((vm:ProjectSettingsViewModel)DataContext).Labels.CustomBadge}" Classes="media-template-badge-text" />
                                                 </Border>
                                             </StackPanel>
                                             <TextBlock Text="{Binding Description}"
